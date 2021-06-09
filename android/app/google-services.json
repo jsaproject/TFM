@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "211987682756",
+    "project_id": "tfm-project-6f488",
+    "storage_bucket": "tfm-project-6f488.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:211987682756:android:d6d5da1d37b70993304091",
+        "android_client_info": {
+          "package_name": "com.tfm.animalspredictor"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "211987682756-q8j8rrq7skf0ejbji6bns4h6tnc7e1h7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDenHXVWY1TiuNyY-ohsuA553Z4ofCgX4E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "211987682756-q8j8rrq7skf0ejbji6bns4h6tnc7e1h7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

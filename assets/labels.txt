@@ -1,0 +1,10 @@
+Perro
+Caballo
+Elefante
+Mariposa
+Gallina
+Gato
+Vaca
+Oveja
+Araña
+Ardilla
