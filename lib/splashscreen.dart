@@ -1,4 +1,4 @@
-import 'package:animalspredictor/home.dart';
+import 'package:animalspredictor/ui/home.dart';
 import 'package:flutter/material.dart';
 import 'package:splashscreen/splashscreen.dart';
 
