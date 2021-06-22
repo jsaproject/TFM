@@ -30,7 +30,7 @@ class _SplashState extends State<Splash> {
                 ),
               ),
               Center(
-                  child: Text("Animals Predictor",style: TextStyle(color:Theme.of(context).primaryColor ,fontSize: 24,fontWeight: FontWeight.w700),))
+                  child: Text("LA GRANJA DE MICHI",style: TextStyle(color:Theme.of(context).primaryColor ,fontSize: 24,fontWeight: FontWeight.w700),))
             ]
         ),
       ),

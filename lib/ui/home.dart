@@ -1,8 +1,11 @@
 import 'package:animalspredictor/widget/navigation_drawer_widget.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:tflite/tflite.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -14,11 +17,12 @@ class _HomeState extends State<Home> {
   File _image;
   bool _loading = false;
   List _output;
+  bool _imagePickCamera = false;
+  final FirebaseAuth auth = FirebaseAuth.instance;
 
   pickImage() async {
-    var image = await picker.getImage(source: ImageSource.camera,
-        maxHeight: 224,
-        maxWidth: 224);
+    var image = await picker.getImage(
+        source: ImageSource.camera, maxHeight: 224, maxWidth: 224);
 
     if (image == null) return null;
 
@@ -26,13 +30,12 @@ class _HomeState extends State<Home> {
       _image = File(image.path);
     });
     classifyImage(_image);
+    _imagePickCamera = true;
   }
 
-
-
   pickGalleryImage() async {
-    var image = await picker.getImage(source: ImageSource.gallery,maxHeight: 224,
-        maxWidth: 224);
+    var image = await picker.getImage(
+        source: ImageSource.gallery, maxHeight: 224, maxWidth: 224);
 
     if (image == null) return null;
 
@@ -40,6 +43,7 @@ class _HomeState extends State<Home> {
       _image = File(image.path);
     });
     classifyImage(_image);
+    _imagePickCamera = false;
   }
 
   @override
@@ -78,6 +82,45 @@ class _HomeState extends State<Home> {
     );
   }
 
+  updateAnswersInfo(String parameter) async {
+    int respuesta= 0;
+    int numRespuestas = 0;
+    await FirebaseFirestore.instance
+        .collection("predictions")
+        .doc('countWrongAndCorrectAnswers')
+        .get().asStream().forEach((element) {
+      numRespuestas = element.data()['totalAnswers'] + 1;
+      respuesta = element.data()[parameter] + 1;
+    });
+    FirebaseFirestore.instance
+        .collection("predictions")
+        .doc('countWrongAndCorrectAnswers')
+        .update({
+      'totalAnswers': numRespuestas,
+      parameter: respuesta
+    });
+  }
+
+  updateWrongAnswersInfo() async {
+    int respuesta= 0;
+    int animal = 0;
+    await FirebaseFirestore.instance
+        .collection("predictions")
+        .doc('animalWrongDetect')
+        .get().asStream().forEach((element) {
+      animal = element.data()['${_output[0]['label']}'] + 1;
+      respuesta = element.data()['totalWrong'] + 1;
+    });
+    FirebaseFirestore.instance
+        .collection("predictions")
+        .doc('animalWrongDetect')
+        .update({
+      'totalWrong': respuesta,
+      '${_output[0]['label']}': animal
+    });
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -100,7 +143,7 @@ class _HomeState extends State<Home> {
             children: <Widget>[
               SizedBox(height: 60),
               Text(
-                'Detect Animals',
+                'La granja de Michi',
                 style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w800,
@@ -168,19 +211,72 @@ class _HomeState extends State<Home> {
                               SizedBox(
                                 height: 20,
                               ),
+                              Text(
+                                '¿Es correcto?',
+                                style: TextStyle(
+                                    color: Colors.black, fontSize: 20.0),
+                              ),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              Container(
+                                child: Row(
+                                  children: <Widget>[
+                                    Expanded(
+                                      child: ElevatedButton(
+                                        child: Text('Sí'),
+                                        onPressed: () {
+                                          updateAnswersInfo('totalCorrectAnswers');
+                                          if(_imagePickCamera){
+                                            updateUser();
+                                          }
+                                          dispose();
+                                          Navigator.of(context).push(
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      Home()));
+                                        },
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: ElevatedButton(
+                                        child: Text('No'),
+                                        onPressed: () {
+                                          updateAnswersInfo('totalWrongAnswers');
+                                          updateWrongAnswersInfo();
+                                          dispose();
+                                          Navigator.of(context).push(
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      Home()));
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(
+                                height: 20,
+                              ),
                             ],
                           ),
                         ),
                       ),
                     ),
                     Container(
-                        width: MediaQuery.of(context).size.width,
+                        width: MediaQuery
+                            .of(context)
+                            .size
+                            .width,
                         child: Column(
                           children: <Widget>[
                             GestureDetector(
                               onTap: pickImage,
                               child: Container(
-                                width: MediaQuery.of(context).size.width - 180,
+                                width: MediaQuery
+                                    .of(context)
+                                    .size
+                                    .width - 180,
                                 alignment: Alignment.center,
                                 padding: EdgeInsets.symmetric(
                                   horizontal: 24,
@@ -191,7 +287,7 @@ class _HomeState extends State<Home> {
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: Text(
-                                  'Take a photo',
+                                  'Haz una foto',
                                   style: TextStyle(
                                       color: Colors.white, fontSize: 18),
                                 ),
@@ -201,7 +297,10 @@ class _HomeState extends State<Home> {
                             GestureDetector(
                               onTap: pickGalleryImage,
                               child: Container(
-                                width: MediaQuery.of(context).size.width - 180,
+                                width: MediaQuery
+                                    .of(context)
+                                    .size
+                                    .width - 180,
                                 alignment: Alignment.center,
                                 padding: EdgeInsets.symmetric(
                                   horizontal: 24,
@@ -212,7 +311,7 @@ class _HomeState extends State<Home> {
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: Text(
-                                  'Camera Roll',
+                                  'Galería',
                                   style: TextStyle(
                                       color: Colors.white, fontSize: 18),
                                 ),
@@ -230,4 +329,8 @@ class _HomeState extends State<Home> {
     );
   }
 
+  void updateUser() {
+    auth.currentUser.email;
+
+  }
 }

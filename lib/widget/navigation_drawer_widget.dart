@@ -30,14 +30,14 @@ class NavigationDrawerWidget extends StatelessWidget {
                 children: [
                   const SizedBox(height: 24),
                   buildMenuItem(
-                    text: 'People',
-                    icon: Icons.people,
+                    text: 'Predecir',
+                    icon: Icons.image_search,
                     onClicked: () => selectedItem(context, 0),
                   ),
                   const SizedBox(height: 16),
                   buildMenuItem(
-                    text: 'Favourites',
-                    icon: Icons.favorite_border,
+                    text: 'Colección',
+                    icon: Icons.collections_bookmark,
                     onClicked: () => selectedItem(context, 1),
                   ),
                   const SizedBox(height: 16),
