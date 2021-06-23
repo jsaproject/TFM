@@ -1,4 +1,4 @@
-import 'package:animalspredictor/ui/sign_in.dart';
+import 'package:animalspredictor/ui/collection.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -14,43 +14,84 @@ class NavigationDrawerWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    String nameApp = "Anónimo";
+    String emailApp = "";
+    if (auth.currentUser != null) {
+      nameApp = auth.currentUser.email.split('@').first;
+      emailApp = auth.currentUser.email;
+    }
     return Drawer(
       child: Material(
         color: Color.fromRGBO(50, 75, 205, 1),
-        child: ListView(
-          children: <Widget>[
-          buildHeader(
-          urlImage: urlImage,
-          name: auth.currentUser.email.split('@').first,
-          email: auth.currentUser.email,
-        ),
-            Container(
-              padding: padding,
-              child: Column(
-                children: [
-                  const SizedBox(height: 24),
-                  buildMenuItem(
-                    text: 'Predecir',
-                    icon: Icons.image_search,
-                    onClicked: () => selectedItem(context, 0),
+        child: auth.currentUser != null
+            ? ListView(
+                children: <Widget>[
+                  buildHeader(
+                    urlImage: urlImage,
+                    name: nameApp,
+                    email: emailApp,
                   ),
-                  const SizedBox(height: 16),
-                  buildMenuItem(
-                    text: 'Colección',
-                    icon: Icons.collections_bookmark,
-                    onClicked: () => selectedItem(context, 1),
+                  Container(
+                    padding: padding,
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 24),
+                        buildMenuItem(
+                          text: 'Predecir',
+                          icon: Icons.image_search,
+                          onClicked: () => selectedItem(context, 0),
+                        ),
+                        const SizedBox(height: 16),
+                        buildMenuItem(
+                          text: 'Colección',
+                          icon: Icons.collections_bookmark,
+                          onClicked: () => selectedItem(context, 1),
+                        ),
+                        const SizedBox(height: 16),
+                        buildMenuItem(
+                          text: 'Cerrar sesión',
+                          icon: Icons.logout,
+                          onClicked: () => selectedItem(context, 2),
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 16),
-                  buildMenuItem(
-                    text: 'Logout',
-                    icon: Icons.logout,
-                    onClicked: () => selectedItem(context, 2),
+                ],
+              )
+            : ListView(
+                children: <Widget>[
+                  buildHeader(
+                    urlImage: urlImage,
+                    name: nameApp,
+                    email: emailApp,
+                  ),
+                  Container(
+                    padding: padding,
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 24),
+                        buildMenuItem(
+                          text: 'Predecir',
+                          icon: Icons.image_search,
+                          onClicked: () => selectedItem(context, 0),
+                        ),
+                        const SizedBox(height: 16),
+                        buildMenuItem(
+                          text: 'Colección',
+                          icon: Icons.collections_bookmark,
+                          onClicked: () => selectedItem(context, 1),
+                        ),
+                        const SizedBox(height: 16),
+                        buildMenuItem(
+                          text: 'Iniciar sesión',
+                          icon: Icons.login,
+                          onClicked: () => selectedItem(context, 3),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -88,7 +129,6 @@ class NavigationDrawerWidget extends StatelessWidget {
         ),
       );
 
-
   Widget buildMenuItem({
     String text,
     IconData icon,
@@ -108,20 +148,30 @@ class NavigationDrawerWidget extends StatelessWidget {
     switch (index) {
       case 0:
         {
+          Navigator.of(context)
+              .push(MaterialPageRoute(builder: (context) => Home()));
+        }
+        break;
+      case 1:
+        {
           Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) => Home()));
+              MaterialPageRoute(builder: (context) => Collection()));
         }
         break;
       case 2:
         {
           FirebaseAuth.instance.signOut();
           Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => AuthenticationWrapper()));
+              MaterialPageRoute(builder: (context) => AuthenticationWrapper()));
+        }
+        break;
+      case 3:
+        {
+          FirebaseAuth.instance.signOut();
+          Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => AuthenticationWrapper()));
         }
         break;
     }
   }
-
-
-
 }

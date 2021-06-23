@@ -27,7 +27,21 @@ class AuthenticationService {
   Future<String> signUp({String email, String password}) async {
     try {
       await _firebaseAuth.createUserWithEmailAndPassword(email: email, password: password);
-
+      await firestoreInstance.collection("users").doc(email).set(
+          {
+            'Perro':0,
+            'Caballo':0,
+            'Elefante':0,
+            'Mariposa':0,
+            'Gallina':0,
+            'Gato':0,
+            'Vaca':0,
+            'Oveja':0,
+            'Araña':0,
+            'Ardilla':0
+          }).then((value){
+        print("Success save new user");
+      });
       return "Signed up";
     } on FirebaseAuthException catch(e) {
       return e.message;

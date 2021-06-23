@@ -1,4 +1,4 @@
-import 'package:animalspredictor/splashscreen.dart';
+import 'package:animalspredictor/ui/collection.dart';
 import 'package:animalspredictor/ui/splash.dart';
 import 'package:flutter/material.dart';
 import 'authentication_service.dart';
@@ -44,6 +44,7 @@ class MyApp extends StatelessWidget {
           '/signin': (context) => SignIn(),
           '/signup': (context) => SignUp(),
           '/home': (context) => Home(),
+          '/collection' : (context) => Collection(),
         },
       ),
     );

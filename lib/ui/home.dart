@@ -83,43 +83,57 @@ class _HomeState extends State<Home> {
   }
 
   updateAnswersInfo(String parameter) async {
-    int respuesta= 0;
+    int respuesta = 0;
     int numRespuestas = 0;
     await FirebaseFirestore.instance
         .collection("predictions")
         .doc('countWrongAndCorrectAnswers')
-        .get().asStream().forEach((element) {
+        .get()
+        .asStream()
+        .forEach((element) {
       numRespuestas = element.data()['totalAnswers'] + 1;
       respuesta = element.data()[parameter] + 1;
     });
     FirebaseFirestore.instance
         .collection("predictions")
         .doc('countWrongAndCorrectAnswers')
-        .update({
-      'totalAnswers': numRespuestas,
-      parameter: respuesta
-    });
+        .update({'totalAnswers': numRespuestas, parameter: respuesta});
   }
 
   updateWrongAnswersInfo() async {
-    int respuesta= 0;
+    int respuesta = 0;
     int animal = 0;
     await FirebaseFirestore.instance
         .collection("predictions")
         .doc('animalWrongDetect')
-        .get().asStream().forEach((element) {
+        .get()
+        .asStream()
+        .forEach((element) {
       animal = element.data()['${_output[0]['label']}'] + 1;
       respuesta = element.data()['totalWrong'] + 1;
     });
     FirebaseFirestore.instance
         .collection("predictions")
         .doc('animalWrongDetect')
-        .update({
-      'totalWrong': respuesta,
-      '${_output[0]['label']}': animal
-    });
+        .update({'totalWrong': respuesta, '${_output[0]['label']}': animal});
   }
 
+  void updateCollectionUser() async {
+    int animal = 0;
+    String email = auth.currentUser.email;
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(email)
+        .get()
+        .asStream()
+        .forEach((element) {
+      animal = element.data()['${_output[0]['label']}'] + 1;
+    });
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(email)
+        .update({'${_output[0]['label']}': animal});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -175,108 +189,105 @@ class _HomeState extends State<Home> {
                       child: Center(
                         child: _loading
                             ? Container(
-                          width: 180,
-                          child: Column(
-                            children: <Widget>[
-                              Image.asset('assets/farm_animals.png'),
-                              SizedBox(
-                                height: 60,
-                              ),
-                            ],
-                          ),
-                        )
-                            : Container(
-                          child: Column(
-                            children: <Widget>[
-                              Container(
-                                height: 200,
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(10),
-                                  child: Image.file(
-                                    _image,
-                                  ),
-                                ),
-                              ),
-                              SizedBox(
-                                height: 20,
-                              ),
-                              _output != null
-                                  ? Text(
-                                'Prediction is: ${_output[0]['label']}',
-                                style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 20.0),
-                              )
-                                  : Container(),
-                              SizedBox(
-                                height: 20,
-                              ),
-                              Text(
-                                '¿Es correcto?',
-                                style: TextStyle(
-                                    color: Colors.black, fontSize: 20.0),
-                              ),
-                              SizedBox(
-                                height: 10,
-                              ),
-                              Container(
-                                child: Row(
+                                width: 180,
+                                child: Column(
                                   children: <Widget>[
-                                    Expanded(
-                                      child: ElevatedButton(
-                                        child: Text('Sí'),
-                                        onPressed: () {
-                                          updateAnswersInfo('totalCorrectAnswers');
-                                          if(_imagePickCamera){
-                                            updateUser();
-                                          }
-                                          dispose();
-                                          Navigator.of(context).push(
-                                              MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      Home()));
-                                        },
+                                    Image.asset('assets/farm_animals.png'),
+                                    SizedBox(
+                                      height: 60,
+                                    ),
+                                  ],
+                                ),
+                              )
+                            : Container(
+                                child: Column(
+                                  children: <Widget>[
+                                    Container(
+                                      height: 200,
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(10),
+                                        child: Image.file(
+                                          _image,
+                                        ),
                                       ),
                                     ),
-                                    Expanded(
-                                      child: ElevatedButton(
-                                        child: Text('No'),
-                                        onPressed: () {
-                                          updateAnswersInfo('totalWrongAnswers');
-                                          updateWrongAnswersInfo();
-                                          dispose();
-                                          Navigator.of(context).push(
-                                              MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      Home()));
-                                        },
+                                    SizedBox(
+                                      height: 20,
+                                    ),
+                                    _output != null
+                                        ? Text(
+                                            'Prediction is: ${_output[0]['label']}',
+                                            style: TextStyle(
+                                                color: Colors.black,
+                                                fontSize: 20.0),
+                                          )
+                                        : Container(),
+                                    SizedBox(
+                                      height: 20,
+                                    ),
+                                    Text(
+                                      '¿Es correcto?',
+                                      style: TextStyle(
+                                          color: Colors.black, fontSize: 20.0),
+                                    ),
+                                    SizedBox(
+                                      height: 10,
+                                    ),
+                                    Container(
+                                      child: Row(
+                                        children: <Widget>[
+                                          Expanded(
+                                            child: FloatingActionButton(
+                                              child: Text('Sí'),
+                                              onPressed: () {
+                                                updateAnswersInfo(
+                                                    'totalCorrectAnswers');
+                                                if (_imagePickCamera &&
+                                                    auth.currentUser != null) {
+                                                  updateCollectionUser();
+                                                }
+                                                dispose();
+                                                Navigator.of(context).push(
+                                                    MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            Home()));
+                                              },
+                                            ),
+                                          ),
+                                          Expanded(
+                                            child: FloatingActionButton(
+                                              child: Text('No'),
+                                              onPressed: () {
+                                                updateAnswersInfo(
+                                                    'totalWrongAnswers');
+                                                updateWrongAnswersInfo();
+                                                dispose();
+                                                Navigator.of(context).push(
+                                                    MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            Home()));
+                                              },
+                                            ),
+                                          ),
+                                        ],
                                       ),
+                                    ),
+                                    SizedBox(
+                                      height: 20,
                                     ),
                                   ],
                                 ),
                               ),
-                              SizedBox(
-                                height: 20,
-                              ),
-                            ],
-                          ),
-                        ),
                       ),
                     ),
                     Container(
-                        width: MediaQuery
-                            .of(context)
-                            .size
-                            .width,
+                        width: MediaQuery.of(context).size.width,
                         child: Column(
                           children: <Widget>[
                             GestureDetector(
                               onTap: pickImage,
                               child: Container(
-                                width: MediaQuery
-                                    .of(context)
-                                    .size
-                                    .width - 180,
+                                width: MediaQuery.of(context).size.width - 180,
                                 alignment: Alignment.center,
                                 padding: EdgeInsets.symmetric(
                                   horizontal: 24,
@@ -297,10 +308,7 @@ class _HomeState extends State<Home> {
                             GestureDetector(
                               onTap: pickGalleryImage,
                               child: Container(
-                                width: MediaQuery
-                                    .of(context)
-                                    .size
-                                    .width - 180,
+                                width: MediaQuery.of(context).size.width - 180,
                                 alignment: Alignment.center,
                                 padding: EdgeInsets.symmetric(
                                   horizontal: 24,
@@ -327,10 +335,5 @@ class _HomeState extends State<Home> {
         ),
       ),
     );
-  }
-
-  void updateUser() {
-    auth.currentUser.email;
-
   }
 }
