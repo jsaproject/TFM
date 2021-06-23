@@ -1,5 +1,6 @@
 import 'package:animalspredictor/widget/navigation_drawer_widget.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:floating_action_bubble/floating_action_bubble.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'dart:io';
@@ -100,22 +101,22 @@ class _HomeState extends State<Home> {
         .update({'totalAnswers': numRespuestas, parameter: respuesta});
   }
 
-  updateWrongAnswersInfo() async {
+  updateWrongAnswersInfo(String animal) async {
     int respuesta = 0;
-    int animal = 0;
+    int animalCount = 0;
     await FirebaseFirestore.instance
         .collection("predictions")
         .doc('animalWrongDetect')
         .get()
         .asStream()
         .forEach((element) {
-      animal = element.data()['${_output[0]['label']}'] + 1;
+      animalCount = element.data()[animal] + 1;
       respuesta = element.data()['totalWrong'] + 1;
     });
     FirebaseFirestore.instance
         .collection("predictions")
         .doc('animalWrongDetect')
-        .update({'totalWrong': respuesta, '${_output[0]['label']}': animal});
+        .update({'totalWrong': respuesta, animal: animalCount});
   }
 
   void updateCollectionUser() async {
@@ -257,10 +258,86 @@ class _HomeState extends State<Home> {
                                           Expanded(
                                             child: FloatingActionButton(
                                               child: Text('No'),
-                                              onPressed: () {
+                                              onPressed: () async{
                                                 updateAnswersInfo(
                                                     'totalWrongAnswers');
-                                                updateWrongAnswersInfo();
+                                                  bool shouldUpdate = await showDialog(
+                                                      context: context,
+                                                      builder: (_) => new SimpleDialog(
+                                                        title: new Text('¿Cuál es el animal correcto?'),
+                                                        children: <Widget>[
+                                                          new SimpleDialogOption(
+                                                            child: new Text('Perro'),
+                                                            onPressed: () {
+                                                              updateWrongAnswersInfo('Perro');
+                                                              Navigator.pop(context, true);
+                                                            },
+                                                          ),
+                                                          new SimpleDialogOption(
+                                                            child: new Text('Caballo'),
+                                                            onPressed: () {
+                                                              updateWrongAnswersInfo('Caballo');
+                                                              Navigator.pop(context, true);
+                                                            },
+                                                          ),
+                                                          new SimpleDialogOption(
+                                                            child: new Text('Elefante'),
+                                                            onPressed: (){
+                                                              updateWrongAnswersInfo('Elefante');
+                                                              Navigator.pop(context, true);
+                                                            },
+                                                          ),
+                                                          new SimpleDialogOption(
+                                                            child: new Text('Mariposa'),
+                                                            onPressed: (){
+                                                              updateWrongAnswersInfo('Mariposa');
+                                                              Navigator.pop(context, true);
+                                                            },
+                                                          ),
+                                                          new SimpleDialogOption(
+                                                            child: new Text('Gallina'),
+                                                            onPressed: (){
+                                                              updateWrongAnswersInfo('Gallina');
+                                                              Navigator.pop(context, true);
+                                                            },
+                                                          ),
+                                                          new SimpleDialogOption(
+                                                            child: new Text('Gato'),
+                                                            onPressed: (){
+                                                              updateWrongAnswersInfo('Gato');
+                                                              Navigator.pop(context, true);
+                                                            },
+                                                          ),
+                                                          new SimpleDialogOption(
+                                                            child: new Text('Vaca'),
+                                                            onPressed: (){
+                                                              updateWrongAnswersInfo('Vaca');
+                                                              Navigator.pop(context, true);
+                                                            },
+                                                          ),
+                                                          new SimpleDialogOption(
+                                                            child: new Text('Oveja'),
+                                                            onPressed: (){
+                                                              updateWrongAnswersInfo('Oveja');
+                                                              Navigator.pop(context, true);
+                                                            },
+                                                          ),
+                                                          new SimpleDialogOption(
+                                                            child: new Text('Araña'),
+                                                            onPressed: (){
+                                                              updateWrongAnswersInfo('Araña');
+                                                              Navigator.pop(context, true);
+                                                            },
+                                                          ),
+                                                          new SimpleDialogOption(
+                                                            child: new Text('Ardilla'),
+                                                            onPressed: (){
+                                                              updateWrongAnswersInfo('Ardilla');
+                                                              Navigator.pop(context, true);
+                                                            },
+                                                          ),
+                                                        ],
+                                                      ));
                                                 dispose();
                                                 Navigator.of(context).push(
                                                     MaterialPageRoute(
