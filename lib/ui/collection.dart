@@ -369,7 +369,7 @@ class _CollectionState extends State<Collection> {
           if (snapshot.hasData) {
             return page(snapshot);
           } else if (snapshot.hasError) {
-            if (auth.currentUser == null) {
+            if (auth.currentUser.isAnonymous) {
               return page(null);
             } else {
               return errorScreen();

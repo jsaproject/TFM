@@ -1,28 +1,42 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 
 class AuthenticationService {
 
+  final FirebaseAnalytics _analytics = FirebaseAnalytics();
 
   final FirebaseAuth _firebaseAuth;
 
   AuthenticationService(this._firebaseAuth);
 
   final firestoreInstance = FirebaseFirestore.instance;
-  Stream<User> get authStateChanges => _firebaseAuth.authStateChanges();
+
+
+  Stream<User> get authStateChanges => _firebaseAuth.userChanges();
 
 
 
   Future<String> signIn({String email, String password}) async {
     try {
       await _firebaseAuth.signInWithEmailAndPassword(email: email, password: password);
-      return "Signed in";
+      await _analytics.logLogin(loginMethod: 'email');
+      return "Logueado con usuario y contraseña";
     } on FirebaseAuthException catch(e) {
       return e.message;
     }
   }
 
+  Future<String> signInAnonymously() async {
+    try {
+      await _firebaseAuth.signInAnonymously();
+      await _analytics.logLogin(loginMethod: 'anonymous');
+      return "Logueado anónimo";
+    } on FirebaseAuthException catch(e) {
+      return e.message;
+    }
+  }
 
   Future<String> signUp({String email, String password}) async {
     try {
@@ -40,9 +54,9 @@ class AuthenticationService {
             'Araña':0,
             'Ardilla':0
           }).then((value){
-        print("Success save new user");
+        print("Usuario registrado con exito");
       });
-      return "Signed up";
+      return "Logueado";
     } on FirebaseAuthException catch(e) {
       return e.message;
     }

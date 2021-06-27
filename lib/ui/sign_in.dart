@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 
 import '../authentication_service.dart';
 import '../helper.dart';
-import 'home.dart';
 
 class SignIn extends StatefulWidget {
   @override
@@ -24,7 +23,7 @@ class _SignInState extends State<SignIn> {
         elevation: 0,
         backgroundColor: Colors.indigoAccent,
         title: const Text(
-          'Sign in',
+          'Iniciar sesión',
           style: TextStyle(
               fontSize: 20, fontWeight: FontWeight.w500, color: Colors.white),
         ),
@@ -111,8 +110,11 @@ class _SignInState extends State<SignIn> {
                           side: const BorderSide(color: Colors.indigoAccent)),
                     ),
                     onPressed: () {
-                      Navigator.of(context).push(
-                          MaterialPageRoute(builder: (context) => Home()));
+                      context
+                          .read<AuthenticationService>()
+                          .signInAnonymously()
+                          .then(
+                              (String result) => showSnackbar(context, result));
                     },
                     child: Text('Entrar sin usuario'),
                   ),

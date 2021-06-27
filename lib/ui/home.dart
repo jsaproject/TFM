@@ -1,13 +1,14 @@
+import 'dart:io';
+
 import 'package:animalspredictor/widget/navigation_drawer_widget.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:firebase_core/firebase_core.dart' as firebase_core;
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:tflite/tflite.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -254,14 +255,14 @@ class _HomeState extends State<Home> {
                                                 updateAnswersInfo(
                                                     'totalCorrectAnswers');
                                                 if (_imagePickCamera &&
-                                                    auth.currentUser != null) {
+                                                    !auth.currentUser.isAnonymous) {
                                                   updateCollectionUser();
                                                 }
                                                 dispose();
-                                                Navigator.of(context).push(
-                                                    MaterialPageRoute(
-                                                        builder: (context) =>
-                                                            Home()));
+                                                Navigator.pushNamed(
+                                                  context,
+                                                  '/home',
+                                                );
                                               },
                                             ),
                                           ),
@@ -404,10 +405,10 @@ class _HomeState extends State<Home> {
                                                               ],
                                                             ));
                                                 dispose();
-                                                Navigator.of(context).push(
-                                                    MaterialPageRoute(
-                                                        builder: (context) =>
-                                                            Home()));
+                                                Navigator.pushNamed(
+                                                  context,
+                                                  '/home',
+                                                );
                                               },
                                             ),
                                           ),
