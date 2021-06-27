@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../authentication_service.dart';
 import '../helper.dart';
+import 'home.dart';
 
 class SignIn extends StatefulWidget {
   @override
@@ -82,14 +83,38 @@ class _SignInState extends State<SignIn> {
                           side: const BorderSide(color: Colors.indigoAccent)),
                     ),
                     onPressed: () {
-                      context.read<AuthenticationService>().signIn(
-                        email: emailTextController.text.trim(),
-                        password: passwordTextController.text.trim(),
-                      )
+                      context
+                          .read<AuthenticationService>()
+                          .signIn(
+                            email: emailTextController.text.trim(),
+                            password: passwordTextController.text.trim(),
+                          )
                           .then(
                               (String result) => showSnackbar(context, result));
                     },
-                    child: Text('SignIn'),
+                    child: Text('Iniciar sesión'),
+                  ),
+                ),
+                const SizedBox(
+                  height: 16,
+                ),
+                Container(
+                  height: 40,
+                  width: 300,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      elevation: 6.0,
+                      primary: Colors.indigoAccent, // background
+                      onPrimary: Colors.white, // foreground
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30.0),
+                          side: const BorderSide(color: Colors.indigoAccent)),
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).push(
+                          MaterialPageRoute(builder: (context) => Home()));
+                    },
+                    child: Text('Entrar sin usuario'),
                   ),
                 ),
                 const SizedBox(
@@ -103,9 +128,9 @@ class _SignInState extends State<SignIn> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text("Don't have an account? "),
+                      Text("¿No tienes una cuenta? "),
                       Text(
-                        'Sign up.',
+                        'Regístrate.',
                         style: TextStyle(
                             color: Theme.of(context).primaryColor,
                             fontWeight: FontWeight.w600),

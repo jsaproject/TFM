@@ -25,12 +25,12 @@ class _SplashState extends State<Splash> {
                 padding: const EdgeInsets.only(top: 60),
                 child: Align(
                   alignment: Alignment.topCenter,
-                  child: Image.asset('assets/farm_animals.png',
+                  child: Image.asset('assets/granja.jpg',
                     width: itemWidth,height: itemHeight,),
                 ),
               ),
               Center(
-                  child: Text("Animals Predictor",style: TextStyle(color:Theme.of(context).primaryColor ,fontSize: 24,fontWeight: FontWeight.w700),))
+                  child: Text("LA GRANJA DE MICHI",style: TextStyle(color:Theme.of(context).primaryColor ,fontSize: 24,fontWeight: FontWeight.w700),))
             ]
         ),
       ),

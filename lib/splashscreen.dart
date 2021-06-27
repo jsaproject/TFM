@@ -14,7 +14,7 @@ class _MySplashState extends State<MySplash> {
       seconds: 2,
       navigateAfterSeconds: Home(),
       title: Text(
-        'Animals Predictor',
+        'La granja de Michi',
         style: TextStyle(
           fontWeight: FontWeight.bold,
           fontSize: 30,
