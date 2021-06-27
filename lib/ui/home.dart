@@ -202,7 +202,7 @@ class _HomeState extends State<Home> {
                                 width: 180,
                                 child: Column(
                                   children: <Widget>[
-                                    Image.asset('assets/farm_animals.png'),
+                                    Image.asset('assets/granja.jpg'),
                                     SizedBox(
                                       height: 60,
                                     ),
@@ -226,7 +226,7 @@ class _HomeState extends State<Home> {
                                     ),
                                     _output != null
                                         ? Text(
-                                            'Prediction is: ${_output[0]['label']}',
+                                            'El animal es: ${_output[0]['label']}',
                                             style: TextStyle(
                                                 color: Colors.black,
                                                 fontSize: 20.0),

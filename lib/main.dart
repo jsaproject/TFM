@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
         )
       ],
       child: MaterialApp(
-        title: 'Flutter Firebase Auth',
+        title: 'AnimalsPredictor',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
             visualDensity: VisualDensity.adaptivePlatformDensity,
