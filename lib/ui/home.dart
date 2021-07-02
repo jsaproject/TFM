@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:tflite/tflite.dart';
+import 'package:flutter_native_image/flutter_native_image.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -25,27 +26,33 @@ class _HomeState extends State<Home> {
 
   pickImage() async {
     var image = await picker.getImage(
-        source: ImageSource.camera, maxHeight: 224, maxWidth: 224);
+        source: ImageSource.camera);
+
+    File compressedFile = await FlutterNativeImage.compressImage(image.path,
+        targetWidth: 224, targetHeight: 224);
 
     if (image == null) return null;
 
     setState(() {
       _image = File(image.path);
     });
-    classifyImage(_image);
+    classifyImage(compressedFile);
     _imagePickCamera = true;
   }
 
   pickGalleryImage() async {
     var image = await picker.getImage(
-        source: ImageSource.gallery, maxHeight: 224, maxWidth: 224);
+        source: ImageSource.gallery);
+
+    File compressedFile = await FlutterNativeImage.compressImage(image.path,
+        targetWidth: 224, targetHeight: 224);
 
     if (image == null) return null;
 
     setState(() {
       _image = File(image.path);
     });
-    classifyImage(_image);
+    classifyImage(compressedFile);
     _imagePickCamera = false;
   }
 
@@ -106,6 +113,14 @@ class _HomeState extends State<Home> {
   updateWrongAnswersInfo(String animal) async {
     int respuesta = 0;
     int animalCount = 0;
+    int cameraOrGalleryFailCount = 0;
+    String pickCameraOrGallery;
+    if(_imagePickCamera){
+      pickCameraOrGallery = "pickCamera";
+    }else{
+      pickCameraOrGallery = "pickGallery";
+    }
+
     await FirebaseFirestore.instance
         .collection("predictions")
         .doc('animalWrongDetect')
@@ -113,6 +128,7 @@ class _HomeState extends State<Home> {
         .asStream()
         .forEach((element) {
       animalCount = element.data()[animal] + 1;
+      cameraOrGalleryFailCount = element.data()[pickCameraOrGallery] + 1;
       respuesta = element.data()['totalWrong'] + 1;
     });
     String fileName = _image.path.split('/').last;
@@ -126,7 +142,7 @@ class _HomeState extends State<Home> {
     FirebaseFirestore.instance
         .collection("predictions")
         .doc('animalWrongDetect')
-        .update({'totalWrong': respuesta, animal: animalCount});
+        .update({'totalWrong': respuesta, animal: animalCount, pickCameraOrGallery: cameraOrGalleryFailCount});
   }
 
   void updateCollectionUser() async {
