@@ -95,6 +95,13 @@ class _HomeState extends State<Home> {
   updateAnswersInfo(String parameter) async {
     int respuesta = 0;
     int numRespuestas = 0;
+    int cameraOrGalleryFailCount = 0;
+    String pickCameraOrGallery;
+    if(_imagePickCamera){
+      pickCameraOrGallery = "pickCamera";
+    }else{
+      pickCameraOrGallery = "pickGallery";
+    }
     await FirebaseFirestore.instance
         .collection("predictions")
         .doc('countWrongAndCorrectAnswers')
@@ -103,24 +110,17 @@ class _HomeState extends State<Home> {
         .forEach((element) {
       numRespuestas = element.data()['totalAnswers'] + 1;
       respuesta = element.data()[parameter] + 1;
+      cameraOrGalleryFailCount = element.data()[pickCameraOrGallery] + 1;
     });
     FirebaseFirestore.instance
         .collection("predictions")
         .doc('countWrongAndCorrectAnswers')
-        .update({'totalAnswers': numRespuestas, parameter: respuesta});
+        .update({'totalAnswers': numRespuestas, parameter: respuesta, pickCameraOrGallery: cameraOrGalleryFailCount});
   }
 
   updateWrongAnswersInfo(String animal) async {
     int respuesta = 0;
     int animalCount = 0;
-    int cameraOrGalleryFailCount = 0;
-    String pickCameraOrGallery;
-    if(_imagePickCamera){
-      pickCameraOrGallery = "pickCamera";
-    }else{
-      pickCameraOrGallery = "pickGallery";
-    }
-
     await FirebaseFirestore.instance
         .collection("predictions")
         .doc('animalWrongDetect')
@@ -128,7 +128,7 @@ class _HomeState extends State<Home> {
         .asStream()
         .forEach((element) {
       animalCount = element.data()[animal] + 1;
-      cameraOrGalleryFailCount = element.data()[pickCameraOrGallery] + 1;
+
       respuesta = element.data()['totalWrong'] + 1;
     });
     String fileName = _image.path.split('/').last;
@@ -142,7 +142,7 @@ class _HomeState extends State<Home> {
     FirebaseFirestore.instance
         .collection("predictions")
         .doc('animalWrongDetect')
-        .update({'totalWrong': respuesta, animal: animalCount, pickCameraOrGallery: cameraOrGalleryFailCount});
+        .update({'totalWrong': respuesta, animal: animalCount});
   }
 
   void updateCollectionUser() async {
