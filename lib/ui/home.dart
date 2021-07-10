@@ -25,8 +25,7 @@ class _HomeState extends State<Home> {
   final FirebaseAuth auth = FirebaseAuth.instance;
 
   pickImage() async {
-    var image = await picker.getImage(
-        source: ImageSource.camera);
+    var image = await picker.getImage(source: ImageSource.camera);
 
     File compressedFile = await FlutterNativeImage.compressImage(image.path,
         targetWidth: 224, targetHeight: 224);
@@ -41,8 +40,7 @@ class _HomeState extends State<Home> {
   }
 
   pickGalleryImage() async {
-    var image = await picker.getImage(
-        source: ImageSource.gallery);
+    var image = await picker.getImage(source: ImageSource.gallery);
 
     File compressedFile = await FlutterNativeImage.compressImage(image.path,
         targetWidth: 224, targetHeight: 224);
@@ -97,10 +95,18 @@ class _HomeState extends State<Home> {
     int numRespuestas = 0;
     int cameraOrGalleryFailCount = 0;
     String pickCameraOrGallery;
-    if(_imagePickCamera){
-      pickCameraOrGallery = "pickCamera";
-    }else{
-      pickCameraOrGallery = "pickGallery";
+    if (parameter == 'totalWrongAnswers') {
+      if (_imagePickCamera) {
+        pickCameraOrGallery = "pickWrongCamera";
+      } else {
+        pickCameraOrGallery = "pickWrongGallery";
+      }
+    } else {
+      if (_imagePickCamera) {
+        pickCameraOrGallery = "pickCorrectCamera";
+      } else {
+        pickCameraOrGallery = "pickCorrectGallery";
+      }
     }
     await FirebaseFirestore.instance
         .collection("predictions")
@@ -115,7 +121,11 @@ class _HomeState extends State<Home> {
     FirebaseFirestore.instance
         .collection("predictions")
         .doc('countWrongAndCorrectAnswers')
-        .update({'totalAnswers': numRespuestas, parameter: respuesta, pickCameraOrGallery: cameraOrGalleryFailCount});
+        .update({
+      'totalAnswers': numRespuestas,
+      parameter: respuesta,
+      pickCameraOrGallery: cameraOrGalleryFailCount
+    });
   }
 
   updateWrongAnswersInfo(String animal) async {
@@ -271,7 +281,8 @@ class _HomeState extends State<Home> {
                                                 updateAnswersInfo(
                                                     'totalCorrectAnswers');
                                                 if (_imagePickCamera &&
-                                                    !auth.currentUser.isAnonymous) {
+                                                    !auth.currentUser
+                                                        .isAnonymous) {
                                                   updateCollectionUser();
                                                 }
                                                 dispose();
