@@ -16,14 +16,14 @@ class NavigationDrawerWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     String nameApp = "Anónimo";
     String emailApp = "";
-    if (auth.currentUser != null) {
+    if (!auth.currentUser.isAnonymous) {
       nameApp = auth.currentUser.email.split('@').first;
       emailApp = auth.currentUser.email;
     }
     return Drawer(
       child: Material(
         color: Color.fromRGBO(50, 75, 205, 1),
-        child: auth.currentUser != null
+        child: !auth.currentUser.isAnonymous
             ? ListView(
                 children: <Widget>[
                   buildHeader(
@@ -148,28 +148,36 @@ class NavigationDrawerWidget extends StatelessWidget {
     switch (index) {
       case 0:
         {
-          Navigator.of(context)
-              .push(MaterialPageRoute(builder: (context) => Home()));
+          Navigator.pushReplacementNamed(
+            context,
+            '/home',
+          );
         }
         break;
       case 1:
         {
-          Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) => Collection()));
+          Navigator.pushReplacementNamed(
+            context,
+            '/collection',
+          );
         }
         break;
       case 2:
         {
           FirebaseAuth.instance.signOut();
-          Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) => AuthenticationWrapper()));
+          Navigator.pushReplacementNamed(
+            context,
+            '/auth',
+          );
         }
         break;
       case 3:
         {
           FirebaseAuth.instance.signOut();
-          Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) => AuthenticationWrapper()));
+          Navigator.pushReplacementNamed(
+            context,
+            '/auth',
+          );
         }
         break;
     }

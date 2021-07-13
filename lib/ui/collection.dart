@@ -110,7 +110,7 @@ class _CollectionState extends State<Collection> {
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Text(
-                    'Greyhound divisively hello coldly wonderfully marginally far upon excluding.',
+                    'El perro es un animal doméstico que vive entre 10-13 años, su longitud es entre 15 y 100 centímetros, su peso entre 1.3 y 100 kilogramos y son mamíferos.',
                     style: TextStyle(color: Colors.black.withOpacity(0.6)),
                   ),
                 ),
@@ -133,7 +133,7 @@ class _CollectionState extends State<Collection> {
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Text(
-                    'Greyhound divisively hello coldly wonderfully marginally far upon excluding.',
+                    'El caballo es un animal que vive entre 25-30 años, su longitud es entre 142 y 163 centímetros, su peso entre 380 y 550 kilogramos y son mamíferos.',
                     style: TextStyle(color: Colors.black.withOpacity(0.6)),
                   ),
                 ),
@@ -156,7 +156,7 @@ class _CollectionState extends State<Collection> {
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Text(
-                    'Greyhound divisively hello coldly wonderfully marginally far upon excluding.',
+                    'El elefante es un animal que vive entre 55-70 años, su longitud es entre 2 y 3.6 metros, su peso entre 3 y 5.4 toneladas y son mamíferos.',
                     style: TextStyle(color: Colors.black.withOpacity(0.6)),
                   ),
                 ),
@@ -179,7 +179,7 @@ class _CollectionState extends State<Collection> {
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Text(
-                    'Greyhound divisively hello coldly wonderfully marginally far upon excluding.',
+                    'La mariposa es un insecto que vive alrededor de un mes, su longitud es entre 3 milímetros y 30 centímetros, su peso entre 0.04 y 0.3 gramos y son ovíparos.',
                     style: TextStyle(color: Colors.black.withOpacity(0.6)),
                   ),
                 ),
@@ -202,7 +202,7 @@ class _CollectionState extends State<Collection> {
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Text(
-                    'Greyhound divisively hello coldly wonderfully marginally far upon excluding.',
+                    'La gallina es un animal que vive entre 5-10 años, su longitud es entre 35 y 45 centímetros, su peso entre 1.8 y 2 kilogramos y son ovíparos.',
                     style: TextStyle(color: Colors.black.withOpacity(0.6)),
                   ),
                 ),
@@ -225,7 +225,7 @@ class _CollectionState extends State<Collection> {
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Text(
-                    'Greyhound divisively hello coldly wonderfully marginally far upon excluding.',
+                    'El gato es un animal doméstico que vive entre 12-16 años, su longitud es entre 40 y 50 centímetros, su peso entre 2.5 y 7 kilogramos y son mamíferos.',
                     style: TextStyle(color: Colors.black.withOpacity(0.6)),
                   ),
                 ),
@@ -248,7 +248,7 @@ class _CollectionState extends State<Collection> {
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Text(
-                    'Greyhound divisively hello coldly wonderfully marginally far upon excluding.',
+                    'La vaca es un animal que vive entre 12-20 años, su longitud es entre 1.5 y 1.8 metros, su peso entre 400 y 800 kilogramos y son mamíferos.',
                     style: TextStyle(color: Colors.black.withOpacity(0.6)),
                   ),
                 ),
@@ -271,7 +271,7 @@ class _CollectionState extends State<Collection> {
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Text(
-                    'Greyhound divisively hello coldly wonderfully marginally far upon excluding.',
+                      'La oveja es un animal que vive entre 5-10 años, su longitud es entre 90 y 140 centímetros, su peso entre 40 y 130 kilogramos y son mamíferos.',
                     style: TextStyle(color: Colors.black.withOpacity(0.6)),
                   ),
                 ),
@@ -294,7 +294,7 @@ class _CollectionState extends State<Collection> {
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Text(
-                    'Greyhound divisively hello coldly wonderfully marginally far upon excluding.',
+                    'La araña es un animal que vive entre 6-12 meses, su longitud es entre 0,5 milímetros y los 9 centímetros, su peso entre 0,05 – 170 gramos y son ovíparos.',
                     style: TextStyle(color: Colors.black.withOpacity(0.6)),
                   ),
                 ),
@@ -317,7 +317,7 @@ class _CollectionState extends State<Collection> {
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Text(
-                    'Greyhound divisively hello coldly wonderfully marginally far upon excluding.',
+                      'La ardilla es un animal que vive entre 2-8 años, su longitud es entre 15 y 30 centímetros, su peso entre 250 y 1000 gramos y son mamíferos.',
                     style: TextStyle(color: Colors.black.withOpacity(0.6)),
                   ),
                 ),
@@ -369,7 +369,7 @@ class _CollectionState extends State<Collection> {
           if (snapshot.hasData) {
             return page(snapshot);
           } else if (snapshot.hasError) {
-            if (auth.currentUser == null) {
+            if (auth.currentUser.isAnonymous) {
               return page(null);
             } else {
               return errorScreen();

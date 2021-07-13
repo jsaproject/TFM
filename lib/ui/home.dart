@@ -1,13 +1,15 @@
+import 'dart:io';
+
 import 'package:animalspredictor/widget/navigation_drawer_widget.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:firebase_core/firebase_core.dart' as firebase_core;
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:tflite/tflite.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_native_image/flutter_native_image.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -23,28 +25,32 @@ class _HomeState extends State<Home> {
   final FirebaseAuth auth = FirebaseAuth.instance;
 
   pickImage() async {
-    var image = await picker.getImage(
-        source: ImageSource.camera, maxHeight: 224, maxWidth: 224);
+    var image = await picker.getImage(source: ImageSource.camera);
+
+    File compressedFile = await FlutterNativeImage.compressImage(image.path,
+        targetWidth: 224, targetHeight: 224);
 
     if (image == null) return null;
 
     setState(() {
       _image = File(image.path);
     });
-    classifyImage(_image);
+    classifyImage(compressedFile);
     _imagePickCamera = true;
   }
 
   pickGalleryImage() async {
-    var image = await picker.getImage(
-        source: ImageSource.gallery, maxHeight: 224, maxWidth: 224);
+    var image = await picker.getImage(source: ImageSource.gallery);
+
+    File compressedFile = await FlutterNativeImage.compressImage(image.path,
+        targetWidth: 224, targetHeight: 224);
 
     if (image == null) return null;
 
     setState(() {
       _image = File(image.path);
     });
-    classifyImage(_image);
+    classifyImage(compressedFile);
     _imagePickCamera = false;
   }
 
@@ -87,6 +93,21 @@ class _HomeState extends State<Home> {
   updateAnswersInfo(String parameter) async {
     int respuesta = 0;
     int numRespuestas = 0;
+    int cameraOrGalleryFailCount = 0;
+    String pickCameraOrGallery;
+    if (parameter == 'totalWrongAnswers') {
+      if (_imagePickCamera) {
+        pickCameraOrGallery = "pickWrongCamera";
+      } else {
+        pickCameraOrGallery = "pickWrongGallery";
+      }
+    } else {
+      if (_imagePickCamera) {
+        pickCameraOrGallery = "pickCorrectCamera";
+      } else {
+        pickCameraOrGallery = "pickCorrectGallery";
+      }
+    }
     await FirebaseFirestore.instance
         .collection("predictions")
         .doc('countWrongAndCorrectAnswers')
@@ -95,11 +116,16 @@ class _HomeState extends State<Home> {
         .forEach((element) {
       numRespuestas = element.data()['totalAnswers'] + 1;
       respuesta = element.data()[parameter] + 1;
+      cameraOrGalleryFailCount = element.data()[pickCameraOrGallery] + 1;
     });
     FirebaseFirestore.instance
         .collection("predictions")
         .doc('countWrongAndCorrectAnswers')
-        .update({'totalAnswers': numRespuestas, parameter: respuesta});
+        .update({
+      'totalAnswers': numRespuestas,
+      parameter: respuesta,
+      pickCameraOrGallery: cameraOrGalleryFailCount
+    });
   }
 
   updateWrongAnswersInfo(String animal) async {
@@ -112,6 +138,7 @@ class _HomeState extends State<Home> {
         .asStream()
         .forEach((element) {
       animalCount = element.data()[animal] + 1;
+
       respuesta = element.data()['totalWrong'] + 1;
     });
     String fileName = _image.path.split('/').last;
@@ -254,14 +281,15 @@ class _HomeState extends State<Home> {
                                                 updateAnswersInfo(
                                                     'totalCorrectAnswers');
                                                 if (_imagePickCamera &&
-                                                    auth.currentUser != null) {
+                                                    !auth.currentUser
+                                                        .isAnonymous) {
                                                   updateCollectionUser();
                                                 }
                                                 dispose();
-                                                Navigator.of(context).push(
-                                                    MaterialPageRoute(
-                                                        builder: (context) =>
-                                                            Home()));
+                                                Navigator.pushNamed(
+                                                  context,
+                                                  '/home',
+                                                );
                                               },
                                             ),
                                           ),
@@ -404,10 +432,10 @@ class _HomeState extends State<Home> {
                                                               ],
                                                             ));
                                                 dispose();
-                                                Navigator.of(context).push(
-                                                    MaterialPageRoute(
-                                                        builder: (context) =>
-                                                            Home()));
+                                                Navigator.pushNamed(
+                                                  context,
+                                                  '/home',
+                                                );
                                               },
                                             ),
                                           ),

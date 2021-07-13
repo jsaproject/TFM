@@ -1,13 +1,17 @@
 import 'package:animalspredictor/ui/collection.dart';
 import 'package:animalspredictor/ui/splash.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_analytics/observer.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import 'analytics_service.dart';
 import 'authentication_service.dart';
 import 'ui/home.dart';
 import 'ui/sign_in.dart';
 import 'ui/sign_up.dart';
-import 'package:provider/provider.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 
 Future<void> main() async {
@@ -18,6 +22,9 @@ Future<void> main() async {
 
 
 class MyApp extends StatelessWidget {
+
+  final FirebaseAnalytics analytics = FirebaseAnalytics();
+
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
@@ -27,12 +34,14 @@ class MyApp extends StatelessWidget {
         ),
         StreamProvider(
           create: (context) => context.read<AuthenticationService>().authStateChanges,
-          initialData: null,
         )
       ],
       child: MaterialApp(
         title: 'AnimalsPredictor',
         debugShowCheckedModeBanner: false,
+        navigatorObservers: [
+          FirebaseAnalyticsObserver(analytics: analytics),
+        ],
         theme: ThemeData(
             visualDensity: VisualDensity.adaptivePlatformDensity,
             primaryColor: Colors.indigoAccent
@@ -53,10 +62,14 @@ class MyApp extends StatelessWidget {
 
 
 class AuthenticationWrapper extends StatelessWidget {
+
+  final FirebaseAnalytics analytics = FirebaseAnalytics();
+
   @override
   Widget build(BuildContext context) {
     final firebaseuser = context.watch<User>();
     if (firebaseuser != null) {
+      analytics.logLogin();
       return Home();
     }
     return SignIn();

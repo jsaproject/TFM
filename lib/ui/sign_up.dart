@@ -21,7 +21,7 @@ class _SignUpState extends State<SignUp> {
         automaticallyImplyLeading: false,
         backgroundColor: Colors.indigoAccent,
         title: const Text(
-          'Sign up',
+          'Regístrate',
           style: TextStyle(
               fontSize: 20, fontWeight: FontWeight.w500, color: Colors.white),
         ),
@@ -88,12 +88,12 @@ class _SignUpState extends State<SignUp> {
 
                       showSnackbar(context, result);
 
-                      if (result == "Signed up") {
+                      if (result == "Logueado") {
                         Navigator.popUntil(
                             context, ModalRoute.withName('/auth'));
                       }
                     },
-                    child: Text('Create Account'),
+                    child: Text('Regístrate'),
                   ),
                 ),
                 const SizedBox(
@@ -104,9 +104,9 @@ class _SignUpState extends State<SignUp> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text("Already have an account? "),
+                      Text("¿Tienes una cuenta? "),
                       Text(
-                        'Sign in.',
+                        'Inicia sesión.',
                         style: TextStyle(
                             color: Theme.of(context).primaryColor,
                             fontWeight: FontWeight.w600),
