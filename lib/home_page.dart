@@ -122,10 +122,15 @@ class _HomePageState extends State<HomePage> {
     _ => 'No se ha podido clasificar la imagen. Inténtalo de nuevo.',
   };
 
-  String _collectionErrorMessage(FirebaseException error) => switch (error.code) {
-    'permission-denied' => 'La predicción se ha hecho, pero no tienes permiso para guardarla.',
-    'unavailable' => 'La predicción se ha hecho. Se guardará cuando vuelva la conexión.',
-    _ => 'La predicción se ha hecho, pero no se ha podido guardar en la colección.',
+  String _collectionErrorMessage(
+    FirebaseException error,
+  ) => switch (error.code) {
+    'permission-denied' =>
+      'La predicción se ha hecho, pero no tienes permiso para guardarla.',
+    'unavailable' =>
+      'La predicción se ha hecho. Se guardará cuando vuelva la conexión.',
+    _ =>
+      'La predicción se ha hecho, pero no se ha podido guardar en la colección.',
   };
 
   @override
