@@ -43,15 +43,17 @@ Estado: completada.
 
 FASE 3 — Completar la colección
 --------------------------------
-[ ] Recuperar las fichas visuales originales de los animales: foto,
+Estado: completada.
+
+[x] Recuperar las fichas visuales originales de los animales: foto,
     descripción y número coleccionado.
-[ ] Definir un catálogo local tipado de animales para evitar textos e imágenes
+[x] Definir un catálogo local tipado de animales para evitar textos e imágenes
     dispersos por la interfaz.
-[ ] Ordenar por nombre, cantidad y último animal identificado.
-[ ] Añadir progreso: animales descubiertos / total de especies.
-[ ] Añadir logros no intrusivos (por ejemplo: primera foto, cinco especies,
+[x] Ordenar por nombre, cantidad y último animal identificado.
+[x] Añadir progreso: animales descubiertos / total de especies.
+[x] Añadir logros no intrusivos (por ejemplo: primera foto, cinco especies,
     colección completa).
-[ ] Permitir borrar o corregir una predicción concreta si se guardó mal.
+[x] Permitir borrar o corregir una predicción concreta si se guardó mal.
 
 
 FASE 4 — Refactorizar y probar el código

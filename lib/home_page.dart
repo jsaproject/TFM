@@ -1,4 +1,5 @@
 import 'package:animalspredictor/auth_service.dart';
+import 'package:animalspredictor/animal_catalog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
@@ -7,6 +8,8 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:tensorflow_lite_flutter/tensorflow_lite_flutter.dart';
+
+enum CollectionOrder { name, amount, latest }
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key, required this.user});
@@ -17,19 +20,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  static const _animals = [
-    'Perro',
-    'Caballo',
-    'Elefante',
-    'Mariposa',
-    'Gallina',
-    'Gato',
-    'Vaca',
-    'Oveja',
-    'Araña',
-    'Ardilla',
-  ];
-
   final _picker = ImagePicker();
   Uint8List? _image;
   String? _predictedAnimal;
@@ -41,6 +31,7 @@ class _HomePageState extends State<HomePage> {
   bool _saving = false;
   bool _permissionDenied = false;
   var _index = 0;
+  CollectionOrder _collectionOrder = CollectionOrder.name;
 
   @override
   void initState() {
@@ -171,12 +162,20 @@ class _HomePageState extends State<HomePage> {
   Future<void> _saveToCollection(String label) async {
     if (widget.user.isAnonymous) return;
     try {
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(widget.user.uid)
-          .set({
-            'collection.$label': FieldValue.increment(1),
-          }, SetOptions(merge: true));
+      final firestore = FirebaseFirestore.instance;
+      final user = firestore.collection('users').doc(widget.user.uid);
+      final prediction = user.collection('predictions').doc();
+      final batch = firestore.batch();
+      batch.set(user, {
+        'collection.$label': FieldValue.increment(1),
+        'lastIdentifiedAt': FieldValue.serverTimestamp(),
+        'lastIdentified.$label': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+      batch.set(prediction, {
+        'animal': label,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+      await batch.commit();
     } on FirebaseException catch (error) {
       if (mounted) setState(() => _error = _collectionErrorMessage(error));
     }
@@ -392,10 +391,12 @@ class _HomePageState extends State<HomePage> {
             decoration: const InputDecoration(
               labelText: '¿Es el animal correcto?',
             ),
-            items: _animals
+            items: animalCatalog
                 .map(
-                  (animal) =>
-                      DropdownMenuItem(value: animal, child: Text(animal)),
+                  (animal) => DropdownMenuItem(
+                    value: animal.name,
+                    child: Text(animal.name),
+                  ),
                 )
                 .toList(),
             onChanged: _saving
@@ -491,24 +492,273 @@ class _HomePageState extends State<HomePage> {
         final collection = rawCollection is Map<String, dynamic>
             ? rawCollection
             : <String, dynamic>{};
+        final rawLastIdentified = snapshot.data?.data()?['lastIdentified'];
+        final lastIdentified = rawLastIdentified is Map<String, dynamic>
+            ? rawLastIdentified
+            : <String, dynamic>{};
         if (collection.isEmpty) return _emptyCollection();
+        final discovered = collection.keys
+            .where((name) => animalByName.containsKey(name))
+            .length;
+        final entries = collection.entries
+            .where((entry) => animalByName.containsKey(entry.key))
+            .toList();
+        entries.sort((a, b) {
+          if (_collectionOrder == CollectionOrder.amount) {
+            return _asCount(b.value).compareTo(_asCount(a.value));
+          }
+          if (_collectionOrder == CollectionOrder.latest) {
+            return _asDate(
+              lastIdentified[b.key],
+            ).compareTo(_asDate(lastIdentified[a.key]));
+          }
+          return a.key.compareTo(b.key);
+        });
         return ListView(
           padding: const EdgeInsets.all(16),
-          children: collection.entries
-              .map(
-                (entry) => Card(
-                  child: ListTile(
-                    minVerticalPadding: 14,
-                    leading: const Icon(Icons.pets, semanticLabel: 'Animal'),
-                    title: Text(entry.key),
-                    trailing: Text('${entry.value}'),
-                  ),
+          children: [
+            _collectionSummary(discovered, entries),
+            const SizedBox(height: 12),
+            DropdownButtonFormField<CollectionOrder>(
+              initialValue: _collectionOrder,
+              decoration: const InputDecoration(
+                labelText: 'Ordenar fichas',
+                border: OutlineInputBorder(),
+              ),
+              items: const [
+                DropdownMenuItem(
+                  value: CollectionOrder.name,
+                  child: Text('Por nombre'),
                 ),
-              )
-              .toList(),
+                DropdownMenuItem(
+                  value: CollectionOrder.amount,
+                  child: Text('Por cantidad'),
+                ),
+                DropdownMenuItem(
+                  value: CollectionOrder.latest,
+                  child: Text('Último identificado'),
+                ),
+              ],
+              onChanged: (order) => setState(
+                () => _collectionOrder = order ?? CollectionOrder.name,
+              ),
+            ),
+            const SizedBox(height: 12),
+            ...entries.map(
+              (entry) =>
+                  _animalCard(animalByName[entry.key]!, _asCount(entry.value)),
+            ),
+            const SizedBox(height: 12),
+            _predictionHistory(),
+          ],
         );
       },
     );
+  }
+
+  int _asCount(dynamic value) => value is num ? value.toInt() : 0;
+
+  DateTime _asDate(dynamic value) => value is Timestamp
+      ? value.toDate()
+      : DateTime.fromMillisecondsSinceEpoch(0);
+
+  Widget _collectionSummary(
+    int discovered,
+    List<MapEntry<String, dynamic>> entries,
+  ) {
+    final totalPhotos = entries.fold<int>(
+      0,
+      (total, entry) => total + _asCount(entry.value),
+    );
+    final achievements = <String>[
+      if (totalPhotos > 0) 'Primera foto',
+      if (discovered >= 5) 'Cinco especies',
+      if (discovered == animalCatalog.length) 'Colección completa',
+    ];
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Progreso de la colección',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '$discovered de ${animalCatalog.length} especies descubiertas',
+            ),
+            const SizedBox(height: 8),
+            LinearProgressIndicator(value: discovered / animalCatalog.length),
+            if (achievements.isNotEmpty) ...[
+              const SizedBox(height: 14),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: achievements
+                    .map(
+                      (achievement) => Chip(
+                        avatar: const Icon(
+                          Icons.emoji_events_outlined,
+                          size: 18,
+                        ),
+                        label: Text(achievement),
+                      ),
+                    )
+                    .toList(),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _animalCard(Animal animal, int count) => Card(
+    clipBehavior: Clip.antiAlias,
+    child: SizedBox(
+      height: 120,
+      child: Row(
+        children: [
+          AspectRatio(
+            aspectRatio: 1,
+            child: Image.asset(animal.imageAsset, fit: BoxFit.cover),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    animal.name,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 4),
+                  Expanded(child: Text(animal.description)),
+                  Text(
+                    '$count ${count == 1 ? 'foto' : 'fotos'} coleccionada${count == 1 ? '' : 's'}',
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+
+  Widget _predictionHistory() =>
+      StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+        stream: FirebaseFirestore.instance
+            .collection('users')
+            .doc(widget.user.uid)
+            .collection('predictions')
+            .orderBy('createdAt', descending: true)
+            .limit(20)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            return const SizedBox.shrink();
+          }
+          return Card(
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Identificaciones recientes',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  ...snapshot.data!.docs.map((document) {
+                    final animal =
+                        document.data()['animal'] as String? ?? 'Animal';
+                    return ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: Icon(animalByName[animal]?.icon ?? Icons.pets),
+                      title: Text(animal),
+                      trailing: PopupMenuButton<String>(
+                        onSelected: (action) =>
+                            _editPrediction(document, animal, action),
+                        itemBuilder: (context) => const [
+                          PopupMenuItem(
+                            value: 'correct',
+                            child: Text('Corregir'),
+                          ),
+                          PopupMenuItem(value: 'delete', child: Text('Borrar')),
+                        ],
+                      ),
+                    );
+                  }),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+
+  Future<void> _editPrediction(
+    DocumentSnapshot<Map<String, dynamic>> document,
+    String oldAnimal,
+    String action,
+  ) async {
+    if (action == 'delete') {
+      await _updatePrediction(document, oldAnimal, null);
+      return;
+    }
+    if (!mounted) return;
+    final corrected = await showDialog<String>(
+      context: context,
+      builder: (context) => SimpleDialog(
+        title: const Text('Corregir animal'),
+        children: animalCatalog
+            .map(
+              (animal) => SimpleDialogOption(
+                onPressed: () => Navigator.pop(context, animal.name),
+                child: Text(animal.name),
+              ),
+            )
+            .toList(),
+      ),
+    );
+    if (corrected != null && corrected != oldAnimal) {
+      await _updatePrediction(document, oldAnimal, corrected);
+    }
+  }
+
+  Future<void> _updatePrediction(
+    DocumentSnapshot<Map<String, dynamic>> document,
+    String oldAnimal,
+    String? newAnimal,
+  ) async {
+    try {
+      final firestore = FirebaseFirestore.instance;
+      final user = firestore.collection('users').doc(widget.user.uid);
+      final userData = (await user.get()).data();
+      final currentCollection =
+          userData?['collection'] as Map<String, dynamic>?;
+      final oldCount = _asCount(currentCollection?[oldAnimal]);
+      final batch = firestore.batch();
+      batch.update(user, {
+        'collection.$oldAnimal': oldCount <= 1
+            ? FieldValue.delete()
+            : FieldValue.increment(-1),
+      });
+      if (newAnimal == null) {
+        batch.delete(document.reference);
+      } else {
+        batch.update(user, {
+          'collection.$newAnimal': FieldValue.increment(1),
+          'lastIdentified.$newAnimal': FieldValue.serverTimestamp(),
+        });
+        batch.update(document.reference, {'animal': newAnimal});
+      }
+      await batch.commit();
+    } on FirebaseException catch (error) {
+      if (mounted) setState(() => _error = _collectionErrorMessage(error));
+    }
   }
 
   Widget _emptyCollection() => Center(
