@@ -1,0 +1,6 @@
+# Copia este archivo como key.properties. No subas key.properties ni el .jks.
+storePassword=CAMBIA_ESTA_CONTRASENA
+keyPassword=CAMBIA_ESTA_CONTRASENA
+keyAlias=upload
+# Ruta relativa a android/ o absoluta, por ejemplo: ../keys/granja-michi-upload.jks
+storeFile=../keys/granja-michi-upload.jks

@@ -83,20 +83,15 @@ class _HomePageState extends State<HomePage> {
       if (label is! String || confidence is! num) {
         throw StateError('El resultado del modelo está incompleto.');
       }
-      if (!widget.user.isAnonymous) {
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(widget.user.uid)
-            .set({
-              'collection.$label': FieldValue.increment(1),
-            }, SetOptions(merge: true));
-      }
       if (mounted) {
         setState(() {
           _image = bytes;
           _prediction = result;
         });
       }
+      await _saveToCollection(label);
+    } on FirebaseException catch (error) {
+      if (mounted) setState(() => _error = _firebaseErrorMessage(error));
     } catch (_) {
       if (mounted) {
         setState(() => _error = 'No se ha podido clasificar la imagen.');
@@ -105,6 +100,33 @@ class _HomePageState extends State<HomePage> {
       if (mounted) setState(() => _loading = false);
     }
   }
+
+  Future<void> _saveToCollection(String label) async {
+    if (widget.user.isAnonymous) return;
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.user.uid)
+          .set({
+            'collection.$label': FieldValue.increment(1),
+          }, SetOptions(merge: true));
+    } on FirebaseException catch (error) {
+      if (!mounted) return;
+      setState(() => _error = _collectionErrorMessage(error));
+    }
+  }
+
+  String _firebaseErrorMessage(FirebaseException error) => switch (error.code) {
+    'permission-denied' => 'No tienes permiso para guardar en tu colección.',
+    'unavailable' => 'No hay conexión. La imagen no se ha podido clasificar.',
+    _ => 'No se ha podido clasificar la imagen. Inténtalo de nuevo.',
+  };
+
+  String _collectionErrorMessage(FirebaseException error) => switch (error.code) {
+    'permission-denied' => 'La predicción se ha hecho, pero no tienes permiso para guardarla.',
+    'unavailable' => 'La predicción se ha hecho. Se guardará cuando vuelva la conexión.',
+    _ => 'La predicción se ha hecho, pero no se ha podido guardar en la colección.',
+  };
 
   @override
   void dispose() {
@@ -280,16 +302,19 @@ class _HomePageState extends State<HomePage> {
           .doc(widget.user.uid)
           .snapshots(),
       builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
-        }
         if (snapshot.hasError) {
           return const Center(
             child: Padding(
               padding: EdgeInsets.all(24),
-              child: Text('No se ha podido cargar la colección.'),
+              child: Text(
+                'No se ha podido cargar la colección. Comprueba tu conexión e inténtalo de nuevo.',
+                textAlign: TextAlign.center,
+              ),
             ),
           );
+        }
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
         }
         final rawCollection = snapshot.data?.data()?['collection'];
         final collection = rawCollection is Map<String, dynamic>

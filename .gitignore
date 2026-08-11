@@ -13,6 +13,11 @@ ios/Flutter/ephemeral/
 macos/
 build_*.log
 
+# Credenciales y almacenes de claves de Android para la firma de releases.
+android/key.properties
+android/*.jks
+android/*.keystore
+
 # Directory created by dartdoc
 # If you don't generate documentation locally you can remove this line.
 doc/api/
