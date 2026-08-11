@@ -11,6 +11,7 @@ android/.idea/
 ios/Flutter/ephemeral/
 # Restos generados de una plataforma macOS no incluida en este proyecto.
 macos/
+build_*.log
 
 # Directory created by dartdoc
 # If you don't generate documentation locally you can remove this line.
