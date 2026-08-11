@@ -81,6 +81,7 @@ class _AppShellState extends State<AppShell> {
         controller: _classifierController,
         onConfirmPrediction: _savePrediction,
         isAnonymous: widget.user.isAnonymous,
+        greetingName: widget.user.displayName,
       ),
       CollectionPage(
         userId: widget.user.uid,

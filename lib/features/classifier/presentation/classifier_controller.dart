@@ -5,15 +5,25 @@ import 'package:image_picker/image_picker.dart';
 
 import '../data/photo_picker_service.dart';
 
-enum ClassifierStatus { loading, ready, classifying, success, error }
+enum ClassifierStatus {
+  loading,
+  ready,
+  previewing,
+  classifying,
+  success,
+  unrecognized,
+  error,
+}
 
 @immutable
 class ClassifierState {
   const ClassifierState({
     required this.status,
     this.image,
-    this.prediction,
+    this.photoPath,
+    this.result,
     this.errorMessage,
+    this.noticeMessage,
     this.permissionDenied = false,
   });
 
@@ -22,9 +32,17 @@ class ClassifierState {
 
   final ClassifierStatus status;
   final Uint8List? image;
-  final Prediction? prediction;
+  final String? photoPath;
+  final ClassificationResult? result;
   final String? errorMessage;
+  final String? noticeMessage;
   final bool permissionDenied;
+
+  Prediction? get prediction => result?.primary;
+
+  bool get hasPhoto => image != null && photoPath != null;
+  bool get canRetryClassification =>
+      status == ClassifierStatus.error && hasPhoto;
 
   bool get isBusy =>
       status == ClassifierStatus.loading ||
@@ -41,14 +59,18 @@ class ClassifierController extends ChangeNotifier {
   final ClassifierService _classifier;
   final PhotoPickerService _photoPicker;
   ClassifierState _state = const ClassifierState.loading();
+  bool _isModelReady = false;
 
   ClassifierState get state => _state;
+  bool get isModelReady => _isModelReady;
 
   Future<void> load() async {
+    _isModelReady = false;
     _state = const ClassifierState.loading();
     notifyListeners();
     try {
       await _classifier.load();
+      _isModelReady = true;
       _state = const ClassifierState.ready();
     } on UnsupportedError {
       _state = const ClassifierState(
@@ -64,24 +86,21 @@ class ClassifierController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> pickAndClassify(ImageSource source) async {
-    if (_state.status != ClassifierStatus.ready &&
-        _state.status != ClassifierStatus.success) {
-      return;
-    }
+  Future<void> selectPhoto(ImageSource source) async {
+    if (_state.isBusy || !_isModelReady) return;
     try {
       final photo = await _photoPicker.pick(source);
-      if (photo == null) return;
+      if (photo == null) {
+        _state = const ClassifierState(
+          status: ClassifierStatus.ready,
+          noticeMessage: 'No se ha seleccionado ninguna imagen.',
+        );
+        return;
+      }
       _state = ClassifierState(
-        status: ClassifierStatus.classifying,
+        status: ClassifierStatus.previewing,
         image: photo.bytes,
-      );
-      notifyListeners();
-      final prediction = await _classifier.classify(photo.path);
-      _state = ClassifierState(
-        status: ClassifierStatus.success,
-        image: photo.bytes,
-        prediction: prediction,
+        photoPath: photo.path,
       );
     } on PhotoPermissionDenied catch (error) {
       _state = ClassifierState(
@@ -90,14 +109,51 @@ class ClassifierController extends ChangeNotifier {
         permissionDenied: true,
       );
     } catch (_) {
-      _state = const ClassifierState(
+      _state = ClassifierState(
         status: ClassifierStatus.error,
-        errorMessage:
-            'No se ha podido clasificar la imagen. Inténtalo de nuevo.',
+        errorMessage: 'No se ha podido abrir la imagen. Inténtalo de nuevo.',
       );
+    } finally {
+      notifyListeners();
     }
-    notifyListeners();
   }
+
+  Future<void> classifySelectedPhoto() async {
+    final path = _state.photoPath;
+    final image = _state.image;
+    if (path == null || image == null || _state.isBusy) return;
+
+    _state = ClassifierState(
+      status: ClassifierStatus.classifying,
+      image: image,
+      photoPath: path,
+    );
+    notifyListeners();
+    try {
+      final result = await _classifier.classify(path);
+      _state = ClassifierState(
+        status: result.primary.confidence >= minimumReliableConfidence
+            ? ClassifierStatus.success
+            : ClassifierStatus.unrecognized,
+        image: image,
+        photoPath: path,
+        result: result,
+      );
+    } catch (_) {
+      _state = ClassifierState(
+        status: ClassifierStatus.error,
+        image: image,
+        photoPath: path,
+        errorMessage:
+            'No se ha podido clasificar la imagen. Comprueba el archivo e inténtalo de nuevo.',
+      );
+    } finally {
+      notifyListeners();
+    }
+  }
+
+  /// Umbral conservador de interfaz mientras se valida el modelo en la fase 7.
+  static const minimumReliableConfidence = 0.75;
 
   @override
   void dispose() {

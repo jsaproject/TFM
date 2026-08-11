@@ -1,10 +1,11 @@
+import 'package:animalspredictor/animal_catalog.dart';
 import 'package:animalspredictor/models/prediction.dart';
 import 'package:flutter/foundation.dart';
 import 'package:tensorflow_lite_flutter/tensorflow_lite_flutter.dart';
 
 abstract class ClassifierService {
   Future<void> load();
-  Future<Prediction> classify(String imagePath);
+  Future<ClassificationResult> classify(String imagePath);
   Future<void> dispose();
 }
 
@@ -21,7 +22,7 @@ class TfliteClassifierService implements ClassifierService {
   }
 
   @override
-  Future<Prediction> classify(String imagePath) async {
+  Future<ClassificationResult> classify(String imagePath) async {
     final results = await Tflite.runModelOnImage(
       path: imagePath,
       numResults: 3,
@@ -29,16 +30,35 @@ class TfliteClassifierService implements ClassifierService {
       imageMean: 0,
       imageStd: 1,
     );
-    final result = results?.isEmpty ?? true ? null : results!.first;
-    if (result is! Map<dynamic, dynamic> ||
+    if (results == null || results.isEmpty) {
+      throw StateError('Resultado del modelo inválido');
+    }
+
+    final predictions = results.map(_toPrediction).toList()
+      ..sort((left, right) => right.confidence.compareTo(left.confidence));
+    if (predictions.isEmpty) throw StateError('Resultado del modelo inválido');
+
+    return ClassificationResult(
+      primary: predictions.first,
+      alternatives: predictions.skip(1).toList(),
+    );
+  }
+
+  Prediction _toPrediction(Object? result) {
+    if (result is! Map ||
         result['label'] is! String ||
         result['confidence'] is! num) {
       throw StateError('Resultado del modelo inválido');
     }
-    return Prediction(
-      animal: result['label'] as String,
-      confidence: (result['confidence'] as num).toDouble(),
-    );
+    final confidence = (result['confidence'] as num).toDouble();
+    if (!confidence.isFinite || confidence < 0 || confidence > 1) {
+      throw StateError('Confianza del modelo inválida');
+    }
+    final animal = (result['label'] as String).trim();
+    if (!animalByName.containsKey(animal)) {
+      throw StateError('Etiqueta del modelo no admitida');
+    }
+    return Prediction(animal: animal, confidence: confidence);
   }
 
   @override

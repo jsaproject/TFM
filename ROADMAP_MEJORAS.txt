@@ -138,15 +138,16 @@ Criterios de salida:
 FASE 3 — IDENTIFICACIÓN CENTRADA EN LA CÁMARA
 ---------------------------------------------
 Duración estimada: 2-3 días.
+Estado: completada.
 
-[ ] Inicio con saludo, progreso breve y CTA principal “Identificar animal”.
-[ ] Elegir cámara o galería desde un bottom sheet.
-[ ] Guía de encuadre, clases soportadas y explicación de procesamiento local.
-[ ] Preview de alta calidad con recorte editable antes de inferencia.
-[ ] Resultado como panel: especie, confianza, alternativas y confirmación.
-[ ] Estado “No reconocido” y tratamiento específico de baja confianza.
-[ ] Animaciones sutiles y feedback háptico configurable.
-[ ] Estados probados: carga, cancelación, permiso, error, offline y reintento.
+[x] Inicio con saludo, progreso breve y CTA principal “Identificar animal”.
+[x] Elegir cámara o galería desde un bottom sheet.
+[x] Guía de encuadre, clases soportadas y explicación de procesamiento local.
+[x] Preview de alta calidad con recorte editable antes de inferencia.
+[x] Resultado como panel: especie, confianza, alternativas y confirmación.
+[x] Estado “No reconocido” y tratamiento específico de baja confianza.
+[x] Animaciones sutiles y feedback háptico configurable.
+[x] Estados probados: carga, cancelación, permiso, error, offline y reintento.
 
 Criterios de salida:
 
