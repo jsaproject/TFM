@@ -119,15 +119,15 @@ FASE 2 — AUTENTICACIÓN MODERNA
 ------------------------------
 Duración estimada: 1-2 días.
 
-[ ] Bienvenida con marca, beneficio principal e ilustración ligera.
-[ ] Flujos visualmente claros para iniciar sesión y crear cuenta.
-[ ] Mostrar/ocultar contraseña, acciones de teclado y autofill completo.
-[ ] Validación inline y mensajes Firebase accionables.
-[ ] Recuperación de contraseña.
-[ ] Confirmación clara después del registro.
-[ ] Invitado como acción secundaria explicando qué datos no se guardarán.
-[ ] Loading dentro del botón y bloqueo de doble envío.
-[ ] Tests de login, registro, invitado, recuperación y errores.
+[x] Bienvenida con marca, beneficio principal e ilustración ligera.
+[x] Flujos visualmente claros para iniciar sesión y crear cuenta.
+[x] Mostrar/ocultar contraseña, acciones de teclado y autofill completo.
+[x] Validación inline y mensajes Firebase accionables.
+[x] Recuperación de contraseña.
+[x] Confirmación clara después del registro.
+[x] Invitado como acción secundaria explicando qué datos no se guardarán.
+[x] Loading dentro del botón y bloqueo de doble envío.
+[x] Tests de login, registro, invitado, recuperación y errores.
 
 Criterios de salida:
 

@@ -6,6 +6,7 @@ abstract class AuthService {
   Future<void> signIn(String email, String password);
   Future<void> signInAnonymously();
   Future<void> signUp(String email, String password);
+  Future<void> sendPasswordResetEmail(String email);
   Future<void> signOut();
 }
 
@@ -41,6 +42,10 @@ class FirebaseAuthService implements AuthService {
       'createdAt': FieldValue.serverTimestamp(),
     });
   }
+
+  @override
+  Future<void> sendPasswordResetEmail(String email) =>
+      _auth.sendPasswordResetEmail(email: email);
 
   @override
   Future<void> signOut() => _auth.signOut();
