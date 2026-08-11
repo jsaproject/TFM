@@ -46,6 +46,14 @@ gga config
 
 Mantener los commits pequeños y centrados en una responsabilidad. Una auditoría con muchos archivos puede superar el timeout y es menos precisa que varias revisiones acotadas.
 
+## Si una revisión supera el tiempo límite
+
+El hook usa `exec gga run`, por lo que Git recibe directamente el resultado de
+la revisión. Si Codex no responde antes del valor `TIMEOUT` configurado (300
+segundos), el commit falla de forma segura: no se crea ningún commit y no hay
+que desinstalar ni omitir el hook. Divide el cambio en commits coherentes,
+vuelve a ejecutar las comprobaciones deterministas y repite el commit.
+
 ## Qué bloquea
 
 - Regresiones de seguridad, autenticación, permisos o privacidad.
