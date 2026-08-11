@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "211987682756-4rkildar8jhf0cf87f4a57i09erjvkdq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.tfm.animalspredictor",
+            "certificate_hash": "f8eeee820823a8ae217b688c7973098acb1e4d7f"
+          }
+        },
+        {
           "client_id": "211987682756-q8j8rrq7skf0ejbji6bns4h6tnc7e1h7.apps.googleusercontent.com",
           "client_type": 3
         }
