@@ -25,17 +25,19 @@ FASE 1 — Consolidar la versión actual (prioridad alta)
 
 FASE 2 — Mejorar experiencia de usuario
 ----------------------------------------
-[ ] Mantener el degradado verde y menú índigo, adaptando márgenes, tipografía
+Estado: completada.
+
+[x] Mantener el degradado verde y menú índigo, adaptando márgenes, tipografía
     y tamaños a pantallas pequeñas y grandes.
-[ ] Añadir una pantalla de bienvenida breve que explique cámara, galería y
+[x] Añadir una pantalla de bienvenida breve que explique cámara, galería y
     colección antes del primer uso.
-[ ] Mostrar permisos denegados con una acción para abrir Ajustes.
-[ ] Añadir estado vacío de colección con una llamada a la acción para hacer
+[x] Mostrar permisos denegados con una acción para abrir Ajustes.
+[x] Añadir estado vacío de colección con una llamada a la acción para hacer
     la primera predicción.
-[ ] Mostrar el resultado de la predicción con nombre, confianza, imagen y
+[x] Mostrar el resultado de la predicción con nombre, confianza, imagen y
     una opción de confirmar o corregir el animal detectado.
-[ ] Añadir feedback háptico o visual ligero al clasificar y guardar.
-[ ] Añadir accesibilidad: contraste comprobado, textos escalables, etiquetas
+[x] Añadir feedback háptico o visual ligero al clasificar y guardar.
+[x] Añadir accesibilidad: contraste comprobado, textos escalables, etiquetas
     semánticas para iconos y botones con objetivos táctiles amplios.
 
 

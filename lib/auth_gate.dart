@@ -1,4 +1,4 @@
-import 'package:animalspredictor/home_page.dart';
+import 'package:animalspredictor/welcome_gate.dart';
 import 'package:animalspredictor/sign_in_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -28,7 +28,7 @@ class AuthGate extends StatelessWidget {
       }
       return snapshot.data == null
           ? const SignInPage()
-          : HomePage(user: snapshot.data!);
+          : WelcomeGate(user: snapshot.data!);
     },
   );
 }

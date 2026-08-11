@@ -48,6 +48,10 @@ android {
 
     buildTypes {
         release {
+            // El plugin TFLite heredado referencia delegados GPU opcionales que
+            // R8 no puede resolver. Se conserva el código nativo sin minimizar.
+            isMinifyEnabled = false
+            isShrinkResources = false
             if (releasePropertiesFile.exists()) {
                 signingConfig = signingConfigs.getByName("release")
             }
