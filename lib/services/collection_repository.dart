@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:animalspredictor/animal_catalog.dart';
 import 'package:animalspredictor/models/user_collection.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -15,9 +16,15 @@ abstract class CollectionRepository {
 }
 
 class CollectionPrediction {
-  const CollectionPrediction({required this.id, required this.animal});
+  const CollectionPrediction({
+    required this.id,
+    required this.animal,
+    this.createdAt,
+  });
+
   final String id;
   final String animal;
+  final DateTime? createdAt;
 }
 
 class FirestoreCollectionRepository implements CollectionRepository {
@@ -37,21 +44,17 @@ class FirestoreCollectionRepository implements CollectionRepository {
   Stream<List<CollectionPrediction>> watchPredictions(String uid) => _user(uid)
       .collection('predictions')
       .orderBy('createdAt', descending: true)
-      .limit(20)
       .snapshots()
       .map(
         (snapshot) => snapshot.docs
-            .map(
-              (doc) => CollectionPrediction(
-                id: doc.id,
-                animal: doc.data()['animal'] as String? ?? 'Animal',
-              ),
-            )
-            .toList(),
+            .map(_predictionFromDocument)
+            .whereType<CollectionPrediction>()
+            .toList(growable: false),
       );
 
   @override
   Future<void> savePrediction(String uid, String animal) async {
+    _validateAnimal(animal);
     final user = _user(uid);
     final batch = _firestore.batch();
     batch.set(user, {
@@ -74,33 +77,67 @@ class FirestoreCollectionRepository implements CollectionRepository {
     CollectionPrediction prediction,
     String? animal,
   ) async {
+    if (animal != null) _validateAnimal(animal);
     final user = _user(uid);
-    final data = (await user.get()).data();
-    final counts = data?['collection'] as Map<String, dynamic>?;
-    final oldCount = counts?[prediction.animal] is num
-        ? (counts![prediction.animal] as num).toInt()
-        : 0;
-    final batch = _firestore.batch();
-    batch.update(user, {
-      'collection.${prediction.animal}': oldCount <= 1
-          ? FieldValue.delete()
-          : FieldValue.increment(-1),
-    });
     final reference = user.collection('predictions').doc(prediction.id);
-    if (animal == null) {
-      batch.delete(reference);
-    } else {
-      batch.update(user, {
+    await _firestore.runTransaction((transaction) async {
+      final userSnapshot = await transaction.get(user);
+      final predictionSnapshot = await transaction.get(reference);
+      if (!predictionSnapshot.exists) {
+        throw StateError('La identificación ya no está disponible.');
+      }
+
+      final storedAnimal = predictionSnapshot.data()?['animal'];
+      if (storedAnimal is! String || !animalByName.containsKey(storedAnimal)) {
+        throw StateError('La identificación guardada no es válida.');
+      }
+      final counts = _readCounts(userSnapshot.data() ?? {});
+      final oldCount = counts[storedAnimal] ?? 0;
+      if (oldCount <= 0) {
+        throw StateError('La colección no contiene esta identificación.');
+      }
+      if (animal == storedAnimal) return;
+
+      transaction.update(user, {
+        'collection.$storedAnimal': oldCount == 1
+            ? FieldValue.delete()
+            : FieldValue.increment(-1),
+      });
+      if (animal == null) {
+        transaction.delete(reference);
+        return;
+      }
+
+      transaction.update(user, {
         'collection.$animal': FieldValue.increment(1),
         'lastIdentified.$animal': FieldValue.serverTimestamp(),
       });
-      batch.update(reference, {'animal': animal});
-    }
-    await batch.commit();
+      transaction.update(reference, {'animal': animal});
+    });
   }
 
   DocumentReference<Map<String, dynamic>> _user(String uid) =>
       _firestore.collection('users').doc(uid);
+
+  CollectionPrediction? _predictionFromDocument(
+    QueryDocumentSnapshot<Map<String, dynamic>> document,
+  ) {
+    final data = document.data();
+    final animal = data['animal'];
+    if (animal is! String || !animalByName.containsKey(animal)) return null;
+    final createdAt = data['createdAt'];
+    return CollectionPrediction(
+      id: document.id,
+      animal: animal,
+      createdAt: createdAt is Timestamp ? createdAt.toDate() : null,
+    );
+  }
+
+  void _validateAnimal(String animal) {
+    if (!animalByName.containsKey(animal)) {
+      throw ArgumentError.value(animal, 'animal', 'Animal no compatible');
+    }
+  }
 
   void _scheduleLegacyMigration(String uid) {
     if (!_legacyMigrations.add(uid)) return;

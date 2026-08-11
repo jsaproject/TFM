@@ -159,14 +159,14 @@ FASE 4 — COLECCIÓN MODERNA
 --------------------------
 Duración estimada: 2-3 días.
 
-[ ] Cabecera compacta con progreso, logros y último descubrimiento.
-[ ] Cuadrícula responsive con imagen, nombre y contador por especie.
-[ ] Filtros mediante chips: descubiertos, pendientes, recientes y cantidad.
-[ ] Detalle de especie con descripción, estadísticas e historial.
-[ ] Historial general separado de la cuadrícula principal.
-[ ] Confirmación para borrar y flujo claro para corregir.
-[ ] Skeletons y estados vacío, error, offline y reintento.
-[ ] Usar listas lazy para historiales que puedan crecer.
+[x] Cabecera compacta con progreso, logros y último descubrimiento.
+[x] Cuadrícula responsive con imagen, nombre y contador por especie.
+[x] Filtros mediante chips: descubiertos, pendientes, recientes y cantidad.
+[x] Detalle de especie con descripción, estadísticas e historial.
+[x] Historial general separado de la cuadrícula principal.
+[x] Confirmación para borrar y flujo claro para corregir.
+[x] Skeletons y estados vacío, error, offline y reintento.
+[x] Usar listas lazy para historiales que puedan crecer.
 
 Criterios de salida:
 

@@ -38,4 +38,14 @@ void main() {
 
     expect(collection.counts, {'Perro': 4});
   });
+
+  test('expone el último descubrimiento de una especie conocida', () {
+    final latest = DateTime(2026, 8, 12);
+    final collection = UserCollection(
+      lastIdentified: {'Desconocido': DateTime(2026, 8, 13), 'Gato': latest},
+    );
+
+    expect(collection.lastDiscoveredAnimal, 'Gato');
+    expect(collection.lastDiscoveredAt, latest);
+  });
 }
