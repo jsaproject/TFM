@@ -13,6 +13,19 @@ class AuthGate extends StatelessWidget {
       if (snapshot.connectionState == ConnectionState.waiting) {
         return const Scaffold(body: Center(child: CircularProgressIndicator()));
       }
+      if (snapshot.hasError) {
+        return const Scaffold(
+          body: Center(
+            child: Padding(
+              padding: EdgeInsets.all(24),
+              child: Text(
+                'No se ha podido comprobar la sesión. Vuelve a abrir la aplicación.',
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+        );
+      }
       return snapshot.data == null
           ? const SignInPage()
           : HomePage(user: snapshot.data!);

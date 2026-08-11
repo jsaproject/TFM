@@ -1,0 +1,31 @@
+name: tensorflow_lite_flutter
+description: A Flutter plugin for accessing TensorFlow Lite. Supports both iOS and Android.
+version: 3.0.0+local.1
+homepage: https://github.com/draz26648/tflite_edited
+repository: https://github.com/draz26648/tflite_edited
+issue_tracker: https://github.com/draz26648/tflite_edited/issues
+
+environment:
+  sdk: '>=3.2.0 <4.0.0'
+  flutter: ">=3.16.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  meta: ^1.10.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.1
+  test: ^1.24.9
+
+# The following section is specific to Flutter.
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: sq.flutter.tflite
+        pluginClass: TflitePlugin
+      ios:
+        pluginClass: TflitePlugin

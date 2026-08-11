@@ -6,11 +6,22 @@ class AnimalsPredictorApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => MaterialApp(
-    title: 'Animals Predictor',
+    title: 'La granja de Michi',
     debugShowCheckedModeBanner: false,
     theme: ThemeData(
-      colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF2E7D32)),
+      colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigoAccent),
       useMaterial3: true,
+      appBarTheme: const AppBarTheme(
+        backgroundColor: Colors.indigoAccent,
+        foregroundColor: Colors.white,
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          backgroundColor: Colors.indigoAccent,
+          foregroundColor: Colors.white,
+          shape: const StadiumBorder(),
+        ),
+      ),
     ),
     home: const AuthGate(),
   );

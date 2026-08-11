@@ -1,0 +1,108 @@
+ROADMAP DE MEJORAS — LA GRANJA DE MICHI
+========================================
+
+Objetivo
+--------
+Evolucionar la aplicación conservando su identidad visual original (nombre,
+colores, iconos y estilo), pero mejorando calidad, experiencia de usuario,
+seguridad y mantenibilidad.
+
+
+FASE 1 — Consolidar la versión actual (prioridad alta)
+------------------------------------------------------
+[ ] Crear un commit y publicar los cambios actuales en GitHub.
+[ ] Probar registro, inicio de sesión, invitado, cierre de sesión, cámara,
+    galería y colección en un dispositivo Android físico.
+[ ] Confirmar en Firebase Console que Email/Password y acceso anónimo están
+    habilitados.
+[ ] Revisar que las reglas de Firestore sólo permitan a cada usuario acceder
+    a /users/{su_uid}.
+[ ] Preparar una APK release firmada para distribución y conservar la clave
+    de firma de forma segura.
+[ ] Probar la app sin conexión y comprobar que todos los errores se comunican
+    de forma clara.
+
+
+FASE 2 — Mejorar experiencia de usuario
+----------------------------------------
+[ ] Mantener el degradado verde y menú índigo, adaptando márgenes, tipografía
+    y tamaños a pantallas pequeñas y grandes.
+[ ] Añadir una pantalla de bienvenida breve que explique cámara, galería y
+    colección antes del primer uso.
+[ ] Mostrar permisos denegados con una acción para abrir Ajustes.
+[ ] Añadir estado vacío de colección con una llamada a la acción para hacer
+    la primera predicción.
+[ ] Mostrar el resultado de la predicción con nombre, confianza, imagen y
+    una opción de confirmar o corregir el animal detectado.
+[ ] Añadir feedback háptico o visual ligero al clasificar y guardar.
+[ ] Añadir accesibilidad: contraste comprobado, textos escalables, etiquetas
+    semánticas para iconos y botones con objetivos táctiles amplios.
+
+
+FASE 3 — Completar la colección
+--------------------------------
+[ ] Recuperar las fichas visuales originales de los animales: foto,
+    descripción y número coleccionado.
+[ ] Definir un catálogo local tipado de animales para evitar textos e imágenes
+    dispersos por la interfaz.
+[ ] Ordenar por nombre, cantidad y último animal identificado.
+[ ] Añadir progreso: animales descubiertos / total de especies.
+[ ] Añadir logros no intrusivos (por ejemplo: primera foto, cinco especies,
+    colección completa).
+[ ] Permitir borrar o corregir una predicción concreta si se guardó mal.
+
+
+FASE 4 — Refactorizar y probar el código
+-----------------------------------------
+[ ] Separar HomePage en widgets y servicios: clasificación, selector de imagen,
+    colección, menú lateral y mensajes de error.
+[ ] Centralizar colores, textos, espaciados y estilos en un tema propio de
+    "La granja de Michi".
+[ ] Inyectar AuthService, Firestore y el clasificador para poder probarlos sin
+    Firebase ni el modelo real.
+[ ] Definir modelos tipados: Animal, Prediction y UserCollection.
+[ ] Añadir tests unitarios para autenticación, validación, errores y guardado.
+[ ] Añadir tests de widgets para login, clasificador, menú y colección.
+[ ] Añadir un flujo de integración Android para cámara/galería y Firestore.
+[ ] Configurar CI en GitHub Actions: formato, análisis, tests y build Android.
+
+
+FASE 5 — Modelo de inteligencia artificial
+-------------------------------------------
+[ ] Medir precisión del modelo con fotos reales, no sólo imágenes de ejemplo.
+[ ] Definir un umbral de confianza: pedir confirmación cuando sea bajo.
+[ ] Mostrar "No reconocido" en vez de guardar resultados poco fiables.
+[ ] Sustituir o actualizar el motor TFLite local cuando exista una alternativa
+    mantenida; conservar pruebas de compatibilidad Android/iOS.
+[ ] Reducir el peso de la APK: analizar el tamaño del modelo y usar ABI split
+    o App Bundle para distribución.
+[ ] Documentar clases soportadas, formato de entrada (224x224) y normalización.
+
+
+FASE 6 — Datos, privacidad y analítica responsable
+---------------------------------------------------
+[ ] Añadir política de privacidad y explicar que las fotos se clasifican de
+    forma local salvo que el usuario acepte explícitamente subirlas.
+[ ] Guardar sólo los datos necesarios en Firestore.
+[ ] Añadir una opción para eliminar cuenta y colección.
+[ ] Si se reintroduce analítica, pedir consentimiento y registrar únicamente
+    eventos útiles: inicio de clasificación, resultado confirmado y error.
+[ ] Usar Crashlytics o una alternativa para detectar fallos reales en uso.
+
+
+FASE 7 — Publicación
+--------------------
+[ ] Crear icono final, capturas y ficha de Google Play conservando el estilo
+    de la granja.
+[ ] Generar AAB release firmado y probarlo en un canal interno de Play Store.
+[ ] Revisar target SDK, permisos y declaración de datos de Google Play.
+[ ] Preparar versionado semántico y notas de cada versión.
+
+
+Orden recomendado
+-----------------
+1. Fase 1: asegurar y probar lo ya construido.
+2. Fase 2 y 3: recuperar y mejorar la experiencia que define el TFM.
+3. Fase 4: modularizar y cubrir con tests antes de añadir más funciones.
+4. Fase 5: mejorar fiabilidad y tamaño del modelo.
+5. Fase 6 y 7: privacidad, seguimiento de fallos y publicación.

@@ -1,8 +1,7 @@
-import 'dart:typed_data';
-
 import 'package:animalspredictor/auth_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:tensorflow_lite_flutter/tensorflow_lite_flutter.dart';
@@ -20,6 +19,7 @@ class _HomePageState extends State<HomePage> {
   Map<dynamic, dynamic>? _prediction;
   String? _error;
   bool _loading = true;
+  bool _modelReady = false;
   var _index = 0;
 
   @override
@@ -29,11 +29,21 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _load() async {
+    if (kIsWeb) {
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _error = 'La clasificación está disponible en Android e iOS.';
+        });
+      }
+      return;
+    }
     try {
       await Tflite.loadModel(
         model: 'assets/model.tflite',
         labels: 'assets/labels.txt',
       );
+      _modelReady = true;
     } catch (_) {
       _error = 'No se ha podido cargar el modelo.';
     }
@@ -41,6 +51,10 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _pick(ImageSource source) async {
+    if (!_modelReady) {
+      setState(() => _error = 'El modelo aún no está disponible.');
+      return;
+    }
     try {
       final image = await _picker.pickImage(
         source: source,
@@ -60,16 +74,21 @@ class _HomePageState extends State<HomePage> {
         imageStd: 1,
       );
       final bytes = await image.readAsBytes();
-      final result = results?.isEmpty ?? true
-          ? null
-          : results!.first as Map<dynamic, dynamic>;
-      if (result == null) throw StateError('No hay resultados');
+      final result = results?.isEmpty ?? true ? null : results!.first;
+      if (result is! Map<dynamic, dynamic>) {
+        throw StateError('El modelo no ha devuelto un resultado válido.');
+      }
+      final label = result['label'];
+      final confidence = result['confidence'];
+      if (label is! String || confidence is! num) {
+        throw StateError('El resultado del modelo está incompleto.');
+      }
       if (!widget.user.isAnonymous) {
         await FirebaseFirestore.instance
             .collection('users')
             .doc(widget.user.uid)
             .set({
-              'collection.${result['label']}': FieldValue.increment(1),
+              'collection.$label': FieldValue.increment(1),
             }, SetOptions(merge: true));
       }
       if (mounted) {
@@ -89,112 +108,157 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void dispose() {
-    Tflite.close();
+    if (!kIsWeb) Tflite.close();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
-      title: Text(_index == 0 ? 'Clasificar animales' : 'Mi colección'),
+      title: Text(_index == 0 ? 'La granja de Michi' : 'Mi colección'),
     ),
     drawer: Drawer(
-      child: ListView(
-        children: [
-          UserAccountsDrawerHeader(
-            accountName: Text(
-              widget.user.isAnonymous
-                  ? 'Invitado'
-                  : (widget.user.email ?? 'Usuario'),
+      child: Material(
+        color: const Color(0xFF324BCD),
+        child: ListView(
+          children: [
+            UserAccountsDrawerHeader(
+              decoration: const BoxDecoration(color: Color(0xFF324BCD)),
+              accountName: Text(
+                widget.user.isAnonymous
+                    ? 'Invitado'
+                    : (widget.user.email ?? 'Usuario'),
+              ),
+              accountEmail: null,
             ),
-            accountEmail: null,
-          ),
-          ListTile(
-            leading: const Icon(Icons.pets),
-            title: const Text('Predecir'),
-            onTap: () {
-              Navigator.pop(context);
-              setState(() => _index = 0);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.collections_bookmark),
-            title: const Text('Colección'),
-            onTap: () {
-              Navigator.pop(context);
-              setState(() => _index = 1);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.logout),
-            title: const Text('Cerrar sesión'),
-            onTap: () => AuthService(
-              FirebaseAuth.instance,
-              FirebaseFirestore.instance,
-            ).signOut(),
-          ),
-        ],
+            ListTile(
+              leading: const Icon(Icons.image_search, color: Colors.white),
+              title: const Text(
+                'Predecir',
+                style: TextStyle(color: Colors.white),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                setState(() => _index = 0);
+              },
+            ),
+            ListTile(
+              leading: const Icon(
+                Icons.collections_bookmark,
+                color: Colors.white,
+              ),
+              title: const Text(
+                'Colección',
+                style: TextStyle(color: Colors.white),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                setState(() => _index = 1);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.logout, color: Colors.white),
+              title: const Text(
+                'Cerrar sesión',
+                style: TextStyle(color: Colors.white),
+              ),
+              onTap: () async {
+                Navigator.pop(context);
+                try {
+                  await AuthService(
+                    FirebaseAuth.instance,
+                    FirebaseFirestore.instance,
+                  ).signOut();
+                } on FirebaseAuthException {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('No se ha podido cerrar sesión.'),
+                      ),
+                    );
+                  }
+                }
+              },
+            ),
+          ],
+        ),
       ),
     ),
     body: _index == 0 ? _classifier() : _collection(),
   );
-  Widget _classifier() => Center(
-    child: ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 560),
-      child: ListView(
-        padding: const EdgeInsets.all(24),
-        children: [
-          Text(
-            'Identifica animales en una foto',
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-          const SizedBox(height: 16),
-          AspectRatio(
-            aspectRatio: 1,
-            child: Card(
-              clipBehavior: Clip.antiAlias,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  if (_image != null)
-                    Image.memory(_image!, fit: BoxFit.cover)
-                  else
-                    Image.asset('assets/farm_animals.png', fit: BoxFit.contain),
-                  if (_loading) const ColoredBox(color: Color(0x55000000)),
-                  if (_loading)
-                    const Center(child: CircularProgressIndicator()),
-                ],
-              ),
+  Widget _classifier() => Container(
+    decoration: const BoxDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [Color(0xFFA8E063), Color(0xFF56AB2F)],
+      ),
+    ),
+    child: Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 560),
+        child: ListView(
+          padding: const EdgeInsets.all(24),
+          children: [
+            Text(
+              'Identifica animales en una foto',
+              style: Theme.of(context).textTheme.headlineSmall,
             ),
-          ),
-          if (_prediction != null)
-            Card(
-              child: ListTile(
-                leading: const Icon(Icons.pets),
-                title: Text(_prediction!['label'] as String),
-                subtitle: Text(
-                  'Confianza: ${((_prediction!['confidence'] as num) * 100).toStringAsFixed(1)} %',
+            const SizedBox(height: 16),
+            AspectRatio(
+              aspectRatio: 1,
+              child: Card(
+                clipBehavior: Clip.antiAlias,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    if (_image != null)
+                      Image.memory(_image!, fit: BoxFit.cover)
+                    else
+                      Image.asset(
+                        'assets/farm_animals.png',
+                        fit: BoxFit.contain,
+                      ),
+                    if (_loading) const ColoredBox(color: Color(0x55000000)),
+                    if (_loading)
+                      const Center(child: CircularProgressIndicator()),
+                  ],
                 ),
               ),
             ),
-          if (_error != null)
-            Text(
-              _error!,
-              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            if (_prediction != null)
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.pets),
+                  title: Text(_prediction!['label'] as String),
+                  subtitle: Text(
+                    'Confianza: ${((_prediction!['confidence'] as num) * 100).toStringAsFixed(1)} %',
+                  ),
+                ),
+              ),
+            if (_error != null)
+              Text(
+                _error!,
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
+              ),
+            const SizedBox(height: 16),
+            FilledButton.icon(
+              onPressed: _loading || !_modelReady
+                  ? null
+                  : () => _pick(ImageSource.camera),
+              icon: const Icon(Icons.camera_alt),
+              label: const Text('Hacer una foto'),
             ),
-          const SizedBox(height: 16),
-          FilledButton.icon(
-            onPressed: _loading ? null : () => _pick(ImageSource.camera),
-            icon: const Icon(Icons.camera_alt),
-            label: const Text('Hacer una foto'),
-          ),
-          const SizedBox(height: 12),
-          OutlinedButton.icon(
-            onPressed: _loading ? null : () => _pick(ImageSource.gallery),
-            icon: const Icon(Icons.photo_library_outlined),
-            label: const Text('Elegir de la galería'),
-          ),
-        ],
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              onPressed: _loading || !_modelReady
+                  ? null
+                  : () => _pick(ImageSource.gallery),
+              icon: const Icon(Icons.photo_library_outlined),
+              label: const Text('Elegir de la galería'),
+            ),
+          ],
+        ),
       ),
     ),
   );
@@ -216,11 +280,21 @@ class _HomePageState extends State<HomePage> {
           .doc(widget.user.uid)
           .snapshots(),
       builder: (context, snapshot) {
-        final collection =
-            snapshot.data?.data()?['collection'] as Map<String, dynamic>? ?? {};
         if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
         }
+        if (snapshot.hasError) {
+          return const Center(
+            child: Padding(
+              padding: EdgeInsets.all(24),
+              child: Text('No se ha podido cargar la colección.'),
+            ),
+          );
+        }
+        final rawCollection = snapshot.data?.data()?['collection'];
+        final collection = rawCollection is Map<String, dynamic>
+            ? rawCollection
+            : <String, dynamic>{};
         if (collection.isEmpty) {
           return const Center(
             child: Text('Aún no has añadido animales a tu colección.'),

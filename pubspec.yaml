@@ -1,7 +1,7 @@
 name: animalspredictor
 description: Clasificador de animales con colección personal.
 publish_to: 'none'
-version: 2.0.0+1
+version: 2.0.0+6
 
 environment:
   sdk: ^3.10.0
@@ -13,7 +13,8 @@ dependencies:
   firebase_auth: ^5.7.0
   firebase_core: ^3.15.2
   image_picker: ^1.2.3
-  tensorflow_lite_flutter: ^3.0.0
+  tensorflow_lite_flutter:
+    path: third_party/tensorflow_lite_flutter
 
 dev_dependencies:
   flutter_test:

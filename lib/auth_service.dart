@@ -19,7 +19,11 @@ class AuthService {
       email: email,
       password: password,
     );
-    await _firestore.collection('users').doc(credential.user!.uid).set({
+    final user = credential.user;
+    if (user == null) {
+      throw StateError('Firebase no devolvió el usuario creado.');
+    }
+    await _firestore.collection('users').doc(user.uid).set({
       'email': email,
       'collection': <String, int>{},
       'createdAt': FieldValue.serverTimestamp(),
