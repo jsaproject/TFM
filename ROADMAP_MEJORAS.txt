@@ -10,16 +10,16 @@ seguridad y mantenibilidad.
 
 FASE 1 — Consolidar la versión actual (prioridad alta)
 ------------------------------------------------------
-[ ] Crear un commit y publicar los cambios actuales en GitHub.
-[ ] Probar registro, inicio de sesión, invitado, cierre de sesión, cámara,
+[x] Crear un commit y publicar los cambios actuales en GitHub.
+[x] Probar registro, inicio de sesión, invitado, cierre de sesión, cámara,
     galería y colección en un dispositivo Android físico.
-[ ] Confirmar en Firebase Console que Email/Password y acceso anónimo están
+[x] Confirmar en Firebase Console que Email/Password y acceso anónimo están
     habilitados.
-[ ] Revisar que las reglas de Firestore sólo permitan a cada usuario acceder
+[x] Revisar que las reglas de Firestore sólo permitan a cada usuario acceder
     a /users/{su_uid}.
-[ ] Preparar una APK release firmada para distribución y conservar la clave
+[x] Preparar una APK release firmada para distribución y conservar la clave
     de firma de forma segura.
-[ ] Probar la app sin conexión y comprobar que todos los errores se comunican
+[x] Probar la app sin conexión y comprobar que todos los errores se comunican
     de forma clara.
 
 
