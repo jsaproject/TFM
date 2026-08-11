@@ -1,112 +1,255 @@
-ROADMAP DE MEJORAS — LA GRANJA DE MICHI
-========================================
+ROADMAP INTEGRAL — LA GRANJA DE MICHI
+=====================================
 
-Objetivo
+Última revisión: agosto de 2026
+
+
+OBJETIVO
 --------
-Evolucionar la aplicación conservando su identidad visual original (nombre,
-colores, iconos y estilo), pero mejorando calidad, experiencia de usuario,
-seguridad y mantenibilidad.
+Convertir La granja de Michi en una aplicación Material 3 actual, clara,
+accesible y reconocible, manteniendo la clasificación local y la colección
+como propuesta principal. La modernización debe mejorar UX, arquitectura,
+privacidad, rendimiento y capacidad de prueba; no limitarse a cambiar colores.
 
 
-FASE 1 — Consolidar la versión actual (prioridad alta)
-------------------------------------------------------
-[x] Crear un commit y publicar los cambios actuales en GitHub.
-[x] Probar registro, inicio de sesión, invitado, cierre de sesión, cámara,
-    galería y colección en un dispositivo Android físico.
-[x] Confirmar en Firebase Console que Email/Password y acceso anónimo están
-    habilitados.
-[x] Revisar que las reglas de Firestore sólo permitan a cada usuario acceder
-    a /users/{su_uid}.
-[x] Preparar una APK release firmada para distribución y conservar la clave
-    de firma de forma segura.
-[x] Probar la app sin conexión y comprobar que todos los errores se comunican
-    de forma clara.
+BASE ACTUAL CONSOLIDADA
+-----------------------
+Estos hitos del roadmap original siguen siendo válidos y ya están completados:
+
+[x] Registro, inicio de sesión, invitado y cierre de sesión con Firebase Auth.
+[x] Cámara y galería probadas en un dispositivo Android físico.
+[x] Reglas de Firestore limitadas al documento del usuario autenticado.
+[x] APK release firmada y clave de distribución fuera del repositorio.
+[x] Mensajes comprensibles para errores de red, permisos y persistencia.
+[x] Bienvenida inicial que explica cámara, galería y colección.
+[x] Permisos denegados con acceso a Ajustes.
+[x] Preview de fotografía en buena calidad y clasificación TFLite local.
+[x] Resultado con confianza, confirmación y corrección manual.
+[x] Catálogo local tipado de animales con imagen y descripción.
+[x] Colección con contadores, progreso, logros, ordenación e historial.
+[x] Corrección y borrado de predicciones guardadas.
+[x] Migración del formato antiguo defectuoso de la colección Firestore.
+[x] Servicios inyectables para autenticación, clasificador y colección.
+[x] Modelos tipados Prediction y UserCollection.
+[x] CI con formato, análisis, tests y build Android.
+[x] Gentleman Guardian Angel con Codex y reglas Flutter/Dart/Firebase/TFLite.
 
 
-FASE 2 — Mejorar experiencia de usuario
-----------------------------------------
+AUDITORÍA ACTUAL
+----------------
+
+Experiencia y diseño:
+
+- El login es un formulario centrado bajo una AppBar, sin presencia de marca,
+  recuperación de contraseña, visibilidad de contraseña ni estados inline
+  suficientemente claros.
+- La navegación usa un drawer para dos destinos. Oculta funciones principales,
+  necesita más gestos y se percibe anterior a Material 3.
+- La interfaz depende de un gradiente verde intenso, AppBar índigo y tarjetas
+  genéricas; faltan superficies, tipografía, espacio y motion coherentes.
+- La captura muestra dos botones competidores y no explica encuadre, clases
+  compatibles, privacidad local o cómo interpretar una confianza baja.
+- La colección es una lista fija; no aprovecha cuadrícula responsive, filtros
+  visuales, detalle por especie ni skeletons.
+- Cerrar sesión comparte nivel con la navegación principal en lugar de vivir
+  dentro de Perfil/Ajustes.
+
+Arquitectura y calidad:
+
+- HomePage supera las 780 líneas y concentra navegación, permisos, selección
+  de imagen, clasificación, resultado, Firestore, colección e historial.
+- El estado usa numerosos booleanos y valores anulables, permitiendo
+  combinaciones difíciles de razonar y probar.
+- Solo existen tres archivos de pruebas y seis casos; faltan navegación,
+  clasificador, colección completa e integración Android.
+- El modelo ocupa 102,4 MB y la APK release ronda 171,5 MB.
+- Firebase y permission_handler tienen versiones mayores pendientes.
+- El wrapper TFLite vive como código nativo de terceros dentro del repositorio
+  y necesita estrategia de mantenimiento o sustitución.
+
+
+DIRECCIÓN VISUAL Y NAVEGACIÓN
+-----------------------------
+
+- Material 3 con verde bosque como primario, crema como fondo, ámbar cálido
+  como acento y el índigo actual reducido a detalles de marca.
+- Tipografía con jerarquía clara, superficies tonales, radios de 16-24 px,
+  elevación contenida y transiciones de 150-300 ms.
+- Eliminar degradados saturados y botones tipo píldora usados universalmente.
+- Usar fotografía de animales como contenido protagonista.
+- Teléfono: NavigationBar inferior con Inicio, Colección y Perfil.
+- Tablet/pantalla ancha: NavigationRail con los mismos destinos.
+- Mantener el estado de las pestañas con un shell/IndexedStack.
+- Abrir detalles sobre el shell sin perder la posición de cada pestaña.
+
+
+FASE 0 — PUERTA DE CALIDAD
+--------------------------
 Estado: completada.
 
-[x] Mantener el degradado verde y menú índigo, adaptando márgenes, tipografía
-    y tamaños a pantallas pequeñas y grandes.
-[x] Añadir una pantalla de bienvenida breve que explique cámara, galería y
-    colección antes del primer uso.
-[x] Mostrar permisos denegados con una acción para abrir Ajustes.
-[x] Añadir estado vacío de colección con una llamada a la acción para hacer
-    la primera predicción.
-[x] Mostrar el resultado de la predicción con nombre, confianza, imagen y
-    una opción de confirmar o corregir el animal detectado.
-[x] Añadir feedback háptico o visual ligero al clasificar y guardar.
-[x] Añadir accesibilidad: contraste comprobado, textos escalables, etiquetas
-    semánticas para iconos y botones con objetivos táctiles amplios.
+[x] Instalar GGA v2.10.1 y usar Codex como proveedor.
+[x] Versionar .gga, AGENTS.md y reglas Flutter/Firebase/ML.
+[x] Instalar y verificar el hook pre-commit local.
+[x] Mantener CI determinista con formato, análisis, tests y build.
+[x] Validar una revisión real sobre código Dart con STATUS: PASSED.
 
 
-FASE 3 — Completar la colección
---------------------------------
-Estado: completada.
+FASE 1 — CIMIENTOS DE UI Y ARQUITECTURA
+---------------------------------------
+Prioridad: máxima. Duración estimada: 2-3 días.
 
-[x] Recuperar las fichas visuales originales de los animales: foto,
-    descripción y número coleccionado.
-[x] Definir un catálogo local tipado de animales para evitar textos e imágenes
-    dispersos por la interfaz.
-[x] Ordenar por nombre, cantidad y último animal identificado.
-[x] Añadir progreso: animales descubiertos / total de especies.
-[x] Añadir logros no intrusivos (por ejemplo: primera foto, cinco especies,
-    colección completa).
-[x] Permitir borrar o corregir una predicción concreta si se guardó mal.
+[x] Crear tokens para color, tipografía, espacio, radios, sombras y motion.
+[x] Incorporar tema claro y oscuro Material 3.
+[x] Dividir por funcionalidades: auth, classifier, collection, profile y shell.
+[x] Separar HomePage en pantallas, controladores y componentes enfocados.
+[x] Modelar estados explícitos para carga, listo, éxito y error.
+[x] Sustituir el drawer por NavigationBar/NavigationRail responsive.
+[x] Conservar el estado de pestañas sin recargar innecesariamente TFLite.
+[x] Evitar Firebase, permisos y TFLite dentro de nuevos widgets.
+[x] Añadir tests del shell para teléfono y tablet.
 
+Criterios de salida:
 
-FASE 4 — Refactorizar y probar el código
------------------------------------------
-[ ] Separar HomePage en widgets y servicios: clasificación, selector de imagen,
-    colección, menú lateral y mensajes de error.
-[ ] Centralizar colores, textos, espaciados y estilos en un tema propio de
-    "La granja de Michi".
-[ ] Inyectar AuthService, Firestore y el clasificador para poder probarlos sin
-    Firebase ni el modelo real.
-[ ] Definir modelos tipados: Animal, Prediction y UserCollection.
-[ ] Añadir tests unitarios para autenticación, validación, errores y guardado.
-[ ] Añadir tests de widgets para login, clasificador, menú y colección.
-[ ] Añadir un flujo de integración Android para cámara/galería y Firestore.
-[ ] Configurar CI en GitHub Actions: formato, análisis, tests y build Android.
+- Ninguna pantalla principal mezcla persistencia, plataforma e interfaz.
+- Tres destinos accesibles y estado de pestañas conservado.
+- Tema y componentes compartidos sin valores visuales dispersos.
 
 
-FASE 5 — Modelo de inteligencia artificial
+FASE 2 — AUTENTICACIÓN MODERNA
+------------------------------
+Duración estimada: 1-2 días.
+
+[ ] Bienvenida con marca, beneficio principal e ilustración ligera.
+[ ] Flujos visualmente claros para iniciar sesión y crear cuenta.
+[ ] Mostrar/ocultar contraseña, acciones de teclado y autofill completo.
+[ ] Validación inline y mensajes Firebase accionables.
+[ ] Recuperación de contraseña.
+[ ] Confirmación clara después del registro.
+[ ] Invitado como acción secundaria explicando qué datos no se guardarán.
+[ ] Loading dentro del botón y bloqueo de doble envío.
+[ ] Tests de login, registro, invitado, recuperación y errores.
+
+Criterios de salida:
+
+- Flujo completo usable con teclado, TalkBack/VoiceOver y texto ampliado.
+- Ninguna acción puede enviarse dos veces ni producir éxito falso.
+
+
+FASE 3 — IDENTIFICACIÓN CENTRADA EN LA CÁMARA
+---------------------------------------------
+Duración estimada: 2-3 días.
+
+[ ] Inicio con saludo, progreso breve y CTA principal “Identificar animal”.
+[ ] Elegir cámara o galería desde un bottom sheet.
+[ ] Guía de encuadre, clases soportadas y explicación de procesamiento local.
+[ ] Preview de alta calidad con recorte editable antes de inferencia.
+[ ] Resultado como panel: especie, confianza, alternativas y confirmación.
+[ ] Estado “No reconocido” y tratamiento específico de baja confianza.
+[ ] Animaciones sutiles y feedback háptico configurable.
+[ ] Estados probados: carga, cancelación, permiso, error, offline y reintento.
+
+Criterios de salida:
+
+- Nunca se presenta un resultado dudoso como identificación fiable.
+- Cámara y galería funcionan sin degradar la imagen visible.
+
+
+FASE 4 — COLECCIÓN MODERNA
+--------------------------
+Duración estimada: 2-3 días.
+
+[ ] Cabecera compacta con progreso, logros y último descubrimiento.
+[ ] Cuadrícula responsive con imagen, nombre y contador por especie.
+[ ] Filtros mediante chips: descubiertos, pendientes, recientes y cantidad.
+[ ] Detalle de especie con descripción, estadísticas e historial.
+[ ] Historial general separado de la cuadrícula principal.
+[ ] Confirmación para borrar y flujo claro para corregir.
+[ ] Skeletons y estados vacío, error, offline y reintento.
+[ ] Usar listas lazy para historiales que puedan crecer.
+
+Criterios de salida:
+
+- Colección usable con 0, 1, 10 y cientos de predicciones.
+- Corrección y borrado preservan contadores e historial atómicamente.
+
+
+FASE 5 — PERFIL, AJUSTES Y PRIVACIDAD
+-------------------------------------
+Duración estimada: 1-2 días.
+
+[ ] Perfil con datos mínimos de cuenta y estado de invitado.
+[ ] Mover cierre de sesión a Perfil.
+[ ] Tema claro, oscuro y sistema.
+[ ] Preferencia de feedback háptico.
+[ ] Estado de permisos con acceso a Ajustes.
+[ ] Política de privacidad: fotos locales y datos guardados en Firestore.
+[ ] Eliminación de cuenta y colección con confirmación y reautenticación.
+[ ] Información del modelo: versión, clases y limitaciones.
+[ ] No introducir analítica sin consentimiento explícito.
+
+
+FASE 6 — ACCESIBILIDAD, TESTS Y RENDIMIENTO
 -------------------------------------------
-[ ] Medir precisión del modelo con fotos reales, no sólo imágenes de ejemplo.
-[ ] Definir un umbral de confianza: pedir confirmación cuando sea bajo.
-[ ] Mostrar "No reconocido" en vez de guardar resultados poco fiables.
-[ ] Sustituir o actualizar el motor TFLite local cuando exista una alternativa
-    mantenida; conservar pruebas de compatibilidad Android/iOS.
-[ ] Reducir el peso de la APK: analizar el tamaño del modelo y usar ABI split
-    o App Bundle para distribución.
-[ ] Documentar clases soportadas, formato de entrada (224x224) y normalización.
+Duración estimada: 3-5 días.
+
+[ ] Validar contraste AA, foco, teclado, lector de pantalla y texto al 200%.
+[ ] Golden tests de login, inicio, resultado, colección y perfil en dos tamaños.
+[ ] Tests de repositorios con fakes/emulador Firestore.
+[ ] Smoke test Android: login, foto, confirmación, colección y logout.
+[ ] Medir arranque, inferencia, memoria, jank y tamaño APK/AAB.
+[ ] Definir presupuestos de rendimiento y tamaño.
+[ ] Migrar Firebase y permission_handler por grupos pequeños.
+[ ] Revisar permisos Android/iOS y eliminar los innecesarios.
+[ ] Evaluar Crashlytics u otra herramienta sin registrar datos sensibles.
+
+Criterios de salida:
+
+- Sin problemas de análisis ni overflows con texto al 200%.
+- Flujo crítico automatizado y estable.
+- Rendimiento y tamaño documentados con medidas reproducibles.
 
 
-FASE 6 — Datos, privacidad y analítica responsable
----------------------------------------------------
-[ ] Añadir política de privacidad y explicar que las fotos se clasifican de
-    forma local salvo que el usuario acepte explícitamente subirlas.
-[ ] Guardar sólo los datos necesarios en Firestore.
-[ ] Añadir una opción para eliminar cuenta y colección.
-[ ] Si se reintroduce analítica, pedir consentimiento y registrar únicamente
-    eventos útiles: inicio de clasificación, resultado confirmado y error.
-[ ] Usar Crashlytics o una alternativa para detectar fallos reales en uso.
+FASE 7 — MODELO DE INTELIGENCIA ARTIFICIAL (FUTURO)
+----------------------------------------------------
+Estado: aplazada hasta terminar la modernización principal.
+
+[ ] Crear dataset balanceado con fotos reales y clase “Otro”.
+[ ] Medir precisión, recall y matriz de confusión por especie.
+[ ] Definir umbral de confianza validado, no arbitrario.
+[ ] Entrenar MobileNetV3 o EfficientNet-Lite mediante transfer learning.
+[ ] Exportar TFLite float16 y verificar Android/iOS.
+[ ] Sustituir o actualizar el motor TFLite local.
+[ ] Documentar clases, entrada 224x224, normalización, licencia y versión.
+[ ] Confirmar que labels.txt coincide exactamente con la salida del modelo.
+[ ] Reducir tamaño y medir latencia frente al modelo actual.
+[ ] Añadir nuevos animales solo junto con catálogo, imágenes y pruebas.
 
 
-FASE 7 — Publicación
+FASE 8 — PUBLICACIÓN
 --------------------
-[ ] Crear icono final, capturas y ficha de Google Play conservando el estilo
-    de la granja.
-[ ] Generar AAB release firmado y probarlo en un canal interno de Play Store.
+
+[ ] Crear icono final, capturas y ficha de Google Play.
+[ ] Generar AAB release firmado y probarlo en canal interno.
 [ ] Revisar target SDK, permisos y declaración de datos de Google Play.
-[ ] Preparar versionado semántico y notas de cada versión.
+[ ] Preparar versionado semántico y notas de versión.
+[ ] Probar actualización desde la versión pública anterior sin perder datos.
+[ ] Verificar privacidad, accesibilidad y cierre de cuenta antes de producción.
 
 
-Orden recomendado
+ORDEN RECOMENDADO
 -----------------
-1. Fase 1: asegurar y probar lo ya construido.
-2. Fase 2 y 3: recuperar y mejorar la experiencia que define el TFM.
-3. Fase 4: modularizar y cubrir con tests antes de añadir más funciones.
-4. Fase 5: mejorar fiabilidad y tamaño del modelo.
-5. Fase 6 y 7: privacidad, seguimiento de fallos y publicación.
+
+1. Fase 1: arquitectura, design system y nueva navegación.
+2. Fase 2: login y registro modernos.
+3. Fase 3: experiencia de identificación.
+4. Fase 4: colección y detalle.
+5. Fase 5: perfil, privacidad y ajustes.
+6. Fase 6: accesibilidad, pruebas y rendimiento.
+7. Fase 7: modelo ampliado cuando se retome el entrenamiento.
+8. Fase 8: publicación.
+
+Estimación de modernización principal (fases 1-6): 11-18 días de trabajo.
+
+No se debe rediseñar todo dentro de HomePage. Primero se crea el shell y se
+separan responsabilidades; después se migra una experiencia cada vez,
+manteniendo la aplicación instalable y verificable al final de cada fase.

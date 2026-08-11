@@ -2,12 +2,14 @@ import 'package:animalspredictor/home_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:animalspredictor/auth_service.dart';
 
 /// Muestra una explicación breve una sola vez en cada dispositivo.
 class WelcomeGate extends StatefulWidget {
-  const WelcomeGate({super.key, required this.user});
+  const WelcomeGate({super.key, required this.user, required this.authService});
 
   final User user;
+  final AuthService authService;
 
   @override
   State<WelcomeGate> createState() => _WelcomeGateState();
@@ -42,7 +44,9 @@ class _WelcomeGateState extends State<WelcomeGate> {
     if (_seenWelcome == null) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
-    if (_seenWelcome!) return HomePage(user: widget.user);
+    if (_seenWelcome!) {
+      return HomePage(user: widget.user, authService: widget.authService);
+    }
     return _WelcomePage(onStart: _finishWelcome);
   }
 }
@@ -55,14 +59,8 @@ class _WelcomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Scaffold(
     body: SafeArea(
-      child: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFFA8E063), Color(0xFF56AB2F)],
-          ),
-        ),
+      child: ColoredBox(
+        color: Theme.of(context).colorScheme.surface,
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 560),
@@ -72,15 +70,16 @@ class _WelcomePage extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Icon(Icons.pets, size: 72, color: Color(0xFF172238)),
+                  Icon(
+                    Icons.pets,
+                    size: 72,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
                   const SizedBox(height: 20),
                   Text(
                     'Bienvenido a La granja de Michi',
                     textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      color: const Color(0xFF172238),
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   const SizedBox(height: 24),
                   const _WelcomeStep(
@@ -134,14 +133,12 @@ class _WelcomeStep extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: const Color(0xFF172238), size: 30),
+          Icon(icon, color: Theme.of(context).colorScheme.primary, size: 30),
           const SizedBox(width: 16),
           Expanded(
             child: Text.rich(
               TextSpan(
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyLarge?.copyWith(color: const Color(0xFF172238)),
+                style: Theme.of(context).textTheme.bodyLarge,
                 children: [
                   TextSpan(
                     text: '$title\n',

@@ -4,7 +4,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class SignInPage extends StatefulWidget {
-  const SignInPage({super.key});
+  SignInPage({super.key, AuthService? authService})
+    : authService =
+          authService ??
+          FirebaseAuthService(
+            FirebaseAuth.instance,
+            FirebaseFirestore.instance,
+          );
+
+  final AuthService authService;
 
   @override
   State<SignInPage> createState() => _SignInPageState();
@@ -17,8 +25,7 @@ class _SignInPageState extends State<SignInPage> {
   bool _register = false;
   bool _busy = false;
 
-  AuthService get _auth =>
-      AuthService(FirebaseAuth.instance, FirebaseFirestore.instance);
+  AuthService get _auth => widget.authService;
 
   Future<void> _submit() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
