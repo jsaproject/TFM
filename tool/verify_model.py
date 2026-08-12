@@ -10,7 +10,7 @@ Uso:
 
     python3 tool/verify_model.py assets/model.tflite --labels assets/labels.txt
     python3 tool/verify_model.py modelo.tflite --labels labels.txt \\
-        --groups tool/imagenet_animal_groups.json --images test_fotos/
+        --groups assets/imagenet_animal_groups.json --images test_fotos/
 
 El directorio de imágenes espera una subcarpeta por clase esperada:
 

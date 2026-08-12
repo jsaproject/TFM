@@ -41,7 +41,7 @@ void main() {
     await controller.classifySelectedPhoto();
 
     expect(controller.state.status, ClassifierStatus.success);
-    expect(controller.state.prediction?.animal, 'Vaca');
+    expect(controller.state.prediction?.animal, 'Bovino');
     expect(controller.state.result?.alternatives.single.animal, 'Caballo');
   });
 
@@ -51,7 +51,7 @@ void main() {
       final controller = ClassifierController(
         classifier: _FakeClassifier(
           result: ClassificationResult(
-            primary: const Prediction(animal: 'Vaca', confidence: 0.42),
+            primary: const Prediction(animal: 'Bovino', confidence: 0.42),
             alternatives: const [],
           ),
         ),
@@ -66,6 +66,29 @@ void main() {
       expect(controller.state.status, ClassifierStatus.unrecognized);
     },
   );
+
+  test('no da por buena una foto que no parece un animal', () async {
+    final controller = ClassifierController(
+      classifier: _FakeClassifier(
+        result: ClassificationResult(
+          // El grupo gana con holgura, pero las clases que no son animales
+          // acumulan todavía más masa: es una foto de otra cosa.
+          primary: const Prediction(animal: 'Bovino', confidence: 0.30),
+          alternatives: const [],
+          notAnimalConfidence: 0.65,
+        ),
+      ),
+      photoPicker: _FakePhotoPicker(photo: _photo),
+    );
+    addTearDown(controller.dispose);
+
+    await controller.load();
+    await controller.selectPhoto(ImageSource.camera);
+    await controller.classifySelectedPhoto();
+
+    expect(controller.state.status, ClassifierStatus.unrecognized);
+    expect(controller.state.result?.looksLikeSomethingElse, isTrue);
+  });
 
   test(
     'expone permiso denegado y permite reintentar un fallo de clasificación',
@@ -169,7 +192,7 @@ class _FakeClassifier implements ClassifierService {
     : result =
           result ??
           ClassificationResult(
-            primary: const Prediction(animal: 'Vaca', confidence: 0.92),
+            primary: const Prediction(animal: 'Bovino', confidence: 0.92),
             alternatives: const [
               Prediction(animal: 'Caballo', confidence: 0.05),
             ],

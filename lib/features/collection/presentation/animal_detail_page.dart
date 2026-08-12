@@ -1,5 +1,6 @@
 import 'package:animalspredictor/animal_catalog.dart';
 import 'package:animalspredictor/app_theme.dart';
+import 'package:animalspredictor/features/collection/presentation/animal_image.dart';
 import 'package:animalspredictor/features/collection/presentation/collection_history_page.dart';
 import 'package:animalspredictor/features/collection/presentation/prediction_edit_action.dart';
 import 'package:animalspredictor/models/user_collection.dart';
@@ -99,11 +100,7 @@ class _AnimalDetailContent extends StatelessWidget {
                 borderRadius: const BorderRadius.all(MichiTokens.radiusLarge),
                 child: AspectRatio(
                   aspectRatio: 16 / 9,
-                  child: Image.asset(
-                    animal.imageAsset,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, _, _) => Center(child: Icon(animal.icon)),
-                  ),
+                  child: AnimalImage(animal: animal),
                 ),
               ),
               const SizedBox(height: MichiTokens.space16),

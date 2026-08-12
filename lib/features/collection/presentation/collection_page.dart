@@ -1,6 +1,7 @@
 import 'package:animalspredictor/animal_catalog.dart';
 import 'package:animalspredictor/app_theme.dart';
 import 'package:animalspredictor/features/collection/presentation/animal_detail_page.dart';
+import 'package:animalspredictor/features/collection/presentation/animal_image.dart';
 import 'package:animalspredictor/features/collection/presentation/collection_history_page.dart';
 import 'package:animalspredictor/features/collection/presentation/prediction_edit_action.dart';
 import 'package:animalspredictor/models/user_collection.dart';
@@ -401,11 +402,7 @@ class _AnimalTile extends StatelessWidget {
             Expanded(
               child: SizedBox(
                 width: double.infinity,
-                child: Image.asset(
-                  animal.imageAsset,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, _, _) => Center(child: Icon(animal.icon)),
-                ),
+                child: AnimalImage(animal: animal),
               ),
             ),
             Padding(

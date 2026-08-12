@@ -1,3 +1,4 @@
+import 'package:animalspredictor/animal_catalog.dart';
 import 'package:animalspredictor/features/collection/presentation/collection_page.dart';
 import 'package:animalspredictor/models/user_collection.dart';
 import 'package:animalspredictor/services/collection_repository.dart';
@@ -23,23 +24,28 @@ void main() {
       buildPage(
         _CollectionRepositoryStub(
           collection: UserCollection(
-            counts: const {'Gato': 2, 'Perro': 1},
-            lastIdentified: {'Gato': DateTime(2026, 8, 12)},
+            counts: const {'Anfibio': 2, 'Antílope': 1},
+            lastIdentified: {'Anfibio': DateTime(2026, 8, 12)},
           ),
         ),
       ),
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('2 de 10 especies descubiertas'), findsOneWidget);
-    expect(find.text('Perro'), findsOneWidget);
-    expect(find.text('Caballo'), findsOneWidget);
+    expect(
+      find.text('2 de ${animalCatalog.length} especies descubiertas'),
+      findsOneWidget,
+    );
+    // La cuadrícula es perezosa y el catálogo va por orden alfabético, así que
+    // las especies de la prueba son de las primeras para que se rendericen.
+    expect(find.text('Anfibio'), findsOneWidget);
+    expect(find.text('Araña y escorpión'), findsOneWidget);
 
     await tester.tap(find.text('Pendientes'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Perro'), findsNothing);
-    expect(find.text('Caballo'), findsOneWidget);
+    expect(find.text('Anfibio'), findsNothing);
+    expect(find.text('Araña y escorpión'), findsOneWidget);
   });
 
   testWidgets('muestra una acción de reintento ante un error de carga', (
@@ -83,22 +89,22 @@ void main() {
       buildPage(
         _CollectionRepositoryStub(
           collection: UserCollection(
-            counts: const {'Perro': 2},
-            lastIdentified: {'Perro': DateTime(2026, 8, 12)},
+            counts: const {'Anfibio': 2},
+            lastIdentified: {'Anfibio': DateTime(2026, 8, 12)},
           ),
           predictions: const [
-            CollectionPrediction(id: 'prediction-1', animal: 'Perro'),
+            CollectionPrediction(id: 'prediction-1', animal: 'Anfibio'),
           ],
         ),
       ),
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Perro'));
+    await tester.tap(find.text('Anfibio'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Un compañero fiel y juguetón.'), findsOneWidget);
-    expect(find.text('Historial de Perro'), findsOneWidget);
+    expect(find.text('Vive entre el agua y la tierra.'), findsOneWidget);
+    expect(find.text('Historial de Anfibio'), findsOneWidget);
   });
 }
 

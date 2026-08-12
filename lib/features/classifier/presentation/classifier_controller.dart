@@ -132,7 +132,7 @@ class ClassifierController extends ChangeNotifier {
     try {
       final result = await _classifier.classify(path);
       _state = ClassifierState(
-        status: result.primary.confidence >= minimumReliableConfidence
+        status: _isReliable(result)
             ? ClassifierStatus.success
             : ClassifierStatus.unrecognized,
         image: image,
@@ -152,8 +152,18 @@ class ClassifierController extends ChangeNotifier {
     }
   }
 
-  /// Umbral conservador de interfaz mientras se valida el modelo en la fase 7.
-  static const minimumReliableConfidence = 0.75;
+  /// Una identificación vale si el grupo gana con holgura y, además, el modelo
+  /// no ve con más fuerza algo que no es un animal.
+  static bool _isReliable(ClassificationResult result) =>
+      result.primary.confidence >= minimumReliableConfidence &&
+      !result.looksLikeSomethingElse;
+
+  /// Los grupos de una sola clase de ImageNet, como Caballo o Cebra, rondan el
+  /// 0,7 de confianza en fotos correctas, así que un umbral más alto los
+  /// rechazaría casi siempre. El descarte de fondo lo hace
+  /// [ClassificationResult.looksLikeSomethingElse], que compara contra las 602
+  /// clases que no son animales.
+  static const minimumReliableConfidence = 0.5;
 
   @override
   void dispose() {

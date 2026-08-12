@@ -244,7 +244,9 @@ class _CaptureGuide extends StatelessWidget {
           ),
           const SizedBox(height: MichiTokens.space8),
           Text(
-            'Puedes identificar: ${animalCatalog.map((animal) => animal.name).join(', ')}.',
+            'Reconoce ${animalCatalog.length} grupos de animales, desde perros '
+            'y gatos hasta insectos, aves, peces y reptiles. Los tienes todos '
+            'en tu colección.',
           ),
           const SizedBox(height: MichiTokens.space8),
           const Row(

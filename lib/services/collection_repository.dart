@@ -88,7 +88,10 @@ class FirestoreCollectionRepository implements CollectionRepository {
       }
 
       final storedAnimal = predictionSnapshot.data()?['animal'];
-      if (storedAnimal is! String || !animalByName.containsKey(storedAnimal)) {
+      // Se valida el nombre traducido, pero se descuenta del campo original:
+      // en Firestore la cuenta sigue guardada bajo la clave antigua.
+      if (storedAnimal is! String ||
+          !animalByName.containsKey(resolveAnimalName(storedAnimal))) {
         throw StateError('La identificación guardada no es válida.');
       }
       final counts = _readCounts(userSnapshot.data() ?? {});
@@ -124,11 +127,13 @@ class FirestoreCollectionRepository implements CollectionRepository {
   ) {
     final data = document.data();
     final animal = data['animal'];
-    if (animal is! String || !animalByName.containsKey(animal)) return null;
+    if (animal is! String) return null;
+    final resolved = resolveAnimalName(animal);
+    if (!animalByName.containsKey(resolved)) return null;
     final createdAt = data['createdAt'];
     return CollectionPrediction(
       id: document.id,
-      animal: animal,
+      animal: resolved,
       createdAt: createdAt is Timestamp ? createdAt.toDate() : null,
     );
   }
@@ -182,14 +187,29 @@ class FirestoreCollectionRepository implements CollectionRepository {
 /// accidentally stored names such as `collection.Perro` as literal keys.
 UserCollection userCollectionFromFirestore(Map<String, dynamic> data) {
   final includeLegacy = data['collectionSchemaVersion'] != 2;
-  final dates = _readRawDates(
+  final dates = <String, DateTime>{};
+  for (final entry in _readRawDates(
     data,
     includeLegacy: includeLegacy,
-  ).map((animal, value) => MapEntry(animal, _asDateTime(value)));
-  return UserCollection(
-    counts: _readCounts(data, includeLegacy: includeLegacy),
-    lastIdentified: dates,
-  );
+  ).entries) {
+    final animal = resolveAnimalName(entry.key);
+    final date = _asDateTime(entry.value);
+    final current = dates[animal];
+    if (current == null || date.isAfter(current)) dates[animal] = date;
+  }
+
+  // Los nombres se traducen al leer, no en Firestore: el documento del usuario
+  // se queda como está y su colección de 2021 sigue contando.
+  final counts = <String, int>{};
+  for (final entry in _readCounts(data, includeLegacy: includeLegacy).entries) {
+    counts.update(
+      resolveAnimalName(entry.key),
+      (current) => current + entry.value,
+      ifAbsent: () => entry.value,
+    );
+  }
+
+  return UserCollection(counts: counts, lastIdentified: dates);
 }
 
 Map<String, int> _readCounts(
