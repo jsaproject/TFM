@@ -78,6 +78,23 @@ def describir(ruta: Path, entrada: dict, salida: dict) -> tuple[int, int]:
     return int(forma[1]), clases
 
 
+def describir_salida(interprete: Interpreter, entrada: dict, salida: dict, lado: int) -> bool:
+    """Avisa si el modelo devuelve logits: la app tendría que aplicar softmax."""
+    interprete.set_tensor(
+        entrada["index"], np.zeros((1, lado, lado, 3), dtype=entrada["dtype"])
+    )
+    interprete.invoke()
+    crudo = interprete.get_tensor(salida["index"])[0].astype(np.float32)
+    if es_distribucion(crudo):
+        print("  tipo de salida probabilidades (softmax incluido en el modelo)")
+        return True
+    print(
+        f"  tipo de salida LOGITS sin normalizar (rango {crudo.min():.1f} a {crudo.max():.1f})\n"
+        "                 la app debe aplicar softmax antes de usar la confianza"
+    )
+    return False
+
+
 def leer_etiquetas(ruta: Path | None, clases: int) -> list[str]:
     if ruta is None:
         return [f"clase_{i}" for i in range(clases)]
@@ -95,10 +112,24 @@ def leer_etiquetas(ruta: Path | None, clases: int) -> list[str]:
     return etiquetas
 
 
+def es_distribucion(vector: np.ndarray) -> bool:
+    """¿La salida ya son probabilidades, o son logits sin normalizar?"""
+    return bool(vector.min() >= 0.0 and abs(float(vector.sum()) - 1.0) < 0.05)
+
+
+def a_probabilidades(vector: np.ndarray) -> np.ndarray:
+    """Convierte logits en probabilidades. Sumar logits por grupo no significa nada."""
+    if es_distribucion(vector):
+        return vector
+    estable = vector - vector.max()
+    exponencial = np.exp(estable)
+    return exponencial / exponencial.sum()
+
+
 def predecir(interprete: Interpreter, entrada: dict, salida: dict, lote: np.ndarray) -> np.ndarray:
     interprete.set_tensor(entrada["index"], lote.astype(entrada["dtype"]))
     interprete.invoke()
-    return interprete.get_tensor(salida["index"])[0].astype(np.float32)
+    return a_probabilidades(interprete.get_tensor(salida["index"])[0].astype(np.float32))
 
 
 def entradas_sinteticas(lado: int) -> dict[str, np.ndarray]:
@@ -264,6 +295,7 @@ def main() -> int:
         print("\n=== ESTRUCTURA ===")
         interprete, entrada, salida = cargar(args.modelo)
         lado, clases = describir(args.modelo, entrada, salida)
+        describir_salida(interprete, entrada, salida, lado)
         etiquetas = leer_etiquetas(args.labels, clases)
         desfase = 0
 
