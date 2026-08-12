@@ -30,3 +30,7 @@ doc/api/
 *.js_
 *.js.deps
 *.js.map
+
+# Bytecode de las herramientas de Python en tool/
+__pycache__/
+*.py[cod]
