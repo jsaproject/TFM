@@ -246,14 +246,18 @@ def main() -> int:
     parser.add_argument("--groups", type=Path, help="JSON de agrupación de clases")
     parser.add_argument("--images", type=Path, help="directorio test_fotos/<clase>/*.jpg")
     parser.add_argument(
-        "--preprocess", choices=sorted(PREPROCESADOS), default="pm1", help="normalización de entrada"
+        "--preprocess",
+        choices=[*sorted(PREPROCESADOS), "auto"],
+        default="pm1",
+        help="normalización de entrada; 'auto' las prueba todas y elige (necesita --images)"
     )
     args = parser.parse_args()
 
     if not args.modelo.is_file():
         return _abortar(f"No existe {args.modelo}")
 
-    preprocesar = PREPROCESADOS[args.preprocess]
+    # Con 'auto' la normalización se decide más abajo, midiendo cuál acierta más.
+    preprocesar = PREPROCESADOS.get(args.preprocess)
     fallos: list[str] = []
 
     try:
@@ -275,7 +279,36 @@ def main() -> int:
             desfase = clases - 1000
             print(f"  grupos         {len(grupos)} (desfase de índice: {desfase})")
 
-        print(f"\n=== ENTRADAS SIN CONTENIDO (normalización '{args.preprocess}') ===")
+        nombre_pre = args.preprocess
+        if nombre_pre == "auto":
+            if not args.images or not args.images.is_dir():
+                raise Problema("--preprocess auto necesita un --images con fotos etiquetadas")
+            print("\n=== NORMALIZACIÓN (probando todas) ===")
+            marcas: dict[str, float] = {}
+            for candidato, funcion in PREPROCESADOS.items():
+                aciertos, total, _ = evaluar(
+                    interprete, entrada, salida, lado, etiquetas, grupos, args.images,
+                    funcion, desfase,
+                )
+                if total == 0:
+                    raise Problema(f"no hay imágenes utilizables en {args.images}")
+                marcas[candidato] = aciertos / total
+                print(f"  {candidato:8s} {aciertos:3d}/{total:<3d}  {marcas[candidato] * 100:5.1f}%")
+
+            nombre_pre = max(marcas, key=marcas.get)
+            mejor = marcas[nombre_pre]
+            print(f"  elegida: '{nombre_pre}'  <-- úsala en imageMean/imageStd de la app")
+            # Elegir mal la normalización es el fallo que rompió el modelo original,
+            # y con pocas imágenes el ganador puede serlo por azar.
+            empatadas = [c for c, r in marcas.items() if c != nombre_pre and mejor - r <= 0.05]
+            if empatadas:
+                fallos.append(
+                    f"la normalización no queda decidida: '{nombre_pre}' empata con "
+                    f"{', '.join(sorted(empatadas))}. Hacen falta más imágenes de prueba"
+                )
+            preprocesar = PREPROCESADOS[nombre_pre]
+
+        print(f"\n=== ENTRADAS SIN CONTENIDO (normalización '{nombre_pre}') ===")
         fallos += comprobar_colapso(interprete, entrada, salida, lado, etiquetas, preprocesar)
 
         print("\n=== FEATURES DEL CLASIFICADOR ===")
@@ -284,7 +317,7 @@ def main() -> int:
         if args.images:
             if not args.images.is_dir():
                 return _abortar(f"No existe el directorio {args.images}")
-            print("\n=== ACIERTOS SOBRE FOTOS REALES ===")
+            print("\n=== ACIERTOS SOBRE LAS IMÁGENES DE PRUEBA ===")
             aciertos, total, lineas = evaluar(
                 interprete, entrada, salida, lado, etiquetas, grupos, args.images,
                 preprocesar, desfase,
@@ -296,7 +329,7 @@ def main() -> int:
                 ratio = aciertos / total
                 print(f"  {'TOTAL':22s} {aciertos:3d}/{total:<3d}  ({ratio * 100:.1f}%)")
                 if ratio < 0.70:
-                    fallos.append(f"solo acierta el {ratio * 100:.0f}% de las fotos de prueba")
+                    fallos.append(f"solo acierta el {ratio * 100:.0f}% de las imágenes de prueba")
         else:
             print("\n  (sin --images no se puede medir la precisión real)")
 
