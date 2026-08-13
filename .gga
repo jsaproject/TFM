@@ -2,7 +2,7 @@
 # Documentation: https://github.com/Gentleman-Programming/gentleman-guardian-angel
 
 PROVIDER="codex"
-FILE_PATTERNS="*.dart,*.yaml,*.yml,*.kts,*.gradle,*.xml,*.plist,*.properties,*.json,*.md,*.txt,*.sh,*.ps1"
+FILE_PATTERNS="*.dart,*.py,*.yaml,*.yml,*.kts,*.gradle,*.xml,*.plist,*.properties,*.json,*.md,*.txt,*.sh,*.ps1"
 EXCLUDE_PATTERNS="*.g.dart,*.freezed.dart,*.lock,lib/firebase_options.dart,android/app/google-services.json"
 RULES_FILE="AGENTS.md"
 STRICT_MODE="true"
