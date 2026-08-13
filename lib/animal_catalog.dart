@@ -5,11 +5,18 @@ import 'package:flutter/material.dart';
 /// Los nombres deben coincidir exactamente con las claves de
 /// `assets/imagenet_animal_groups.json`: son la misma entidad vista desde el
 /// modelo y desde la interfaz.
+/// Dónde vive un animal, visto por un niño.
+///
+/// Es lo que agrupa las medallas de "toda la granja", "todos los de casa" y
+/// "todo el zoo" (ver `features/collection/domain/achievement.dart`).
+enum AnimalHabitat { granja, casa, salvaje }
+
 class Animal {
   const Animal({
     required this.name,
     required this.description,
     required this.icon,
+    this.habitat,
     this.imageAsset,
   });
 
@@ -17,9 +24,19 @@ class Animal {
   final String description;
   final IconData icon;
 
+  /// Nulo solo en [legacyAnimalCatalog]: los grupos antiguos ya no cuentan
+  /// para el progreso ni para las medallas.
+  final AnimalHabitat? habitat;
+
   /// Ilustración del catálogo. Nula mientras el grupo no tenga una propia.
   final String? imageAsset;
 }
+
+/// Los animales del catálogo actual que viven en un sitio concreto.
+List<Animal> animalsInHabitat(AnimalHabitat habitat) => [
+  for (final animal in animalCatalog)
+    if (animal.habitat == habitat) animal,
+];
 
 /// Los 28 animales que reconoce el modelo actual y que forman el progreso.
 ///
@@ -31,148 +48,176 @@ class Animal {
 const animalCatalog = <Animal>[
   Animal(
     name: 'Vaca',
+    habitat: AnimalHabitat.granja,
     description: 'Tranquila, curiosa y experta en pastar.',
     icon: Icons.agriculture,
     imageAsset: 'assets/vaca.jpg',
   ),
   Animal(
     name: 'Caballo',
+    habitat: AnimalHabitat.granja,
     description: 'Rápido, fuerte y elegante.',
     icon: Icons.directions_run,
     imageAsset: 'assets/caballo.jpg',
   ),
   Animal(
     name: 'Cerdo',
+    habitat: AnimalHabitat.granja,
     description: 'Listo, sociable y con un gran olfato.',
     icon: Icons.savings,
   ),
   Animal(
     name: 'Oveja',
+    habitat: AnimalHabitat.granja,
     description: 'Su lana parece una nube calentita.',
     icon: Icons.cloud_outlined,
     imageAsset: 'assets/oveja.jpg',
   ),
   Animal(
     name: 'Cabra',
+    habitat: AnimalHabitat.granja,
     description: 'Inquieta, ágil y amiga de las alturas.',
     icon: Icons.terrain,
   ),
   Animal(
     name: 'Burro',
+    habitat: AnimalHabitat.granja,
     description: 'Paciente, resistente y de orejas larguísimas.',
     icon: Icons.hearing,
   ),
   Animal(
     name: 'Gallina',
+    habitat: AnimalHabitat.granja,
     description: 'Picotea, cacarea y cuida de sus pollitos.',
     icon: Icons.egg_alt,
     imageAsset: 'assets/gallina.jpg',
   ),
   Animal(
     name: 'Pato',
+    habitat: AnimalHabitat.granja,
     description: 'Nada, vuela y camina con mucho salero.',
     icon: Icons.waves,
   ),
   Animal(
     name: 'Perro',
+    habitat: AnimalHabitat.casa,
     description: 'Compañero fiel, juguetón y cariñoso.',
     icon: Icons.pets,
     imageAsset: 'assets/perro.jpg',
   ),
   Animal(
     name: 'Gato',
+    habitat: AnimalHabitat.casa,
     description: 'Curioso, suave y maestro de las siestas.',
     icon: Icons.bedtime,
     imageAsset: 'assets/gato.jpg',
   ),
   Animal(
     name: 'Conejo',
+    habitat: AnimalHabitat.casa,
     description: 'Orejas largas, nariz inquieta y grandes saltos.',
     icon: Icons.cruelty_free,
   ),
   Animal(
     name: 'Hámster',
+    habitat: AnimalHabitat.casa,
     description: 'Pequeño, redondito y siempre atareado.',
     icon: Icons.autorenew,
   ),
   Animal(
     name: 'Tortuga',
+    habitat: AnimalHabitat.casa,
     description: 'Lleva su casa siempre encima.',
     icon: Icons.eco,
   ),
   Animal(
     name: 'Pez',
+    habitat: AnimalHabitat.casa,
     description: 'Nada entre burbujas y colores.',
     icon: Icons.set_meal,
   ),
   Animal(
     name: 'Loro',
+    habitat: AnimalHabitat.casa,
     description: 'Plumas brillantes y una voz muy divertida.',
     icon: Icons.flutter_dash,
   ),
   Animal(
     name: 'León',
+    habitat: AnimalHabitat.salvaje,
     description: 'Una gran melena y un rugido impresionante.',
     icon: Icons.brightness_7,
   ),
   Animal(
     name: 'Tigre',
+    habitat: AnimalHabitat.salvaje,
     description: 'Cada tigre tiene un dibujo de rayas único.',
     icon: Icons.line_weight,
   ),
   Animal(
     name: 'Elefante',
+    habitat: AnimalHabitat.salvaje,
     description: 'Gigante amable con una trompa muy útil.',
     icon: Icons.shower,
     imageAsset: 'assets/elefante.jpg',
   ),
   Animal(
     name: 'Jirafa',
+    habitat: AnimalHabitat.salvaje,
     description: 'Su largo cuello alcanza las hojas más altas.',
     icon: Icons.park_outlined,
   ),
   Animal(
     name: 'Cebra',
+    habitat: AnimalHabitat.salvaje,
     description: 'Sus rayas no se repiten jamás.',
     icon: Icons.contrast,
   ),
   Animal(
     name: 'Mono',
+    habitat: AnimalHabitat.salvaje,
     description: 'Manos hábiles y mirada muy curiosa.',
     icon: Icons.back_hand,
   ),
   Animal(
     name: 'Panda',
+    habitat: AnimalHabitat.salvaje,
     description: 'Un oso blanco y negro al que le encanta el bambú.',
     icon: Icons.forest,
   ),
   Animal(
     name: 'Oso',
+    habitat: AnimalHabitat.salvaje,
     description: 'Grande, fuerte y sorprendentemente buen nadador.',
     icon: Icons.hive,
   ),
   Animal(
     name: 'Hipopótamo',
+    habitat: AnimalHabitat.salvaje,
     description: 'Pasa el día fresquito dentro del agua.',
     icon: Icons.pool,
   ),
   Animal(
     name: 'Rinoceronte',
+    habitat: AnimalHabitat.salvaje,
     description: 'Piel gruesa, gran cuerno y pasos poderosos.',
     icon: Icons.change_history,
   ),
   Animal(
     name: 'Cocodrilo',
+    habitat: AnimalHabitat.salvaje,
     description: 'Espera inmóvil bajo el agua.',
     icon: Icons.visibility,
   ),
   Animal(
     name: 'Pingüino',
+    habitat: AnimalHabitat.salvaje,
     description: 'Parece llevar esmoquin y nada rapidísimo.',
     icon: Icons.ac_unit,
   ),
   Animal(
     name: 'Koala',
+    habitat: AnimalHabitat.salvaje,
     description: 'Abraza los eucaliptos y duerme muchas horas.',
     icon: Icons.spa,
   ),

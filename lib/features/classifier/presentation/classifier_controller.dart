@@ -160,11 +160,10 @@ class ClassifierController extends ChangeNotifier {
     }
   }
 
+  /// Deja la pantalla lista para la siguiente foto. No deja ningún aviso: de
+  /// decir que se ha guardado se encarga la celebración.
   void reset() {
-    _state = const ClassifierState(
-      status: ClassifierStatus.ready,
-      noticeMessage: TextosNino.guardado,
-    );
+    _state = const ClassifierState(status: ClassifierStatus.ready);
     notifyListeners();
   }
 

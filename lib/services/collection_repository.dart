@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:animalspredictor/animal_catalog.dart';
+import 'package:animalspredictor/features/collection/domain/achievement.dart';
 import 'package:animalspredictor/models/user_collection.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -13,6 +14,10 @@ abstract class CollectionRepository {
     CollectionPrediction prediction,
     String? animal,
   );
+
+  /// Deja constancia de que estas medallas ya se han celebrado, para no
+  /// volver a anunciarlas en la siguiente foto.
+  Future<void> markAchievementsSeen(String uid, Iterable<String> ids);
 }
 
 class CollectionPrediction {
@@ -119,6 +124,17 @@ class FirestoreCollectionRepository implements CollectionRepository {
     });
   }
 
+  @override
+  Future<void> markAchievementsSeen(String uid, Iterable<String> ids) async {
+    final known = ids
+        .where(_knownAchievementIds.contains)
+        .toList(growable: false);
+    if (known.isEmpty) return;
+    await _user(uid).set({
+      'achievements': FieldValue.arrayUnion(known),
+    }, SetOptions(merge: true));
+  }
+
   DocumentReference<Map<String, dynamic>> _user(String uid) =>
       _firestore.collection('users').doc(uid);
 
@@ -209,7 +225,26 @@ UserCollection userCollectionFromFirestore(Map<String, dynamic> data) {
     );
   }
 
-  return UserCollection(counts: counts, lastIdentified: dates);
+  return UserCollection(
+    counts: counts,
+    lastIdentified: dates,
+    seenAchievements: _readSeenAchievements(data),
+  );
+}
+
+/// Identificadores de medalla que existen hoy. Lo que haya guardado de más en
+/// Firestore (una medalla retirada, un valor manipulado) se ignora al leer.
+final _knownAchievementIds = {
+  for (final achievement in achievementCatalog) achievement.id,
+};
+
+Set<String> _readSeenAchievements(Map<String, dynamic> data) {
+  final stored = data['achievements'];
+  if (stored is! List) return const {};
+  return {
+    for (final id in stored)
+      if (id is String && _knownAchievementIds.contains(id)) id,
+  };
 }
 
 Map<String, int> _readCounts(

@@ -111,6 +111,38 @@ void main() {
     expect(find.text(TextosNino.tusFotosDe('Vaca')), findsOneWidget);
   });
 
+  testWidgets('enseña las medallas ganadas y las que faltan', (tester) async {
+    final semantics = tester.ensureSemantics();
+    await tester.pumpWidget(
+      buildPage(
+        _CollectionRepositoryStub(
+          collection: const UserCollection(counts: {'Vaca': 1}),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text(TextosNino.misMedallas), findsOneWidget);
+    expect(
+      find.text(TextosNino.teFaltan(animalCatalog.length - 1)),
+      findsOneWidget,
+    );
+    // La primera foto ya está ganada; la colección entera, no.
+    expect(
+      find.bySemanticsLabel(
+        TextosNino.medallaGanada(TextosNino.logroPrimeraFoto),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.bySemanticsLabel(
+        TextosNino.medallaPorGanar(TextosNino.logroCincoAnimales),
+      ),
+      findsOneWidget,
+    );
+    semantics.dispose();
+  });
+
   testWidgets('anuncia cada especie como una unica accion con su contador', (
     tester,
   ) async {
@@ -145,6 +177,9 @@ class _CollectionRepositoryStub implements CollectionRepository {
 
   @override
   Future<void> savePrediction(String uid, String animal) async {}
+
+  @override
+  Future<void> markAchievementsSeen(String uid, Iterable<String> ids) async {}
 
   @override
   Future<void> updatePrediction(

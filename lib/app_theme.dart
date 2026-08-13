@@ -54,7 +54,12 @@ abstract final class MichiTokens {
 
   static const durationShort = Duration(milliseconds: 150);
   static const durationMedium = Duration(milliseconds: 250);
+
+  /// Cuánto dura la fiesta al guardar un animal nuevo…
   static const durationCelebration = Duration(milliseconds: 1500);
+
+  /// …y cuánto cuando el animal ya estaba en la colección.
+  static const durationCelebrationShort = Duration(milliseconds: 900);
 
   static const cardElevation = 1.0;
   static const cardShadowLight = Color(0x1F000000);
@@ -83,6 +88,18 @@ abstract final class MichiTokens {
 
   static const selectionBorderWidth = 4.0;
   static const selectorSheetHeightFactor = 0.92;
+
+  /// Celebración: la foto del niño, las medallas y el confeti.
+  static const celebrationPhotoSize = 220.0;
+  static const celebrationScrim = Color(0xE6211D18);
+  static const medalSize = 88.0;
+  static const medalSizeLarge = 132.0;
+  static const medalLabelLines = 2;
+  static const medalLabelLineHeight = 26.0;
+  static const medalBorderWidth = 3.0;
+  static const confettiPieces = 28;
+  static const confettiPiecesShort = 12;
+  static const confettiPieceSize = 18.0;
 
   static const navigationBarHeight = 88.0;
   static const navigationBadgePadding = EdgeInsets.symmetric(

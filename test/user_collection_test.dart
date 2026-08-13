@@ -1,3 +1,4 @@
+import 'package:animalspredictor/animal_catalog.dart';
 import 'package:animalspredictor/models/user_collection.dart';
 import 'package:animalspredictor/services/collection_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -12,6 +13,36 @@ void main() {
     expect(collection.discovered, 2);
     expect(collection.totalPhotos, 7);
     expect(collection.isEmpty, isFalse);
+  });
+
+  test('cuenta los animales que ya tiene de cada sitio', () {
+    const collection = UserCollection(counts: {'Vaca': 1, 'Gato': 3});
+
+    expect(collection.discoveredIn(AnimalHabitat.granja), 1);
+    expect(collection.discoveredIn(AnimalHabitat.casa), 1);
+    expect(collection.discoveredIn(AnimalHabitat.salvaje), 0);
+  });
+
+  test('lee las medallas ya celebradas y descarta lo que no existe', () {
+    final collection = userCollectionFromFirestore({
+      'collection': {'Vaca': 1},
+      'achievements': ['primera_foto', 'medalla_inventada', 7],
+    });
+
+    expect(collection.seenAchievements, {'primera_foto'});
+  });
+
+  test('sin medallas guardadas la lista llega vacía, no rota', () {
+    final sinCampo = userCollectionFromFirestore({
+      'collection': {'Vaca': 1},
+    });
+    final conBasura = userCollectionFromFirestore({
+      'collection': {'Vaca': 1},
+      'achievements': 'primera_foto',
+    });
+
+    expect(sinCampo.seenAchievements, isEmpty);
+    expect(conBasura.seenAchievements, isEmpty);
   });
 
   test('recupera y combina el formato antiguo de la colección', () {

@@ -84,6 +84,12 @@ class _ProfilePageState extends State<ProfilePage> {
     _showSettingsError();
   }
 
+  Future<void> _changeSound(bool enabled) async {
+    final saved = await widget.settings.setSoundEnabled(enabled);
+    if (!mounted || saved) return;
+    _showSettingsError();
+  }
+
   void _showSettingsError() {
     final message = widget.settings.errorMessage;
     if (message != null) {
@@ -191,6 +197,13 @@ class _ProfilePageState extends State<ProfilePage> {
                   subtitle: const Text(TextosAdulto.hapticaTexto),
                   value: widget.settings.hapticsEnabled,
                   onChanged: widget.settings.isLoading ? null : _changeHaptics,
+                ),
+                const Divider(height: MichiTokens.dividerThickness),
+                SwitchListTile(
+                  title: const Text(TextosAdulto.sonidoTitulo),
+                  subtitle: const Text(TextosAdulto.sonidoTexto),
+                  value: widget.settings.soundEnabled,
+                  onChanged: widget.settings.isLoading ? null : _changeSound,
                 ),
               ],
             ),

@@ -2,12 +2,20 @@ import 'package:animalspredictor/auth_gate.dart';
 import 'package:animalspredictor/app_theme.dart';
 import 'package:animalspredictor/features/profile/data/settings_repository.dart';
 import 'package:animalspredictor/l10n/textos.dart';
+import 'package:animalspredictor/services/sound_service.dart';
 import 'package:flutter/material.dart';
 
 class AnimalsPredictorApp extends StatefulWidget {
-  const AnimalsPredictorApp({super.key, this.settingsRepository});
+  const AnimalsPredictorApp({
+    super.key,
+    this.settingsRepository,
+    this.soundService,
+  });
 
   final SettingsRepository? settingsRepository;
+
+  /// Quien reproduce los sonidos. En los tests se pasa uno mudo.
+  final SoundService? soundService;
 
   @override
   State<AnimalsPredictorApp> createState() => _AnimalsPredictorAppState();
@@ -21,6 +29,7 @@ class _AnimalsPredictorAppState extends State<AnimalsPredictorApp> {
     super.initState();
     _settings = SettingsController(
       widget.settingsRepository ?? SharedPreferencesSettingsRepository(),
+      sounds: widget.soundService ?? AudioPlayersSoundService(),
     )..load();
   }
 
