@@ -1,6 +1,7 @@
 import 'package:animalspredictor/app.dart';
 import 'package:animalspredictor/app_theme.dart';
 import 'package:animalspredictor/firebase_options.dart';
+import 'package:animalspredictor/l10n/textos.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
@@ -29,10 +30,7 @@ class _StartupErrorApp extends StatelessWidget {
       body: Center(
         child: Padding(
           padding: MichiTokens.pagePadding,
-          child: Text(
-            'No se pudo iniciar la aplicación. Comprueba la conexión e inténtalo de nuevo.',
-            textAlign: TextAlign.center,
-          ),
+          child: Text(TextosAdulto.errorArranque, textAlign: TextAlign.center),
         ),
       ),
     ),

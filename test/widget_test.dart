@@ -1,5 +1,6 @@
 import 'package:animalspredictor/sign_in_page.dart';
 import 'package:animalspredictor/auth_service.dart';
+import 'package:animalspredictor/l10n/textos.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -9,7 +10,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(home: SignInPage(authService: _AuthStub())),
     );
-    expect(find.text('La granja de Michi'), findsOneWidget);
+    expect(find.text(TextosAdulto.marca), findsOneWidget);
   });
 }
 

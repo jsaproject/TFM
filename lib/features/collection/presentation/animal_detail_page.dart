@@ -3,6 +3,7 @@ import 'package:animalspredictor/app_theme.dart';
 import 'package:animalspredictor/features/collection/presentation/animal_image.dart';
 import 'package:animalspredictor/features/collection/presentation/collection_history_page.dart';
 import 'package:animalspredictor/features/collection/presentation/prediction_edit_action.dart';
+import 'package:animalspredictor/l10n/textos.dart';
 import 'package:animalspredictor/models/user_collection.dart';
 import 'package:animalspredictor/services/collection_repository.dart';
 import 'package:flutter/material.dart';
@@ -111,19 +112,19 @@ class _AnimalDetailContent extends StatelessWidget {
               const SizedBox(height: MichiTokens.space16),
               Row(
                 children: [
-                  _Statistic(label: 'Fotos', value: '$count'),
+                  _Statistic(label: TextosNino.fichaFotos, value: '$count'),
                   const SizedBox(width: MichiTokens.space12),
                   _Statistic(
-                    label: 'Última vez',
+                    label: TextosNino.fichaUltimaVez,
                     value: lastIdentified == null
-                        ? 'Aún no'
-                        : _formatDate(lastIdentified!),
+                        ? TextosNino.fichaAunNo
+                        : TextosNino.fechaDeLaFoto(lastIdentified!),
                   ),
                 ],
               ),
               const SizedBox(height: MichiTokens.space24),
               Text(
-                'Historial de ${animal.name}',
+                TextosNino.tusFotosDe(animal.name),
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: MichiTokens.space8),
@@ -135,9 +136,7 @@ class _AnimalDetailContent extends StatelessWidget {
         const SliverToBoxAdapter(
           child: Padding(
             padding: MichiTokens.pagePadding,
-            child: Text(
-              'Aún no hay identificaciones guardadas de esta especie.',
-            ),
+            child: Text(TextosNino.sinFotosDeEste),
           ),
         )
       else
@@ -192,20 +191,17 @@ class _DetailError extends StatelessWidget {
           const Icon(Icons.cloud_off_outlined, size: MichiTokens.iconSizeLarge),
           const SizedBox(height: MichiTokens.space16),
           const Text(
-            'No se ha podido cargar esta especie. Comprueba tu conexión e inténtalo de nuevo.',
+            TextosNino.noEncuentroEsteAnimal,
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: MichiTokens.space16),
           FilledButton.icon(
             onPressed: onRetry,
             icon: const Icon(Icons.refresh),
-            label: const Text('Reintentar'),
+            label: const Text(TextosNino.pruebaOtraVez),
           ),
         ],
       ),
     ),
   );
 }
-
-String _formatDate(DateTime date) =>
-    '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';

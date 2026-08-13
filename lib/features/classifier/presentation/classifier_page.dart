@@ -1,6 +1,8 @@
 import 'package:animalspredictor/animal_catalog.dart';
 import 'package:animalspredictor/app_theme.dart';
+import 'package:animalspredictor/features/classifier/domain/confidence_level.dart';
 import 'package:animalspredictor/features/profile/data/settings_repository.dart';
+import 'package:animalspredictor/l10n/textos.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -69,24 +71,26 @@ class _ClassifierPageState extends State<ClassifierPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Añade una foto',
+                TextosNino.eligeUnaFoto,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
-              const SizedBox(height: MichiTokens.space8),
-              const Text('Elige cómo quieres identificar al animal.'),
               const SizedBox(height: MichiTokens.space12),
               ListTile(
                 contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.camera_alt_outlined),
-                title: const Text('Usar cámara'),
-                subtitle: const Text('Haz una foto ahora'),
+                leading: const Icon(
+                  Icons.camera_alt_outlined,
+                  size: MichiTokens.iconSizeMedium,
+                ),
+                title: const Text(TextosNino.usarCamara),
                 onTap: () => Navigator.pop(context, ImageSource.camera),
               ),
               ListTile(
                 contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.photo_library_outlined),
-                title: const Text('Elegir de la galería'),
-                subtitle: const Text('Selecciona una foto guardada'),
+                leading: const Icon(
+                  Icons.photo_library_outlined,
+                  size: MichiTokens.iconSizeMedium,
+                ),
+                title: const Text(TextosNino.usarGaleria),
                 onTap: () => Navigator.pop(context, ImageSource.gallery),
               ),
             ],
@@ -111,19 +115,15 @@ class _ClassifierPageState extends State<ClassifierPage> {
         SnackBar(
           content: Text(
             widget.isAnonymous
-                ? 'Resultado confirmado.'
-                : '$animal se ha añadido a tu colección.',
+                ? TextosNino.guardado
+                : TextosNino.yaTienes(animal),
           ),
         ),
       );
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'La predicción se ha hecho, pero no se ha podido guardar en la colección.',
-          ),
-        ),
+        const SnackBar(content: Text(TextosNino.noHePodidoGuardarlo)),
       );
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -136,7 +136,7 @@ class _ClassifierPageState extends State<ClassifierPage> {
     builder: (context, _) {
       final state = widget.controller.state;
       return Scaffold(
-        appBar: AppBar(title: const Text('Identificar animal')),
+        appBar: AppBar(title: const Text(TextosNino.marca)),
         body: SafeArea(
           top: false,
           child: Center(
@@ -163,12 +163,12 @@ class _ClassifierPageState extends State<ClassifierPage> {
                     FilledButton.icon(
                       onPressed: widget.controller.classifySelectedPhoto,
                       icon: const Icon(Icons.auto_awesome_outlined),
-                      label: const Text('Identificar esta foto'),
+                      label: const Text(TextosNino.queAnimalEs),
                     ),
                     const SizedBox(height: MichiTokens.space8),
                     TextButton(
                       onPressed: _choosePhoto,
-                      child: const Text('Elegir otra foto'),
+                      child: const Text(TextosNino.elegirOtraFoto),
                     ),
                   ],
                   if (state.status == ClassifierStatus.success ||
@@ -190,9 +190,6 @@ class _ClassifierPageState extends State<ClassifierPage> {
                       onRetry: state.canRetryClassification
                           ? widget.controller.classifySelectedPhoto
                           : widget.controller.load,
-                      retryLabel: state.canRetryClassification
-                          ? 'Reintentar identificación'
-                          : 'Reintentar carga',
                     ),
                   const SizedBox(height: MichiTokens.space24),
                   FilledButton.icon(
@@ -201,7 +198,7 @@ class _ClassifierPageState extends State<ClassifierPage> {
                         ? null
                         : _choosePhoto,
                     icon: const Icon(Icons.add_a_photo_outlined),
-                    label: const Text('Identificar animal'),
+                    label: const Text(TextosNino.hazUnaFoto),
                   ),
                 ],
               ),
@@ -218,17 +215,22 @@ class _WelcomeHeader extends StatelessWidget {
   final String? name;
 
   @override
-  Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(
-        name == null || name!.trim().isEmpty ? 'Hola' : 'Hola, ${name!.trim()}',
-        style: Theme.of(context).textTheme.headlineSmall,
-      ),
-      const SizedBox(height: MichiTokens.space4),
-      const Text('Tu próxima foto puede ampliar tu colección.'),
-    ],
-  );
+  Widget build(BuildContext context) {
+    final trimmed = name?.trim() ?? '';
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          trimmed.isEmpty
+              ? TextosNino.saludoSinNombre
+              : TextosNino.saludo(trimmed),
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
+        const SizedBox(height: MichiTokens.space4),
+        const Text(TextosNino.buscaUnAnimal),
+      ],
+    );
+  }
 }
 
 class _CaptureGuide extends StatelessWidget {
@@ -242,31 +244,58 @@ class _CaptureGuide extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Prepara la foto',
+            TextosNino.consejosTitulo,
             style: Theme.of(context).textTheme.titleLarge,
           ),
-          const SizedBox(height: MichiTokens.space8),
-          const Text(
-            'Encuadra un solo animal, con buena luz y sin que quede muy lejos.',
-          ),
-          const SizedBox(height: MichiTokens.space8),
-          Text(
-            'Reconoce ${animalCatalog.length} animales de granja, domésticos '
-            'y de zoo. Los tienes todos en tu colección.',
-          ),
-          const SizedBox(height: MichiTokens.space8),
+          const SizedBox(height: MichiTokens.space12),
           const Row(
             children: [
-              Icon(
-                Icons.phone_android_outlined,
-                size: MichiTokens.iconSizeSmall,
-              ),
-              SizedBox(width: MichiTokens.space8),
               Expanded(
-                child: Text('La imagen se procesa solo en este dispositivo.'),
+                child: _CaptureTip(
+                  icon: Icons.pets,
+                  label: TextosNino.consejoUnAnimal,
+                ),
+              ),
+              Expanded(
+                child: _CaptureTip(
+                  icon: Icons.wb_sunny_outlined,
+                  label: TextosNino.consejoLuz,
+                ),
+              ),
+              Expanded(
+                child: _CaptureTip(
+                  icon: Icons.zoom_in,
+                  label: TextosNino.consejoCerca,
+                ),
               ),
             ],
           ),
+          const SizedBox(height: MichiTokens.space12),
+          Text(TextosNino.conozcoAnimales(animalCatalog.length)),
+        ],
+      ),
+    ),
+  );
+}
+
+class _CaptureTip extends StatelessWidget {
+  const _CaptureTip({required this.icon, required this.label});
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    label: label,
+    child: ExcludeSemantics(
+      child: Column(
+        children: [
+          Icon(
+            icon,
+            size: MichiTokens.iconSizeLarge,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+          const SizedBox(height: MichiTokens.space8),
+          Text(label, textAlign: TextAlign.center),
         ],
       ),
     ),
@@ -280,8 +309,8 @@ class _PhotoPreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Semantics(
     label: state.image == null
-        ? 'Imagen de ejemplo de animales de granja'
-        : 'Vista previa de la imagen seleccionada',
+        ? TextosNino.dibujoDeAnimales
+        : TextosNino.tuFoto,
     image: true,
     child: AspectRatio(
       aspectRatio: MichiTokens.squareImageAspectRatio,
@@ -299,9 +328,8 @@ class _PhotoPreview extends StatelessWidget {
                     state.image!,
                     fit: BoxFit.cover,
                     cacheWidth: cacheWidth,
-                    errorBuilder: (context, error, stackTrace) => const Center(
-                      child: Text('No se ha podido mostrar esta imagen.'),
-                    ),
+                    errorBuilder: (context, error, stackTrace) =>
+                        const Center(child: Text(TextosNino.noVeoLaFoto)),
                   )
                 else
                   Image.asset('assets/farm_animals.png', fit: BoxFit.contain),
@@ -314,7 +342,7 @@ class _PhotoPreview extends StatelessWidget {
                       children: [
                         CircularProgressIndicator(),
                         SizedBox(height: MichiTokens.space12),
-                        Text('Identificando animal…'),
+                        Text(TextosNino.mirandoLaFoto),
                       ],
                     ),
                   ),
@@ -346,6 +374,10 @@ class _PredictionPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final result = state.result!;
     final reliable = state.status == ClassifierStatus.success;
+    final level = ConfidenceLevel.of(
+      reliable: reliable,
+      confidence: result.primary.confidence,
+    );
     return Padding(
       padding: const EdgeInsets.only(top: MichiTokens.space16),
       child: Card(
@@ -358,40 +390,30 @@ class _PredictionPanel extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                reliable
-                    ? 'Resultado de la identificación'
-                    : 'No reconocido con fiabilidad',
+                reliable ? TextosNino.yaLoTengo : TextosNino.noLoReconozco,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: MichiTokens.space8),
-              Text(
-                reliable
-                    ? 'Parece ser: ${result.primary.animal}'
-                    : 'La foto se parece a ${result.primary.animal}, pero la confianza es baja. Elige el animal correcto antes de guardarlo.',
-              ),
-              Text(
-                'Confianza: ${(result.primary.confidence * 100).toStringAsFixed(1)} %',
-              ),
+              Text(TextosNino.creoQueEs(result.primary.animal)),
+              if (!reliable) const Text(TextosNino.puedesCambiarlo),
+              const SizedBox(height: MichiTokens.space8),
+              _ConfidenceBadge(level: level),
               if (result.alternatives.isNotEmpty) ...[
                 const SizedBox(height: MichiTokens.space12),
                 Text(
-                  'Otras posibilidades',
+                  TextosNino.tambienPuedeSer,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(height: MichiTokens.space4),
                 ...result.alternatives.map(
-                  (alternative) => Text(
-                    '${alternative.animal} · ${(alternative.confidence * 100).toStringAsFixed(1)} %',
-                  ),
+                  (alternative) => Text(alternative.animal),
                 ),
               ],
               const SizedBox(height: MichiTokens.space12),
               DropdownButtonFormField<String>(
                 initialValue: selectedAnimal,
                 isExpanded: true,
-                decoration: const InputDecoration(
-                  labelText: 'Confirma el animal',
-                ),
+                decoration: const InputDecoration(labelText: TextosNino.esEste),
                 items: animalCatalog
                     .map(
                       (animal) => DropdownMenuItem(
@@ -413,10 +435,50 @@ class _PredictionPanel extends StatelessWidget {
                         ),
                       )
                     : const Icon(Icons.check_circle_outline),
-                label: Text(saving ? 'Guardando…' : 'Confirmar resultado'),
+                label: Text(saving ? TextosNino.guardando : TextosNino.guardar),
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Sustituye al porcentaje de confianza: icono, color y tres palabras.
+class _ConfidenceBadge extends StatelessWidget {
+  const _ConfidenceBadge({required this.level});
+  final ConfidenceLevel level;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final (icon, label, color) = switch (level) {
+      ConfidenceLevel.sure => (
+        Icons.sentiment_very_satisfied,
+        TextosNino.nivelSeguro,
+        colors.secondary,
+      ),
+      ConfidenceLevel.almostSure => (
+        Icons.sentiment_satisfied,
+        TextosNino.nivelCasiSeguro,
+        colors.onTertiaryContainer,
+      ),
+      ConfidenceLevel.unsure => (
+        Icons.help_outline,
+        TextosNino.nivelNoLoSe,
+        colors.onTertiaryContainer,
+      ),
+    };
+    return Semantics(
+      label: label,
+      child: ExcludeSemantics(
+        child: Row(
+          children: [
+            Icon(icon, size: MichiTokens.iconSizeMedium, color: color),
+            const SizedBox(width: MichiTokens.space8),
+            Text(label, style: Theme.of(context).textTheme.titleMedium),
+          ],
         ),
       ),
     );
@@ -444,12 +506,10 @@ class _ErrorCard extends StatelessWidget {
     required this.message,
     required this.showSettings,
     required this.onRetry,
-    required this.retryLabel,
   });
   final String message;
   final bool showSettings;
   final VoidCallback onRetry;
-  final String retryLabel;
 
   @override
   Widget build(BuildContext context) => Padding(
@@ -461,7 +521,17 @@ class _ErrorCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(message),
+            Row(
+              children: [
+                Icon(
+                  Icons.sentiment_dissatisfied,
+                  size: MichiTokens.iconSizeProminent,
+                  color: Theme.of(context).colorScheme.onErrorContainer,
+                ),
+                const SizedBox(width: MichiTokens.space12),
+                Expanded(child: Text(message)),
+              ],
+            ),
             const SizedBox(height: MichiTokens.space8),
             Wrap(
               spacing: MichiTokens.space8,
@@ -469,13 +539,13 @@ class _ErrorCard extends StatelessWidget {
                 TextButton.icon(
                   onPressed: onRetry,
                   icon: const Icon(Icons.refresh),
-                  label: Text(retryLabel),
+                  label: const Text(TextosNino.pruebaOtraVez),
                 ),
                 if (showSettings)
                   TextButton.icon(
                     onPressed: openAppSettings,
                     icon: const Icon(Icons.settings_outlined),
-                    label: const Text('Abrir Ajustes'),
+                    label: const Text(TextosNino.abrirAjustes),
                   ),
               ],
             ),

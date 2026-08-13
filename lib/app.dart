@@ -1,6 +1,7 @@
 import 'package:animalspredictor/auth_gate.dart';
 import 'package:animalspredictor/app_theme.dart';
 import 'package:animalspredictor/features/profile/data/settings_repository.dart';
+import 'package:animalspredictor/l10n/textos.dart';
 import 'package:flutter/material.dart';
 
 class AnimalsPredictorApp extends StatefulWidget {
@@ -33,7 +34,7 @@ class _AnimalsPredictorAppState extends State<AnimalsPredictorApp> {
   Widget build(BuildContext context) => AnimatedBuilder(
     animation: _settings,
     builder: (context, _) => MaterialApp(
-      title: 'La granja de Michi',
+      title: TextosNino.marca,
       debugShowCheckedModeBanner: false,
       theme: MichiTheme.light(),
       darkTheme: MichiTheme.dark(),

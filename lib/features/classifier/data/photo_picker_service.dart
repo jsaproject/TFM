@@ -1,3 +1,4 @@
+import 'package:animalspredictor/l10n/textos.dart';
 import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -34,8 +35,8 @@ class DevicePhotoPickerService implements PhotoPickerService {
       if (!status.isGranted && !status.isLimited) {
         throw PhotoPermissionDenied(
           source == ImageSource.camera
-              ? 'El permiso de cámara es necesario para hacer una foto.'
-              : 'El permiso de fotos es necesario para elegir una imagen.',
+              ? TextosNino.dejameUsarLaCamara
+              : TextosNino.dejameVerTusFotos,
         );
       }
     }

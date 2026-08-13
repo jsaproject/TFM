@@ -1,4 +1,5 @@
 import 'package:animalspredictor/auth_service.dart';
+import 'package:animalspredictor/l10n/textos.dart';
 import 'package:animalspredictor/sign_in_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -54,15 +55,12 @@ void main() {
     await tester.pumpWidget(_app(FakeAuthService()));
     await _tapAfterScrolling(
       tester,
-      find.widgetWithText(FilledButton, 'Iniciar sesión'),
+      find.widgetWithText(FilledButton, TextosAdulto.accesoBoton),
     );
     await tester.pump();
 
-    expect(find.text('Escribe un correo válido.'), findsOneWidget);
-    expect(
-      find.text('La contraseña debe tener al menos 6 caracteres.'),
-      findsOneWidget,
-    );
+    expect(find.text(TextosAdulto.correoInvalido), findsOneWidget);
+    expect(find.text(TextosAdulto.contrasenaCorta), findsOneWidget);
   });
 
   testWidgets('inicia sesión con las credenciales introducidas', (
@@ -74,7 +72,7 @@ void main() {
     await tester.enterText(find.byType(TextFormField).at(1), 'secreto');
     await _tapAfterScrolling(
       tester,
-      find.widgetWithText(FilledButton, 'Iniciar sesión'),
+      find.widgetWithText(FilledButton, TextosAdulto.accesoBoton),
     );
     await tester.pump();
 
@@ -86,25 +84,25 @@ void main() {
   ) async {
     final auth = FakeAuthService();
     await tester.pumpWidget(_app(auth));
-    await _tapAfterScrolling(tester, find.text('Crear una cuenta'));
+    await _tapAfterScrolling(tester, find.text(TextosAdulto.irARegistro));
     await tester.pump();
-    await tester.tap(find.byTooltip('Mostrar contraseña'));
+    await tester.tap(find.byTooltip(TextosAdulto.mostrarContrasena));
     await tester.enterText(find.byType(TextFormField).at(0), 'michi@granja.es');
     await tester.enterText(find.byType(TextFormField).at(1), 'secreto');
     await _tapAfterScrolling(
       tester,
-      find.widgetWithText(FilledButton, 'Crear cuenta'),
+      find.widgetWithText(FilledButton, TextosAdulto.registroBoton),
     );
     await tester.pump();
 
     expect(auth.signedUpEmail, 'michi@granja.es');
-    expect(find.text('Cuenta creada'), findsOneWidget);
+    expect(find.text(TextosAdulto.cuentaCreadaTitulo), findsOneWidget);
   });
 
   testWidgets('permite continuar como invitado', (tester) async {
     final auth = FakeAuthService();
     await tester.pumpWidget(_app(auth));
-    await _tapAfterScrolling(tester, find.text('Continuar como invitado'));
+    await _tapAfterScrolling(tester, find.text(TextosAdulto.invitadoBoton));
     await tester.pump();
 
     expect(auth.anonymousSignInCalled, isTrue);
@@ -113,10 +111,10 @@ void main() {
   testWidgets('envía el correo de recuperación', (tester) async {
     final auth = FakeAuthService();
     await tester.pumpWidget(_app(auth));
-    await _tapAfterScrolling(tester, find.text('He olvidado mi contraseña'));
+    await _tapAfterScrolling(tester, find.text(TextosAdulto.olvideContrasena));
     await tester.pump();
     await tester.enterText(find.byType(TextFormField).last, 'michi@granja.es');
-    await tester.tap(find.text('Enviar enlace'));
+    await tester.tap(find.text(TextosAdulto.recuperarBoton));
     await tester.pump();
 
     expect(auth.resetEmail, 'michi@granja.es');
@@ -131,7 +129,7 @@ void main() {
     await tester.enterText(find.byType(TextFormField).at(1), 'secreto');
     await _tapAfterScrolling(
       tester,
-      find.widgetWithText(FilledButton, 'Iniciar sesión'),
+      find.widgetWithText(FilledButton, TextosAdulto.accesoBoton),
     );
     await tester.pump();
 

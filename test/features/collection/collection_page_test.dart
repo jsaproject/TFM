@@ -1,5 +1,6 @@
 import 'package:animalspredictor/animal_catalog.dart';
 import 'package:animalspredictor/features/collection/presentation/collection_page.dart';
+import 'package:animalspredictor/l10n/textos.dart';
 import 'package:animalspredictor/models/user_collection.dart';
 import 'package:animalspredictor/services/collection_repository.dart';
 import 'package:flutter/material.dart';
@@ -33,13 +34,13 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.text('2 de ${animalCatalog.length} especies descubiertas'),
+      find.text(TextosNino.tienesAnimales(2, animalCatalog.length)),
       findsOneWidget,
     );
     expect(find.text('Vaca'), findsOneWidget);
     expect(find.text('Cerdo'), findsOneWidget);
 
-    await tester.tap(find.text('Pendientes'));
+    await tester.tap(find.text(TextosNino.filtroLosQueFaltan));
     await tester.pumpAndSettle();
 
     expect(find.text('Vaca'), findsNothing);
@@ -54,8 +55,8 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.text('Reintentar'), findsOneWidget);
-    expect(find.textContaining('Comprueba tu conexión'), findsOneWidget);
+    expect(find.text(TextosNino.pruebaOtraVez), findsOneWidget);
+    expect(find.text(TextosNino.noEncuentroTuColeccion), findsOneWidget);
   });
 
   testWidgets('abre el historial general fuera de la cuadrícula', (
@@ -73,10 +74,10 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byTooltip('Ver historial'));
+    await tester.tap(find.byTooltip(TextosNino.verMisFotos));
     await tester.pumpAndSettle();
 
-    expect(find.text('Historial'), findsOneWidget);
+    expect(find.text(TextosNino.misFotosTitulo), findsOneWidget);
     expect(find.text('Gato'), findsOneWidget);
   });
 
@@ -98,6 +99,8 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    await tester.ensureVisible(find.text('Vaca'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Vaca'));
     await tester.pumpAndSettle();
 
@@ -105,7 +108,7 @@ void main() {
       find.text('Tranquila, curiosa y experta en pastar.'),
       findsOneWidget,
     );
-    expect(find.text('Historial de Vaca'), findsOneWidget);
+    expect(find.text(TextosNino.tusFotosDe('Vaca')), findsOneWidget);
   });
 
   testWidgets('anuncia cada especie como una unica accion con su contador', (
@@ -121,7 +124,10 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.bySemanticsLabel('Vaca, 1 foto'), findsOneWidget);
+    expect(
+      find.bySemanticsLabel(TextosNino.animalConFotos('Vaca', 1)),
+      findsOneWidget,
+    );
     semantics.dispose();
   });
 }

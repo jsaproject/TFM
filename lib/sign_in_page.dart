@@ -1,5 +1,6 @@
 import 'package:animalspredictor/app_theme.dart';
 import 'package:animalspredictor/auth_service.dart';
+import 'package:animalspredictor/l10n/textos.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -50,9 +51,9 @@ class _SignInPageState extends State<SignInPage> {
     } on FirebaseAuthException catch (error) {
       _setError(_authErrorMessage(error));
     } on FirebaseException {
-      _setError('No se ha podido guardar la cuenta. Inténtalo de nuevo.');
+      _setError(TextosAdulto.errorGuardarCuenta);
     } catch (_) {
-      _setError('Ha ocurrido un error inesperado. Inténtalo de nuevo.');
+      _setError(TextosAdulto.errorInesperado);
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -69,7 +70,7 @@ class _SignInPageState extends State<SignInPage> {
     } on FirebaseAuthException catch (error) {
       _setError(_authErrorMessage(error));
     } catch (_) {
-      _setError('No se ha podido iniciar como invitado. Inténtalo de nuevo.');
+      _setError(TextosAdulto.errorInvitado);
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -79,14 +80,12 @@ class _SignInPageState extends State<SignInPage> {
     context: context,
     builder: (context) => AlertDialog(
       icon: const Icon(Icons.check_circle_outline),
-      title: const Text('Cuenta creada'),
-      content: const Text(
-        'Tu colección se guardará con esta cuenta cuando confirmes tus identificaciones.',
-      ),
+      title: const Text(TextosAdulto.cuentaCreadaTitulo),
+      content: const Text(TextosAdulto.cuentaCreadaTexto),
       actions: [
         FilledButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Continuar'),
+          child: const Text(TextosAdulto.continuar),
         ),
       ],
     ),
@@ -105,18 +104,16 @@ class _SignInPageState extends State<SignInPage> {
   }
 
   String _authErrorMessage(FirebaseAuthException error) => switch (error.code) {
-    'invalid-email' => 'El correo electrónico no es válido.',
+    'invalid-email' => TextosAdulto.errorCorreoInvalido,
     'invalid-credential' ||
     'wrong-password' ||
-    'user-not-found' => 'El correo o la contraseña no son correctos.',
-    'email-already-in-use' => 'Ya existe una cuenta con ese correo.',
-    'weak-password' => 'La contraseña debe tener al menos 6 caracteres.',
-    'network-request-failed' =>
-      'No hay conexión a internet. Comprueba tu red y reintenta.',
-    'too-many-requests' =>
-      'Has hecho demasiados intentos. Espera unos minutos y vuelve a probar.',
-    'operation-not-allowed' => 'Este método de acceso no está habilitado.',
-    _ => 'No se ha podido autenticar. Inténtalo de nuevo.',
+    'user-not-found' => TextosAdulto.errorCredenciales,
+    'email-already-in-use' => TextosAdulto.errorCorreoEnUso,
+    'weak-password' => TextosAdulto.errorContrasenaDebil,
+    'network-request-failed' => TextosAdulto.errorSinConexion,
+    'too-many-requests' => TextosAdulto.errorDemasiadosIntentos,
+    'operation-not-allowed' => TextosAdulto.errorMetodoNoPermitido,
+    _ => TextosAdulto.errorAutenticacion,
   };
 
   @override
@@ -129,8 +126,12 @@ class _SignInPageState extends State<SignInPage> {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final title = _register ? 'Crea tu cuenta' : 'Bienvenido de nuevo';
-    final actionLabel = _register ? 'Crear cuenta' : 'Iniciar sesión';
+    final title = _register
+        ? TextosAdulto.registroTitulo
+        : TextosAdulto.accesoTitulo;
+    final actionLabel = _register
+        ? TextosAdulto.registroBoton
+        : TextosAdulto.accesoBoton;
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -147,8 +148,8 @@ class _SignInPageState extends State<SignInPage> {
                 const SizedBox(height: MichiTokens.space8),
                 Text(
                   _register
-                      ? 'Guarda tus descubrimientos y sigue completando tu colección.'
-                      : 'Identifica animales y continúa tu colección.',
+                      ? TextosAdulto.registroSubtitulo
+                      : TextosAdulto.accesoSubtitulo,
                   style: textTheme.bodyLarge,
                 ),
                 const SizedBox(height: MichiTokens.space24),
@@ -169,7 +170,7 @@ class _SignInPageState extends State<SignInPage> {
                           autofillHints: [AutofillHints.email],
                           validator: _emailValidator,
                           decoration: const InputDecoration(
-                            labelText: 'Correo electrónico',
+                            labelText: TextosAdulto.correo,
                             prefixIcon: Icon(Icons.email_outlined),
                           ),
                         ),
@@ -187,12 +188,12 @@ class _SignInPageState extends State<SignInPage> {
                           onFieldSubmitted: (_) => _busy ? null : _submit(),
                           validator: _passwordValidator,
                           decoration: InputDecoration(
-                            labelText: 'Contraseña',
+                            labelText: TextosAdulto.contrasena,
                             prefixIcon: const Icon(Icons.lock_outline),
                             suffixIcon: IconButton(
                               tooltip: _passwordVisible
-                                  ? 'Ocultar contraseña'
-                                  : 'Mostrar contraseña',
+                                  ? TextosAdulto.ocultarContrasena
+                                  : TextosAdulto.mostrarContrasena,
                               onPressed: _busy
                                   ? null
                                   : () => setState(
@@ -216,7 +217,7 @@ class _SignInPageState extends State<SignInPage> {
                     alignment: Alignment.centerRight,
                     child: TextButton(
                       onPressed: _busy ? null : _openPasswordRecovery,
-                      child: const Text('He olvidado mi contraseña'),
+                      child: const Text(TextosAdulto.olvideContrasena),
                     ),
                   ),
                 ],
@@ -236,21 +237,21 @@ class _SignInPageState extends State<SignInPage> {
                 TextButton(
                   onPressed: _busy ? null : _changeMode,
                   child: Text(
-                    _register ? 'Ya tengo una cuenta' : 'Crear una cuenta',
+                    _register
+                        ? TextosAdulto.irAAcceso
+                        : TextosAdulto.irARegistro,
                   ),
                 ),
                 const SizedBox(height: MichiTokens.space16),
                 const Divider(),
                 const SizedBox(height: MichiTokens.space16),
-                Text('¿Quieres probar primero?', style: textTheme.titleMedium),
+                Text(TextosAdulto.invitadoTitulo, style: textTheme.titleMedium),
                 const SizedBox(height: MichiTokens.space4),
-                const Text(
-                  'Como invitado no guardaremos tu correo ni tus descubrimientos en una colección.',
-                ),
+                const Text(TextosAdulto.invitadoTexto),
                 const SizedBox(height: MichiTokens.space12),
                 OutlinedButton(
                   onPressed: _busy ? null : _signInAnonymously,
-                  child: const Text('Continuar como invitado'),
+                  child: const Text(TextosAdulto.invitadoBoton),
                 ),
               ],
             ),
@@ -275,16 +276,12 @@ class _SignInPageState extends State<SignInPage> {
       await _auth.sendPasswordResetEmail(email);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Hemos enviado un enlace de recuperación a $email.'),
-        ),
+        SnackBar(content: Text(TextosAdulto.recuperacionEnviada(email))),
       );
     } on FirebaseAuthException catch (error) {
       _setError(_authErrorMessage(error));
     } catch (_) {
-      _setError(
-        'No se ha podido enviar el correo de recuperación. Inténtalo de nuevo.',
-      );
+      _setError(TextosAdulto.errorRecuperacion);
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -294,12 +291,11 @@ class _SignInPageState extends State<SignInPage> {
     final email = value?.trim() ?? '';
     return RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(email)
         ? null
-        : 'Escribe un correo válido.';
+        : TextosAdulto.correoInvalido;
   }
 
-  String? _passwordValidator(String? value) => (value?.length ?? 0) >= 6
-      ? null
-      : 'La contraseña debe tener al menos 6 caracteres.';
+  String? _passwordValidator(String? value) =>
+      (value?.length ?? 0) >= 6 ? null : TextosAdulto.contrasenaCorta;
 }
 
 class _BrandWelcome extends StatelessWidget {
@@ -307,7 +303,7 @@ class _BrandWelcome extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Semantics(
-    label: 'La granja de Michi. Identifica animales y completa tu colección.',
+    label: TextosAdulto.marcaSemantica,
     child: Column(
       children: [
         Container(
@@ -325,13 +321,13 @@ class _BrandWelcome extends StatelessWidget {
         ),
         const SizedBox(height: MichiTokens.space16),
         Text(
-          'La granja de Michi',
+          TextosAdulto.marca,
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.headlineMedium,
         ),
         const SizedBox(height: MichiTokens.space8),
         Text(
-          'Descubre animales con una foto y crea tu propia colección.',
+          TextosAdulto.marcaDescripcion,
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.bodyLarge,
         ),
@@ -390,7 +386,7 @@ class _PasswordRecoveryDialogState extends State<_PasswordRecoveryDialog> {
 
   @override
   Widget build(BuildContext context) => AlertDialog(
-    title: const Text('Recuperar contraseña'),
+    title: const Text(TextosAdulto.recuperarTitulo),
     content: Form(
       key: _formKey,
       child: TextFormField(
@@ -404,17 +400,20 @@ class _PasswordRecoveryDialogState extends State<_PasswordRecoveryDialog> {
           final email = value?.trim() ?? '';
           return RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(email)
               ? null
-              : 'Escribe un correo válido.';
+              : TextosAdulto.correoInvalido;
         },
-        decoration: const InputDecoration(labelText: 'Correo electrónico'),
+        decoration: const InputDecoration(labelText: TextosAdulto.correo),
       ),
     ),
     actions: [
       TextButton(
         onPressed: () => Navigator.of(context).pop(),
-        child: const Text('Cancelar'),
+        child: const Text(TextosAdulto.cancelar),
       ),
-      FilledButton(onPressed: _send, child: const Text('Enviar enlace')),
+      FilledButton(
+        onPressed: _send,
+        child: const Text(TextosAdulto.recuperarBoton),
+      ),
     ],
   );
 

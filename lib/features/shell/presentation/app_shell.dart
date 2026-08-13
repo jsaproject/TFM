@@ -6,6 +6,7 @@ import 'package:animalspredictor/features/collection/presentation/collection_pag
 import 'package:animalspredictor/features/profile/presentation/profile_page.dart';
 import 'package:animalspredictor/features/profile/data/permission_service.dart';
 import 'package:animalspredictor/features/profile/data/settings_repository.dart';
+import 'package:animalspredictor/l10n/textos.dart';
 import 'package:animalspredictor/services/classifier_service.dart';
 import 'package:animalspredictor/services/collection_repository.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -67,17 +68,17 @@ class _AppShellState extends State<AppShell> {
     onDestinationSelected: (index) => setState(() => _selectedIndex = index),
     destinations: const [
       ShellDestination(
-        label: 'Inicio',
+        label: TextosNino.navegacionInicio,
         icon: Icons.home_outlined,
         selectedIcon: Icons.home,
       ),
       ShellDestination(
-        label: 'Colección',
+        label: TextosNino.navegacionColeccion,
         icon: Icons.collections_bookmark_outlined,
         selectedIcon: Icons.collections_bookmark,
       ),
       ShellDestination(
-        label: 'Perfil',
+        label: TextosNino.navegacionPerfil,
         icon: Icons.person_outline,
         selectedIcon: Icons.person,
       ),

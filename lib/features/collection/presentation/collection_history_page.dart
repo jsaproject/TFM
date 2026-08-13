@@ -1,6 +1,7 @@
 import 'package:animalspredictor/animal_catalog.dart';
 import 'package:animalspredictor/app_theme.dart';
 import 'package:animalspredictor/features/collection/presentation/prediction_edit_action.dart';
+import 'package:animalspredictor/l10n/textos.dart';
 import 'package:animalspredictor/services/collection_repository.dart';
 import 'package:flutter/material.dart';
 
@@ -28,7 +29,7 @@ class _CollectionHistoryPageState extends State<CollectionHistoryPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Historial')),
+    appBar: AppBar(title: const Text(TextosNino.misFotosTitulo)),
     body: StreamBuilder<List<CollectionPrediction>>(
       key: ValueKey(_refreshKey),
       stream: widget.repository.watchPredictions(widget.userId),
@@ -121,16 +122,16 @@ class _PredictionHistoryListState extends State<PredictionHistoryList> {
                   ),
                 )
               : PopupMenuButton<PredictionEditAction>(
-                  tooltip: 'Acciones de identificación',
+                  tooltip: TextosNino.cambiarOBorrar,
                   onSelected: (action) => _edit(prediction, action),
                   itemBuilder: (context) => const [
                     PopupMenuItem(
                       value: PredictionEditAction.correct,
-                      child: Text('Corregir'),
+                      child: Text(TextosNino.cambiar),
                     ),
                     PopupMenuItem(
                       value: PredictionEditAction.delete,
-                      child: Text('Borrar'),
+                      child: Text(TextosNino.borrar),
                     ),
                   ],
                 ),
@@ -154,14 +155,14 @@ class _HistoryError extends StatelessWidget {
           const Icon(Icons.cloud_off_outlined, size: MichiTokens.iconSizeLarge),
           const SizedBox(height: MichiTokens.space16),
           const Text(
-            'No se ha podido cargar el historial. Comprueba tu conexión e inténtalo de nuevo.',
+            TextosNino.noEncuentroTusFotos,
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: MichiTokens.space16),
           FilledButton.icon(
             onPressed: onRetry,
             icon: const Icon(Icons.refresh),
-            label: const Text('Reintentar'),
+            label: const Text(TextosNino.pruebaOtraVez),
           ),
         ],
       ),
@@ -194,12 +195,10 @@ class _EmptyHistory extends StatelessWidget {
   Widget build(BuildContext context) => const Center(
     child: Padding(
       padding: MichiTokens.pagePadding,
-      child: Text('Todavía no hay identificaciones en el historial.'),
+      child: Text(TextosNino.todaviaNoTienesFotos),
     ),
   );
 }
 
-String _dateLabel(DateTime? date) {
-  if (date == null) return 'Pendiente de sincronizar';
-  return 'Identificado el ${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
-}
+String _dateLabel(DateTime? date) =>
+    date == null ? TextosNino.fotoSinGuardar : TextosNino.fechaDeLaFoto(date);

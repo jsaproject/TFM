@@ -1,3 +1,4 @@
+import 'package:animalspredictor/l10n/textos.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -54,12 +55,12 @@ class FirebaseAuthService implements AuthService {
   @override
   Future<void> deleteAccount({String? password}) async {
     final user = _auth.currentUser;
-    if (user == null) throw StateError('No hay una sesión activa.');
+    if (user == null) throw StateError(TextosAdulto.errorSinSesion);
 
     if (!user.isAnonymous) {
       final email = user.email;
       if (email == null || password == null || password.isEmpty) {
-        throw StateError('Es necesaria la contraseña para eliminar la cuenta.');
+        throw StateError(TextosAdulto.errorContrasenaNecesaria);
       }
       await user.reauthenticateWithCredential(
         EmailAuthProvider.credential(email: email, password: password),

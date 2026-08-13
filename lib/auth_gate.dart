@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:animalspredictor/auth_service.dart';
 import 'package:animalspredictor/features/profile/data/settings_repository.dart';
+import 'package:animalspredictor/l10n/textos.dart';
 import 'package:flutter/material.dart';
 
 class AuthGate extends StatelessWidget {
@@ -29,7 +30,7 @@ class AuthGate extends StatelessWidget {
             child: Padding(
               padding: MichiTokens.pagePadding,
               child: Text(
-                'No se ha podido comprobar la sesión. Vuelve a abrir la aplicación.',
+                TextosAdulto.sesionNoComprobada,
                 textAlign: TextAlign.center,
               ),
             ),

@@ -1,5 +1,6 @@
 import 'package:animalspredictor/home_page.dart';
 import 'package:animalspredictor/app_theme.dart';
+import 'package:animalspredictor/l10n/textos.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -95,33 +96,27 @@ class _WelcomePage extends StatelessWidget {
                         ),
                         const SizedBox(height: MichiTokens.space20),
                         Text(
-                          'Bienvenido a La granja de Michi',
+                          TextosNino.marca,
                           textAlign: TextAlign.center,
                           style: Theme.of(context).textTheme.headlineSmall,
                         ),
                         const SizedBox(height: MichiTokens.space24),
                         const _WelcomeStep(
                           icon: Icons.camera_alt_outlined,
-                          title: 'Haz una foto',
-                          text:
-                              'Usa la cámara para identificar un animal al momento.',
+                          text: TextosNino.hazUnaFoto,
                         ),
                         const _WelcomeStep(
                           icon: Icons.photo_library_outlined,
-                          title: 'O elige de tu galería',
-                          text:
-                              'También puedes clasificar una imagen que ya tengas.',
+                          text: TextosNino.bienvenidaPasoGaleria,
                         ),
                         const _WelcomeStep(
                           icon: Icons.collections_bookmark_outlined,
-                          title: 'Completa tu colección',
-                          text:
-                              'Confirma cada resultado para guardarlo en tu cuenta.',
+                          text: TextosNino.bienvenidaPasoColeccion,
                         ),
                         const SizedBox(height: MichiTokens.space28),
                         FilledButton(
                           onPressed: onStart,
-                          child: const Text('Empezar a explorar'),
+                          child: const Text(TextosNino.bienvenidaBoton),
                         ),
                       ],
                     ),
@@ -136,46 +131,33 @@ class _WelcomePage extends StatelessWidget {
   );
 }
 
+/// Un paso del onboarding: una frase corta y una ilustración más grande que
+/// ella, para que se entienda sin saber leer.
 class _WelcomeStep extends StatelessWidget {
-  const _WelcomeStep({
-    required this.icon,
-    required this.title,
-    required this.text,
-  });
+  const _WelcomeStep({required this.icon, required this.text});
 
   final IconData icon;
-  final String title;
   final String text;
 
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: MichiTokens.space8),
+    padding: const EdgeInsets.symmetric(vertical: MichiTokens.space12),
     child: Semantics(
-      label: '$title. $text',
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(
-            icon,
-            color: Theme.of(context).colorScheme.primary,
-            size: MichiTokens.iconSizeMedium,
-          ),
-          const SizedBox(width: MichiTokens.space16),
-          Expanded(
-            child: Text.rich(
-              TextSpan(
-                style: Theme.of(context).textTheme.bodyLarge,
-                children: [
-                  TextSpan(
-                    text: '$title\n',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  TextSpan(text: text),
-                ],
-              ),
+      label: text,
+      child: ExcludeSemantics(
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              color: Theme.of(context).colorScheme.primary,
+              size: MichiTokens.iconSizeHero,
             ),
-          ),
-        ],
+            const SizedBox(width: MichiTokens.space16),
+            Expanded(
+              child: Text(text, style: Theme.of(context).textTheme.titleMedium),
+            ),
+          ],
+        ),
       ),
     ),
   );

@@ -1,3 +1,4 @@
+import 'package:animalspredictor/l10n/textos.dart';
 import 'package:animalspredictor/models/prediction.dart';
 import 'package:animalspredictor/services/classifier_service.dart';
 import 'package:flutter/foundation.dart';
@@ -75,12 +76,12 @@ class ClassifierController extends ChangeNotifier {
     } on UnsupportedError {
       _state = const ClassifierState(
         status: ClassifierStatus.error,
-        errorMessage: 'La clasificación está disponible en Android e iOS.',
+        errorMessage: TextosNino.soloEnMovil,
       );
     } catch (_) {
       _state = const ClassifierState(
         status: ClassifierStatus.error,
-        errorMessage: 'No se ha podido cargar el modelo. Inténtalo de nuevo.',
+        errorMessage: TextosNino.noHePodidoEmpezar,
       );
     }
     notifyListeners();
@@ -93,7 +94,7 @@ class ClassifierController extends ChangeNotifier {
       if (photo == null) {
         _state = const ClassifierState(
           status: ClassifierStatus.ready,
-          noticeMessage: 'No se ha seleccionado ninguna imagen.',
+          noticeMessage: TextosNino.noHasElegidoFoto,
         );
         return;
       }
@@ -111,7 +112,7 @@ class ClassifierController extends ChangeNotifier {
     } catch (_) {
       _state = ClassifierState(
         status: ClassifierStatus.error,
-        errorMessage: 'No se ha podido abrir la imagen. Inténtalo de nuevo.',
+        errorMessage: TextosNino.noHePodidoAbrirLaFoto,
       );
     } finally {
       notifyListeners();
@@ -144,8 +145,7 @@ class ClassifierController extends ChangeNotifier {
         status: ClassifierStatus.error,
         image: image,
         photoPath: path,
-        errorMessage:
-            'No se ha podido clasificar la imagen. Comprueba el archivo e inténtalo de nuevo.',
+        errorMessage: TextosNino.noHePodidoMirarLaFoto,
       );
     } finally {
       notifyListeners();
@@ -155,7 +155,7 @@ class ClassifierController extends ChangeNotifier {
   void reset() {
     _state = const ClassifierState(
       status: ClassifierStatus.ready,
-      noticeMessage: 'Guardado',
+      noticeMessage: TextosNino.guardado,
     );
     notifyListeners();
   }

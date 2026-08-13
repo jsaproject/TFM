@@ -272,6 +272,41 @@ ACEPTACION
 FASE 2 - HABLAR COMO UN NINO DE 5 ANOS
 ================================================================================
 
+ESTADO: COMPLETADA (2026-08-13)
+
+Que se ha hecho:
+
+  - Tarea 2.1 primero, como pedia el plan: lib/l10n/textos.dart con TODOS los
+    textos de la interfaz. TextosNino es lo que lee el nino; TextosAdulto es
+    acceso, ajustes, privacidad y borrado. Ningun widget escribe ya una cadena
+    literal visible; solo quedan fuera los mensajes de excepcion internos (no
+    llegan a pantalla tal cual) y ModelInformation, que es metadato del modelo
+    y se versiona con el (docs/MODELO.md).
+  - Reescrito el inventario entero de textos de esta fase.
+  - El porcentaje de confianza desaparece de la interfaz. En su sitio hay tres
+    niveles con icono y color: Seguro / Casi seguro / No lo se. La traduccion
+    del numero vive en features/classifier/domain/confidence_level.dart, no en
+    el widget, con su test.
+  - "Prepara la foto" pasa a "Consejos" con tres pictogramas (un animal /
+    mucha luz / de cerca) y sin frase.
+  - "La imagen se procesa solo en este dispositivo" sale de la pantalla del
+    nino. Ese aviso ya estaba, con mas detalle, en la tarjeta de Privacidad
+    del perfil, que es donde la FASE 5 lo quiere.
+  - Onboarding: una frase de cuatro palabras por paso, con el icono a tamano
+    hero (72) por encima del tamano del texto.
+  - Filtros renombrados a "Los que tengo / Los que faltan / Los ultimos / Los
+    mas vistos", cada uno con icono. Reducir a dos filtros visibles es la
+    tarea 3.3.2 y se deja para la FASE 3, que es donde el plan la asigna.
+  - Los errores del controlador y de los permisos tambien se reescriben: los
+    veia el nino en su pantalla y hablaban de modelos y de clasificacion.
+
+Comprobaciones: test/l10n/textos_test.dart verifica las cuatro reglas de la
+fase sobre TextosNino.revisables (8 palabras, palabras prohibidas, nada de
+porcentajes ni decimales, singular/plural). Actualizados los tres tests de
+interfaz que buscaban por texto; ahora buscan por la constante y no volveran
+a romperse al cambiar una frase. dart format, flutter analyze y los 53 tests
+de la suite pasan.
+
 Objetivo: que ningun texto de la app necesite un adulto al lado.
 
 REGLAS

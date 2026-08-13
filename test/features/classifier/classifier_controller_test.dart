@@ -4,6 +4,7 @@ import 'package:animalspredictor/features/classifier/data/photo_picker_service.d
 import 'package:animalspredictor/features/classifier/presentation/classifier_controller.dart';
 import 'package:animalspredictor/features/classifier/presentation/classifier_page.dart';
 import 'package:animalspredictor/features/profile/data/settings_repository.dart';
+import 'package:animalspredictor/l10n/textos.dart';
 import 'package:animalspredictor/models/prediction.dart';
 import 'package:animalspredictor/services/classifier_service.dart';
 import 'package:flutter/material.dart';
@@ -22,10 +23,7 @@ void main() {
     await controller.selectPhoto(ImageSource.camera);
 
     expect(controller.state.status, ClassifierStatus.ready);
-    expect(
-      controller.state.noticeMessage,
-      'No se ha seleccionado ninguna imagen.',
-    );
+    expect(controller.state.noticeMessage, TextosNino.noHasElegidoFoto);
   });
 
   test('muestra alternativas tras identificar una foto fiable', () async {
@@ -145,7 +143,7 @@ void main() {
     expect(controller.state.result, isNull);
     expect(controller.state.image, isNull);
     expect(controller.state.photoPath, isNull);
-    expect(controller.state.noticeMessage, 'Guardado');
+    expect(controller.state.noticeMessage, TextosNino.guardado);
   });
 
   test('respeta la decisión de rechazo calibrada del modelo', () async {
@@ -206,7 +204,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Hola, Michi'), findsOneWidget);
+    expect(find.text(TextosNino.saludo('Michi')), findsOneWidget);
     await tester.scrollUntilVisible(
       find.byKey(const Key('classifier-primary-cta')),
       200,
@@ -214,17 +212,20 @@ void main() {
     );
     await tester.tap(find.byKey(const Key('classifier-primary-cta')));
     await tester.pumpAndSettle();
-    expect(find.text('Usar cámara'), findsOneWidget);
-    expect(find.text('Elegir de la galería'), findsOneWidget);
+    expect(find.text(TextosNino.usarCamara), findsOneWidget);
+    expect(find.text(TextosNino.usarGaleria), findsOneWidget);
 
-    await tester.tap(find.text('Elegir de la galería'));
+    await tester.tap(find.text(TextosNino.usarGaleria));
     await tester.pump();
-    expect(find.text('Identificar esta foto'), findsOneWidget);
+    expect(find.text(TextosNino.queAnimalEs), findsOneWidget);
 
-    await tester.tap(find.text('Identificar esta foto'));
+    await tester.tap(find.text(TextosNino.queAnimalEs));
     await tester.pump();
-    expect(find.text('Resultado de la identificación'), findsOneWidget);
-    expect(find.text('Otras posibilidades'), findsOneWidget);
+    expect(find.text(TextosNino.yaLoTengo), findsOneWidget);
+    expect(find.text(TextosNino.creoQueEs('Vaca')), findsOneWidget);
+    expect(find.text(TextosNino.nivelSeguro), findsOneWidget);
+    expect(find.text(TextosNino.tambienPuedeSer), findsOneWidget);
+    expect(find.textContaining('%'), findsNothing);
   });
 }
 

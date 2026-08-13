@@ -1,21 +1,22 @@
 import 'package:animalspredictor/features/shell/presentation/adaptive_navigation_shell.dart';
+import 'package:animalspredictor/l10n/textos.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   const destinations = [
     ShellDestination(
-      label: 'Inicio',
+      label: TextosNino.navegacionInicio,
       icon: Icons.home_outlined,
       selectedIcon: Icons.home,
     ),
     ShellDestination(
-      label: 'Colección',
+      label: TextosNino.navegacionColeccion,
       icon: Icons.collections_bookmark_outlined,
       selectedIcon: Icons.collections_bookmark,
     ),
     ShellDestination(
-      label: 'Perfil',
+      label: TextosNino.navegacionPerfil,
       icon: Icons.person_outline,
       selectedIcon: Icons.person,
     ),
@@ -30,7 +31,11 @@ void main() {
           selectedIndex: 0,
           onDestinationSelected: (_) {},
           destinations: destinations,
-          children: const [Text('Inicio'), Text('Colección'), Text('Perfil')],
+          children: const [
+            Text(TextosNino.navegacionInicio),
+            Text(TextosNino.navegacionColeccion),
+            Text(TextosNino.navegacionPerfil),
+          ],
         ),
       ),
     );
@@ -41,7 +46,7 @@ void main() {
 
     expect(find.byType(NavigationBar), findsOneWidget);
     expect(find.byType(NavigationRail), findsNothing);
-    expect(find.text('Inicio'), findsAtLeastNWidgets(1));
+    expect(find.text(TextosNino.navegacionInicio), findsAtLeastNWidgets(1));
   });
 
   testWidgets('muestra una NavigationRail en pantalla ancha', (tester) async {
@@ -49,6 +54,6 @@ void main() {
 
     expect(find.byType(NavigationRail), findsOneWidget);
     expect(find.byType(NavigationBar), findsNothing);
-    expect(find.text('Inicio'), findsAtLeastNWidgets(1));
+    expect(find.text(TextosNino.navegacionInicio), findsAtLeastNWidgets(1));
   });
 }

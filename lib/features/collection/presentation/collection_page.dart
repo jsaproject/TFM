@@ -4,6 +4,7 @@ import 'package:animalspredictor/features/collection/presentation/animal_detail_
 import 'package:animalspredictor/features/collection/presentation/animal_image.dart';
 import 'package:animalspredictor/features/collection/presentation/collection_history_page.dart';
 import 'package:animalspredictor/features/collection/presentation/prediction_edit_action.dart';
+import 'package:animalspredictor/l10n/textos.dart';
 import 'package:animalspredictor/models/user_collection.dart';
 import 'package:animalspredictor/services/collection_repository.dart';
 import 'package:flutter/material.dart';
@@ -40,18 +41,16 @@ class _CollectionPageState extends State<CollectionPage> {
       final shouldDelete = await showDialog<bool>(
         context: context,
         builder: (dialogContext) => AlertDialog(
-          title: const Text('¿Borrar identificación?'),
-          content: const Text(
-            'Se eliminará del historial y se actualizará el contador de la colección.',
-          ),
+          title: const Text(TextosNino.borrarFotoTitulo),
+          content: const Text(TextosNino.borrarFotoTexto),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext, false),
-              child: const Text('Cancelar'),
+              child: const Text(TextosNino.cancelar),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(dialogContext, true),
-              child: const Text('Borrar'),
+              child: const Text(TextosNino.borrar),
             ),
           ],
         ),
@@ -64,7 +63,7 @@ class _CollectionPageState extends State<CollectionPage> {
     final correctedAnimal = await showDialog<String>(
       context: context,
       builder: (dialogContext) => SimpleDialog(
-        title: const Text('Corregir animal'),
+        title: const Text(TextosNino.cualEs),
         children: animalCatalog
             .map(
               (animal) => SimpleDialogOption(
@@ -96,11 +95,7 @@ class _CollectionPageState extends State<CollectionPage> {
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'No se ha podido actualizar la identificación. Comprueba tu conexión e inténtalo de nuevo.',
-          ),
-        ),
+        const SnackBar(content: Text(TextosNino.noHePodidoCambiarlo)),
       );
     }
   }
@@ -173,10 +168,10 @@ class _CollectionContent extends StatelessWidget {
       slivers: [
         SliverAppBar(
           pinned: true,
-          title: const Text('Mi colección'),
+          title: const Text(TextosNino.coleccionTitulo),
           actions: [
             IconButton(
-              tooltip: 'Ver historial',
+              tooltip: TextosNino.verMisFotos,
               onPressed: onOpenHistory,
               icon: const Icon(Icons.history),
             ),
@@ -278,9 +273,9 @@ class _CollectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final achievements = <String>[
-      if (collection.totalPhotos > 0) 'Primera foto',
-      if (collection.discovered >= 5) 'Cinco especies',
-      if (collection.discovered == animalCatalog.length) 'Colección completa',
+      if (collection.totalPhotos > 0) TextosNino.logroPrimeraFoto,
+      if (collection.discovered >= 5) TextosNino.logroCincoAnimales,
+      if (collection.discovered == animalCatalog.length) TextosNino.logroTodos,
     ];
     final latest = collection.lastDiscoveredAnimal;
     return Card(
@@ -290,19 +285,25 @@ class _CollectionHeader extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Tu progreso', style: Theme.of(context).textTheme.titleLarge),
+            Text(
+              TextosNino.tuProgreso,
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
             const SizedBox(height: MichiTokens.space8),
             Text(
-              '${collection.discovered} de ${animalCatalog.length} especies descubiertas',
+              TextosNino.tienesAnimales(
+                collection.discovered,
+                animalCatalog.length,
+              ),
             ),
             const SizedBox(height: MichiTokens.space8),
             LinearProgressIndicator(
               value: collection.discovered / animalCatalog.length,
-              semanticsLabel: 'Progreso de la colección',
+              semanticsLabel: TextosNino.tuProgreso,
             ),
             if (latest != null) ...[
               const SizedBox(height: MichiTokens.space12),
-              Text('Último descubrimiento: $latest'),
+              Text(TextosNino.elUltimo(latest)),
             ],
             if (achievements.isNotEmpty) ...[
               const SizedBox(height: MichiTokens.space12),
@@ -340,25 +341,29 @@ class _CollectionFilters extends StatelessWidget {
     runSpacing: MichiTokens.space8,
     children: [
       _FilterChip(
-        label: 'Descubiertos',
+        label: TextosNino.filtroLosQueTengo,
+        icon: Icons.check_circle_outline,
         filter: CollectionFilter.discovered,
         selected: selected,
         onChanged: onChanged,
       ),
       _FilterChip(
-        label: 'Pendientes',
+        label: TextosNino.filtroLosQueFaltan,
+        icon: Icons.help_outline,
         filter: CollectionFilter.pending,
         selected: selected,
         onChanged: onChanged,
       ),
       _FilterChip(
-        label: 'Recientes',
+        label: TextosNino.filtroLosUltimos,
+        icon: Icons.schedule,
         filter: CollectionFilter.recent,
         selected: selected,
         onChanged: onChanged,
       ),
       _FilterChip(
-        label: 'Cantidad',
+        label: TextosNino.filtroLosMasVistos,
+        icon: Icons.star_outline,
         filter: CollectionFilter.amount,
         selected: selected,
         onChanged: onChanged,
@@ -370,17 +375,20 @@ class _CollectionFilters extends StatelessWidget {
 class _FilterChip extends StatelessWidget {
   const _FilterChip({
     required this.label,
+    required this.icon,
     required this.filter,
     required this.selected,
     required this.onChanged,
   });
   final String label;
+  final IconData icon;
   final CollectionFilter filter;
   final CollectionFilter? selected;
   final ValueChanged<CollectionFilter?> onChanged;
 
   @override
   Widget build(BuildContext context) => FilterChip(
+    avatar: Icon(icon, size: MichiTokens.iconSizeSmall),
     label: Text(label),
     selected: selected == filter,
     onSelected: (isSelected) => onChanged(isSelected ? filter : null),
@@ -400,7 +408,7 @@ class _AnimalTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Semantics(
     button: true,
-    label: '${animal.name}, $count ${count == 1 ? 'foto' : 'fotos'}',
+    label: TextosNino.animalConFotos(animal.name, count),
     onTap: onTap,
     child: ExcludeSemantics(
       child: Card(
@@ -425,7 +433,7 @@ class _AnimalTile extends StatelessWidget {
                       animal.name,
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
-                    Text('$count ${count == 1 ? 'foto' : 'fotos'}'),
+                    Text(TextosNino.fotos(count)),
                   ],
                 ),
               ),
@@ -444,10 +452,7 @@ class _GuestCollection extends StatelessWidget {
   Widget build(BuildContext context) => const Center(
     child: Padding(
       padding: MichiTokens.pagePadding,
-      child: Text(
-        'Inicia sesión con una cuenta para guardar y consultar tu colección.',
-        textAlign: TextAlign.center,
-      ),
+      child: Text(TextosNino.entraParaGuardar, textAlign: TextAlign.center),
     ),
   );
 }
@@ -465,15 +470,15 @@ class _CollectionError extends StatelessWidget {
         children: [
           const Icon(Icons.cloud_off_outlined, size: MichiTokens.iconSizeLarge),
           const SizedBox(height: MichiTokens.space16),
-          Text(
-            'No se ha podido cargar la colección. Comprueba tu conexión e inténtalo de nuevo.',
+          const Text(
+            TextosNino.noEncuentroTuColeccion,
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: MichiTokens.space16),
           FilledButton.icon(
             onPressed: onRetry,
             icon: const Icon(Icons.refresh),
-            label: const Text('Reintentar'),
+            label: const Text(TextosNino.pruebaOtraVez),
           ),
         ],
       ),
@@ -519,10 +524,7 @@ class _NoFilteredAnimals extends StatelessWidget {
   @override
   Widget build(BuildContext context) => const Padding(
     padding: EdgeInsets.symmetric(vertical: MichiTokens.space32),
-    child: Text(
-      'No hay especies que coincidan con este filtro.',
-      textAlign: TextAlign.center,
-    ),
+    child: Text(TextosNino.aquiNoHayNada, textAlign: TextAlign.center),
   );
 }
 
@@ -543,19 +545,16 @@ class _EmptyCollection extends StatelessWidget {
           ),
           const SizedBox(height: MichiTokens.space16),
           Text(
-            'Tu colección está esperando',
+            TextosNino.coleccionVaciaTitulo,
             style: Theme.of(context).textTheme.headlineSmall,
           ),
           const SizedBox(height: MichiTokens.space8),
-          const Text(
-            'Haz tu primera predicción y confirma el animal para añadirlo.',
-            textAlign: TextAlign.center,
-          ),
+          const Text(TextosNino.hazTuPrimeraFoto, textAlign: TextAlign.center),
           const SizedBox(height: MichiTokens.space24),
           FilledButton.icon(
             onPressed: onStartIdentifying,
             icon: const Icon(Icons.camera_alt_outlined),
-            label: const Text('Identificar animal'),
+            label: const Text(TextosNino.hazUnaFoto),
           ),
         ],
       ),

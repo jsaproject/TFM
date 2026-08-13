@@ -1,3 +1,4 @@
+import 'package:animalspredictor/l10n/textos.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -90,8 +91,7 @@ class SettingsController extends ChangeNotifier {
       _theme = settings.theme;
       _hapticsEnabled = settings.hapticsEnabled;
     } catch (_) {
-      _errorMessage =
-          'No se han podido cargar los ajustes. Se usarán los valores predeterminados.';
+      _errorMessage = TextosAdulto.errorCargarAjustes;
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -108,7 +108,7 @@ class SettingsController extends ChangeNotifier {
       _theme = theme;
       return true;
     } catch (_) {
-      _errorMessage = 'No se ha podido guardar el tema. Inténtalo de nuevo.';
+      _errorMessage = TextosAdulto.errorGuardarTema;
       return false;
     } finally {
       _isLoading = false;
@@ -126,8 +126,7 @@ class SettingsController extends ChangeNotifier {
       _hapticsEnabled = enabled;
       return true;
     } catch (_) {
-      _errorMessage =
-          'No se ha podido guardar la respuesta háptica. Inténtalo de nuevo.';
+      _errorMessage = TextosAdulto.errorGuardarHaptica;
       return false;
     } finally {
       _isLoading = false;

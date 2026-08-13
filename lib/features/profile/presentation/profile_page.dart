@@ -3,6 +3,7 @@ import 'package:animalspredictor/auth_service.dart';
 import 'package:animalspredictor/features/profile/data/permission_service.dart';
 import 'package:animalspredictor/features/profile/data/settings_repository.dart';
 import 'package:animalspredictor/features/profile/model_information.dart';
+import 'package:animalspredictor/l10n/textos.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -49,10 +50,7 @@ class _ProfilePageState extends State<ProfilePage> {
       if (mounted) setState(() => _permissions = permissions);
     } catch (_) {
       if (mounted) {
-        setState(
-          () => _permissionsError =
-              'No se ha podido comprobar el estado de los permisos.',
-        );
+        setState(() => _permissionsError = TextosAdulto.permisosError);
       }
     } finally {
       if (mounted) setState(() => _loadingPermissions = false);
@@ -66,9 +64,7 @@ class _ProfilePageState extends State<ProfilePage> {
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('No se ha podido cerrar sesión. Inténtalo de nuevo.'),
-        ),
+        const SnackBar(content: Text(TextosAdulto.errorCerrarSesion)),
       );
     } finally {
       if (mounted) setState(() => _signingOut = false);
@@ -102,9 +98,7 @@ class _ProfilePageState extends State<ProfilePage> {
     if (!mounted) return;
     if (!opened) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('No se han podido abrir los Ajustes del dispositivo.'),
-        ),
+        const SnackBar(content: Text(TextosAdulto.ajustesNoAbiertos)),
       );
       return;
     }
@@ -135,11 +129,7 @@ class _ProfilePageState extends State<ProfilePage> {
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'No se ha podido eliminar la cuenta y la colección. Inténtalo de nuevo.',
-          ),
-        ),
+        const SnackBar(content: Text(TextosAdulto.errorEliminarCuenta)),
       );
     } finally {
       if (mounted) setState(() => _deleting = false);
@@ -147,20 +137,17 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   String _deletionMessage(FirebaseAuthException error) => switch (error.code) {
-    'wrong-password' || 'invalid-credential' =>
-      'La contraseña no es correcta. Vuelve a intentarlo.',
-    'too-many-requests' =>
-      'Hay demasiados intentos. Espera unos minutos antes de volver a intentarlo.',
-    'network-request-failed' =>
-      'No hay conexión. Comprueba internet y vuelve a intentarlo.',
-    'requires-recent-login' =>
-      'Vuelve a iniciar sesión antes de eliminar la cuenta.',
-    _ => 'No se ha podido verificar tu identidad. Vuelve a intentarlo.',
+    'wrong-password' ||
+    'invalid-credential' => TextosAdulto.errorContrasenaIncorrecta,
+    'too-many-requests' => TextosAdulto.errorEsperaUnosMinutos,
+    'network-request-failed' => TextosAdulto.errorCompruebaInternet,
+    'requires-recent-login' => TextosAdulto.errorVuelveAIniciarSesion,
+    _ => TextosAdulto.errorIdentidad,
   };
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Perfil y ajustes')),
+    appBar: AppBar(title: const Text(TextosAdulto.perfilTitulo)),
     body: AnimatedBuilder(
       animation: widget.settings,
       builder: (context, _) => ListView(
@@ -169,7 +156,7 @@ class _ProfilePageState extends State<ProfilePage> {
           _AccountCard(email: widget.email, isAnonymous: widget.isAnonymous),
           const SizedBox(height: MichiTokens.space24),
           Text(
-            'Apariencia y respuesta',
+            TextosAdulto.aparienciaTitulo,
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: MichiTokens.space8),
@@ -177,33 +164,31 @@ class _ProfilePageState extends State<ProfilePage> {
             child: Column(
               children: [
                 ListTile(
-                  title: const Text('Tema'),
-                  subtitle: const Text('Elige claro, oscuro o el del sistema.'),
+                  title: const Text(TextosAdulto.tema),
+                  subtitle: const Text(TextosAdulto.temaTexto),
                   trailing: DropdownButton<AppThemePreference>(
                     value: widget.settings.theme,
                     onChanged: widget.settings.isLoading ? null : _changeTheme,
                     items: const [
                       DropdownMenuItem(
                         value: AppThemePreference.system,
-                        child: Text('Sistema'),
+                        child: Text(TextosAdulto.temaSistema),
                       ),
                       DropdownMenuItem(
                         value: AppThemePreference.light,
-                        child: Text('Claro'),
+                        child: Text(TextosAdulto.temaClaro),
                       ),
                       DropdownMenuItem(
                         value: AppThemePreference.dark,
-                        child: Text('Oscuro'),
+                        child: Text(TextosAdulto.temaOscuro),
                       ),
                     ],
                   ),
                 ),
                 const Divider(height: MichiTokens.dividerThickness),
                 SwitchListTile(
-                  title: const Text('Respuesta háptica'),
-                  subtitle: const Text(
-                    'Vibrar brevemente al confirmar acciones compatibles.',
-                  ),
+                  title: const Text(TextosAdulto.hapticaTitulo),
+                  subtitle: const Text(TextosAdulto.hapticaTexto),
                   value: widget.settings.hapticsEnabled,
                   onChanged: widget.settings.isLoading ? null : _changeHaptics,
                 ),
@@ -211,7 +196,10 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ),
           const SizedBox(height: MichiTokens.space24),
-          Text('Permisos', style: Theme.of(context).textTheme.titleLarge),
+          Text(
+            TextosAdulto.permisosTitulo,
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
           const SizedBox(height: MichiTokens.space8),
           _PermissionsCard(
             permissions: _permissions,
@@ -221,12 +209,15 @@ class _ProfilePageState extends State<ProfilePage> {
             onOpenSettings: _openSettings,
           ),
           const SizedBox(height: MichiTokens.space24),
-          Text('Privacidad', style: Theme.of(context).textTheme.titleLarge),
+          Text(
+            TextosAdulto.privacidadTitulo,
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
           const SizedBox(height: MichiTokens.space8),
           const _PrivacyCard(),
           const SizedBox(height: MichiTokens.space24),
           Text(
-            'Modelo de identificación',
+            TextosAdulto.modeloTitulo,
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: MichiTokens.space8),
@@ -242,7 +233,11 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                   )
                 : const Icon(Icons.logout),
-            label: Text(_signingOut ? 'Cerrando sesión…' : 'Cerrar sesión'),
+            label: Text(
+              _signingOut
+                  ? TextosAdulto.cerrandoSesion
+                  : TextosAdulto.cerrarSesion,
+            ),
           ),
           const SizedBox(height: MichiTokens.space12),
           OutlinedButton.icon(
@@ -256,7 +251,9 @@ class _ProfilePageState extends State<ProfilePage> {
                   )
                 : const Icon(Icons.delete_forever_outlined),
             label: Text(
-              _deleting ? 'Eliminando cuenta…' : 'Eliminar cuenta y colección',
+              _deleting
+                  ? TextosAdulto.eliminandoCuenta
+                  : TextosAdulto.eliminarCuenta,
             ),
             style: OutlinedButton.styleFrom(
               foregroundColor: Theme.of(context).colorScheme.error,
@@ -286,14 +283,16 @@ class _AccountCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  isAnonymous ? 'Invitado' : (email ?? 'Usuario'),
+                  isAnonymous
+                      ? TextosAdulto.cuentaInvitado
+                      : (email ?? TextosAdulto.cuentaUsuario),
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const SizedBox(height: MichiTokens.space4),
                 Text(
                   isAnonymous
-                      ? 'Tus descubrimientos no se guardan en una colección.'
-                      : 'Tu colección está asociada a esta cuenta.',
+                      ? TextosAdulto.cuentaInvitadoTexto
+                      : TextosAdulto.cuentaTexto,
                 ),
               ],
             ),
@@ -334,20 +333,29 @@ class _PermissionsCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(errorMessage!),
-                TextButton(onPressed: onRetry, child: const Text('Reintentar')),
+                TextButton(
+                  onPressed: onRetry,
+                  child: const Text(TextosAdulto.reintentar),
+                ),
               ],
             )
           : Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _PermissionRow(label: 'Cámara', status: permissions!.camera),
+                _PermissionRow(
+                  label: TextosAdulto.permisoCamara,
+                  status: permissions!.camera,
+                ),
                 const SizedBox(height: MichiTokens.space8),
-                _PermissionRow(label: 'Fotos', status: permissions!.photos),
+                _PermissionRow(
+                  label: TextosAdulto.permisoFotos,
+                  status: permissions!.photos,
+                ),
                 const SizedBox(height: MichiTokens.space12),
                 TextButton.icon(
                   onPressed: onOpenSettings,
                   icon: const Icon(Icons.settings_outlined),
-                  label: const Text('Abrir Ajustes'),
+                  label: const Text(TextosAdulto.abrirAjustes),
                 ),
               ],
             ),
@@ -366,15 +374,15 @@ class _PermissionRow extends StatelessWidget {
         status == AppPermissionStatus.granted ||
         status == AppPermissionStatus.limited;
     final text = switch (status) {
-      AppPermissionStatus.granted => 'Permitido',
-      AppPermissionStatus.limited => 'Acceso limitado',
-      AppPermissionStatus.unavailable => 'No disponible en web',
-      AppPermissionStatus.permanentlyDenied => 'Bloqueado en Ajustes',
-      AppPermissionStatus.restricted => 'Restringido por el dispositivo',
-      AppPermissionStatus.denied => 'No concedido',
+      AppPermissionStatus.granted => TextosAdulto.permisoConcedido,
+      AppPermissionStatus.limited => TextosAdulto.permisoLimitado,
+      AppPermissionStatus.unavailable => TextosAdulto.permisoNoDisponible,
+      AppPermissionStatus.permanentlyDenied => TextosAdulto.permisoBloqueado,
+      AppPermissionStatus.restricted => TextosAdulto.permisoRestringido,
+      AppPermissionStatus.denied => TextosAdulto.permisoDenegado,
     };
     return Semantics(
-      label: '$label: $text',
+      label: TextosAdulto.permisoSemantica(label, text),
       child: Row(
         children: [
           Icon(granted ? Icons.check_circle_outline : Icons.info_outline),
@@ -397,15 +405,11 @@ class _PrivacyCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Tus fotos no salen del dispositivo.'),
+          Text(TextosAdulto.privacidadResumen),
           SizedBox(height: MichiTokens.space8),
-          Text(
-            'La clasificación se realiza localmente. Si usas una cuenta, Firestore guarda solo tu correo, la colección de especies, las fechas de identificación y el historial; no guarda las imágenes.',
-          ),
+          Text(TextosAdulto.privacidadDetalle),
           SizedBox(height: MichiTokens.space8),
-          Text(
-            'La app no incorpora analítica. Puedes eliminar permanentemente tu cuenta y colección desde esta pantalla.',
-          ),
+          Text(TextosAdulto.privacidadBorrado),
         ],
       ),
     ),
@@ -422,9 +426,9 @@ class _ModelInformationCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Versión: ${ModelInformation.version}'),
+          Text(TextosAdulto.modeloVersion(ModelInformation.version)),
           const SizedBox(height: MichiTokens.space8),
-          Text('Clases compatibles: ${ModelInformation.classes.join(', ')}.'),
+          Text(TextosAdulto.modeloClases(ModelInformation.classes.join(', '))),
           const SizedBox(height: MichiTokens.space8),
           Text(ModelInformation.limitations),
         ],
@@ -459,15 +463,13 @@ class _DeleteAccountDialogState extends State<_DeleteAccountDialog> {
 
   @override
   Widget build(BuildContext context) => AlertDialog(
-    title: const Text('¿Eliminar cuenta?'),
+    title: const Text(TextosAdulto.eliminarCuentaTitulo),
     content: SingleChildScrollView(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Esta acción elimina permanentemente tu cuenta y toda tu colección. No se puede deshacer.',
-          ),
+          const Text(TextosAdulto.eliminarCuentaTexto),
           if (!widget.isAnonymous) ...[
             const SizedBox(height: MichiTokens.space16),
             TextField(
@@ -475,11 +477,11 @@ class _DeleteAccountDialogState extends State<_DeleteAccountDialog> {
               obscureText: _obscurePassword,
               autofillHints: const [AutofillHints.password],
               decoration: InputDecoration(
-                labelText: 'Contraseña para confirmar',
+                labelText: TextosAdulto.eliminarCuentaContrasena,
                 suffixIcon: IconButton(
                   tooltip: _obscurePassword
-                      ? 'Mostrar contraseña'
-                      : 'Ocultar contraseña',
+                      ? TextosAdulto.mostrarContrasena
+                      : TextosAdulto.ocultarContrasena,
                   onPressed: () =>
                       setState(() => _obscurePassword = !_obscurePassword),
                   icon: Icon(
@@ -497,7 +499,7 @@ class _DeleteAccountDialogState extends State<_DeleteAccountDialog> {
             value: _acknowledged,
             onChanged: (value) =>
                 setState(() => _acknowledged = value ?? false),
-            title: const Text('Entiendo que no podré recuperar estos datos.'),
+            title: const Text(TextosAdulto.eliminarCuentaCasilla),
           ),
         ],
       ),
@@ -505,7 +507,7 @@ class _DeleteAccountDialogState extends State<_DeleteAccountDialog> {
     actions: [
       TextButton(
         onPressed: () => Navigator.pop(context),
-        child: const Text('Cancelar'),
+        child: const Text(TextosAdulto.cancelar),
       ),
       FilledButton(
         onPressed:
@@ -522,7 +524,7 @@ class _DeleteAccountDialogState extends State<_DeleteAccountDialog> {
           backgroundColor: Theme.of(context).colorScheme.error,
           foregroundColor: Theme.of(context).colorScheme.onError,
         ),
-        child: const Text('Eliminar permanentemente'),
+        child: const Text(TextosAdulto.eliminarCuentaBoton),
       ),
     ],
   );
