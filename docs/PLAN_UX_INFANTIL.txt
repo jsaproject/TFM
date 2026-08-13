@@ -457,11 +457,13 @@ RIESGO
 
 
 ================================================================================
-FASE 3 - QUE UN NINO LO PUEDA TOCAR   [HECHA EN CODIGO 2026-08-13]
+FASE 3 - QUE UN NINO LO PUEDA TOCAR   [COMPLETADA 2026-08-13]
 ================================================================================
 
-ESTADO: hecho todo lo que depende del codigo. Sigue pendiente lo unico que no
-depende de el: los 28 dibujos (tarea 3.0, encargados a la hermana de Juan).
+ESTADO: COMPLETADA (2026-08-13). Hecho todo lo que depende del codigo. Lo
+unico que no depende de el son los 28 dibujos (tarea 3.0, encargados a la
+hermana de Juan): entran con una linea por animal cuando esten, sin tocar
+ninguna pantalla.
 
 Que se ha hecho:
 
