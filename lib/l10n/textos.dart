@@ -25,7 +25,7 @@ abstract final class TextosNino {
   static const marca = 'La granja de Michi';
   static const navegacionInicio = 'Inicio';
   static const navegacionColeccion = 'Colección';
-  static const navegacionPerfil = 'Perfil';
+  static const navegacionAdultos = 'Adultos';
 
   // Bienvenida.
   static const bienvenidaPasoGaleria = 'O busca una foto';
@@ -48,11 +48,8 @@ abstract final class TextosNino {
 
   // Elegir de dónde sale la foto.
   static const hazUnaFoto = 'Haz una foto';
-  static const eligeUnaFoto = 'Elige una foto';
-  static const usarCamara = 'Con la cámara';
   static const usarGaleria = 'De mis fotos';
   static const elegirOtraFoto = 'Elige otra foto';
-  static const queAnimalEs = '¿Qué animal es?';
 
   // Resultado.
   static const yaLoTengo = 'Ya lo tengo';
@@ -64,6 +61,9 @@ abstract final class TextosNino {
   static const nivelNoLoSe = 'No lo sé';
   static const tambienPuedeSer = 'También puede ser';
   static const esEste = 'Es este';
+  static const esOtro = 'Es otro';
+  static const todosLosAnimales = 'Todos los animales';
+  static String elegido(String animal) => 'Elegido: $animal';
   static const guardar = 'Guardar';
   static const guardando = 'Guardando…';
   static const guardado = '¡Guardado!';
@@ -93,8 +93,6 @@ abstract final class TextosNino {
   static const logroTodos = '¡Están todos!';
   static const filtroLosQueTengo = 'Los que tengo';
   static const filtroLosQueFaltan = 'Los que faltan';
-  static const filtroLosUltimos = 'Los últimos';
-  static const filtroLosMasVistos = 'Los más vistos';
   static String fotos(int cuantas) =>
       cuantas == 1 ? '1 foto' : '$cuantas fotos';
   static String animalConFotos(String animal, int cuantas) =>
@@ -167,7 +165,7 @@ abstract final class TextosNino {
     marca,
     navegacionInicio,
     navegacionColeccion,
-    navegacionPerfil,
+    navegacionAdultos,
     bienvenidaPasoGaleria,
     bienvenidaPasoColeccion,
     bienvenidaBoton,
@@ -184,11 +182,8 @@ abstract final class TextosNino {
     mirandoLaFoto,
     noVeoLaFoto,
     hazUnaFoto,
-    eligeUnaFoto,
-    usarCamara,
     usarGaleria,
     elegirOtraFoto,
-    queAnimalEs,
     yaLoTengo,
     noLoReconozco,
     creoQueEs('Vaca'),
@@ -198,6 +193,9 @@ abstract final class TextosNino {
     nivelNoLoSe,
     tambienPuedeSer,
     esEste,
+    esOtro,
+    todosLosAnimales,
+    elegido('Vaca'),
     guardar,
     guardando,
     guardado,
@@ -222,8 +220,6 @@ abstract final class TextosNino {
     logroTodos,
     filtroLosQueTengo,
     filtroLosQueFaltan,
-    filtroLosUltimos,
-    filtroLosMasVistos,
     fotos(1),
     fotos(4),
     animalConFotos('Vaca', 2),

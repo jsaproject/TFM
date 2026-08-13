@@ -1,3 +1,4 @@
+import 'package:animalspredictor/app_theme.dart';
 import 'package:animalspredictor/features/shell/presentation/adaptive_navigation_shell.dart';
 import 'package:animalspredictor/l10n/textos.dart';
 import 'package:flutter/material.dart';
@@ -9,16 +10,19 @@ void main() {
       label: TextosNino.navegacionInicio,
       icon: Icons.home_outlined,
       selectedIcon: Icons.home,
+      accent: ShellAccent.primary,
     ),
     ShellDestination(
       label: TextosNino.navegacionColeccion,
       icon: Icons.collections_bookmark_outlined,
       selectedIcon: Icons.collections_bookmark,
+      accent: ShellAccent.secondary,
     ),
     ShellDestination(
-      label: TextosNino.navegacionPerfil,
-      icon: Icons.person_outline,
-      selectedIcon: Icons.person,
+      label: TextosNino.navegacionAdultos,
+      icon: Icons.lock_outline,
+      selectedIcon: Icons.lock,
+      accent: ShellAccent.tertiary,
     ),
   ];
 
@@ -27,6 +31,7 @@ void main() {
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(
       MaterialApp(
+        theme: MichiTheme.light(),
         home: AdaptiveNavigationShell(
           selectedIndex: 0,
           onDestinationSelected: (_) {},
@@ -34,7 +39,7 @@ void main() {
           children: const [
             Text(TextosNino.navegacionInicio),
             Text(TextosNino.navegacionColeccion),
-            Text(TextosNino.navegacionPerfil),
+            Text(TextosNino.navegacionAdultos),
           ],
         ),
       ),
@@ -47,6 +52,41 @@ void main() {
     expect(find.byType(NavigationBar), findsOneWidget);
     expect(find.byType(NavigationRail), findsNothing);
     expect(find.text(TextosNino.navegacionInicio), findsAtLeastNWidgets(1));
+  });
+
+  testWidgets('pinta cada sección con el color de su acento', (tester) async {
+    await pumpShell(tester, 390);
+
+    final colors = MichiTheme.light().colorScheme;
+    final fondos = tester
+        .widgetList<DecoratedBox>(
+          find.descendant(
+            of: find.byType(NavigationBar),
+            matching: find.byType(DecoratedBox),
+          ),
+        )
+        .map((caja) => caja.decoration)
+        .whereType<ShapeDecoration>()
+        .map((forma) => forma.color)
+        .whereType<Color>()
+        .toSet();
+
+    expect(
+      fondos,
+      containsAll(<Color>[
+        colors.primary,
+        colors.secondaryContainer,
+        colors.tertiaryContainer,
+      ]),
+    );
+    for (final icono in tester.widgetList<Icon>(
+      find.descendant(
+        of: find.byType(NavigationBar),
+        matching: find.byType(Icon),
+      ),
+    )) {
+      expect(icono.size, MichiTokens.iconSizeMedium);
+    }
   });
 
   testWidgets('muestra una NavigationRail en pantalla ancha', (tester) async {

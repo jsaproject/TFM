@@ -2,6 +2,7 @@ import 'package:animalspredictor/animal_catalog.dart';
 import 'package:animalspredictor/app_theme.dart';
 import 'package:animalspredictor/features/collection/presentation/animal_detail_page.dart';
 import 'package:animalspredictor/features/collection/presentation/animal_image.dart';
+import 'package:animalspredictor/features/collection/presentation/animal_selector.dart';
 import 'package:animalspredictor/features/collection/presentation/collection_history_page.dart';
 import 'package:animalspredictor/features/collection/presentation/prediction_edit_action.dart';
 import 'package:animalspredictor/l10n/textos.dart';
@@ -9,7 +10,9 @@ import 'package:animalspredictor/models/user_collection.dart';
 import 'package:animalspredictor/services/collection_repository.dart';
 import 'package:flutter/material.dart';
 
-enum CollectionFilter { discovered, pending, recent, amount }
+/// Solo dos filtros: para un niño, "los que tengo" y "los que faltan" son las
+/// dos preguntas que se hace. Ordenar por fecha o por cantidad era ruido.
+enum CollectionFilter { discovered, pending }
 
 class CollectionPage extends StatefulWidget {
   const CollectionPage({
@@ -60,19 +63,9 @@ class _CollectionPageState extends State<CollectionPage> {
       return;
     }
 
-    final correctedAnimal = await showDialog<String>(
-      context: context,
-      builder: (dialogContext) => SimpleDialog(
-        title: const Text(TextosNino.cualEs),
-        children: animalCatalog
-            .map(
-              (animal) => SimpleDialogOption(
-                onPressed: () => Navigator.pop(dialogContext, animal.name),
-                child: Text(animal.name),
-              ),
-            )
-            .toList(growable: false),
-      ),
+    final correctedAnimal = await showAnimalSelector(
+      context,
+      selected: prediction.animal,
     );
     if (!mounted ||
         correctedAnimal == null ||
@@ -236,34 +229,16 @@ List<Animal> _filteredAnimals(
           (collection.counts[animal.name] ?? 0) > 0)
         animal,
   ];
-  final animals = visibleCatalog
+  return visibleCatalog
       .where((animal) {
         final count = collection.counts[animal.name] ?? 0;
         return switch (filter) {
           CollectionFilter.discovered => count > 0,
           CollectionFilter.pending => count == 0,
-          _ => true,
+          null => true,
         };
       })
       .toList(growable: false);
-  if (filter == CollectionFilter.recent) {
-    return animals..sort((left, right) {
-      final rightDate = collection.lastIdentified[right.name] ?? DateTime(0);
-      final leftDate = collection.lastIdentified[left.name] ?? DateTime(0);
-      return rightDate.compareTo(leftDate);
-    });
-  }
-  if (filter == CollectionFilter.amount) {
-    return animals..sort((left, right) {
-      final countComparison = (collection.counts[right.name] ?? 0).compareTo(
-        collection.counts[left.name] ?? 0,
-      );
-      return countComparison != 0
-          ? countComparison
-          : left.name.compareTo(right.name);
-    });
-  }
-  return animals;
 }
 
 class _CollectionHeader extends StatelessWidget {
@@ -351,20 +326,6 @@ class _CollectionFilters extends StatelessWidget {
         label: TextosNino.filtroLosQueFaltan,
         icon: Icons.help_outline,
         filter: CollectionFilter.pending,
-        selected: selected,
-        onChanged: onChanged,
-      ),
-      _FilterChip(
-        label: TextosNino.filtroLosUltimos,
-        icon: Icons.schedule,
-        filter: CollectionFilter.recent,
-        selected: selected,
-        onChanged: onChanged,
-      ),
-      _FilterChip(
-        label: TextosNino.filtroLosMasVistos,
-        icon: Icons.star_outline,
-        filter: CollectionFilter.amount,
         selected: selected,
         onChanged: onChanged,
       ),

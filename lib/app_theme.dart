@@ -73,6 +73,23 @@ abstract final class MichiTokens {
   static const progressIndicatorStrokeWidth = 2.0;
   static const chipVerticalPadding = 21.0;
 
+  /// Ficha del selector de animales: imagen grande y nombre debajo.
+  static const animalChoiceExtent = 176.0;
+  static const animalChoiceMaxWidth = 168.0;
+  static const animalChoiceMinWidth = 96.0;
+
+  /// Parte de la ficha que ocupa el icono cuando el animal no tiene dibujo.
+  static const animalIconRatio = 0.55;
+
+  static const selectionBorderWidth = 4.0;
+  static const selectorSheetHeightFactor = 0.92;
+
+  static const navigationBarHeight = 88.0;
+  static const navigationBadgePadding = EdgeInsets.symmetric(
+    horizontal: space20,
+    vertical: space8,
+  );
+
   static const collectionGridMaxCrossAxisExtent = 260.0;
   static const collectionGridMainAxisExtent = 242.0;
   static const collectionHeaderSkeletonHeight = 190.0;
@@ -221,6 +238,25 @@ abstract final class MichiTheme {
     listTileTheme: const ListTileThemeData(
       minTileHeight: MichiTokens.touchTargetMin,
       minVerticalPadding: MichiTokens.space12,
+    ),
+    // La navegación pinta su propia pastilla de color por sección
+    // (`AdaptiveNavigationShell`), así que el indicador de Material sobra.
+    navigationBarTheme: NavigationBarThemeData(
+      height: MichiTokens.navigationBarHeight,
+      indicatorColor: Colors.transparent,
+      labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+      labelTextStyle: WidgetStatePropertyAll(
+        MichiTokens.labelLarge.copyWith(color: scheme.onSurface),
+      ),
+    ),
+    navigationRailTheme: NavigationRailThemeData(
+      indicatorColor: Colors.transparent,
+      selectedLabelTextStyle: MichiTokens.labelLarge.copyWith(
+        color: scheme.onSurface,
+      ),
+      unselectedLabelTextStyle: MichiTokens.labelLarge.copyWith(
+        color: scheme.onSurface,
+      ),
     ),
     inputDecorationTheme: const InputDecorationTheme(
       border: OutlineInputBorder(

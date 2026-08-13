@@ -457,8 +457,58 @@ RIESGO
 
 
 ================================================================================
-FASE 3 - QUE UN NINO LO PUEDA TOCAR
+FASE 3 - QUE UN NINO LO PUEDA TOCAR   [HECHA EN CODIGO 2026-08-13]
 ================================================================================
+
+ESTADO: hecho todo lo que depende del codigo. Sigue pendiente lo unico que no
+depende de el: los 28 dibujos (tarea 3.0, encargados a la hermana de Juan).
+
+Que se ha hecho:
+
+  - 3.0.5 Ningun animal del catalogo actual repite icono. Antes 12 compartian
+    Icons.pets y otros dos Icons.water. Los iconos se eligen por la pista que
+    dan (las orejas del burro, la rueda del hamster, las rayas del tigre).
+    test/animal_catalog_test.dart no deja que vuelva a haber uno repetido.
+  - Ademas del icono, la ficha sin dibujo (_Fallback de animal_image.dart)
+    pinta el icono a tamano grande sobre uno de cuatro colores del tema, fijo
+    para cada animal. Con eso ya se distinguen dos fichas cualesquiera tapando
+    el texto, que es la aceptacion de la tarea 3.0, aun sin dibujos.
+  - 3.1 Nuevo widget unico, features/collection/presentation/animal_selector
+    .dart: AnimalChoiceCard (dibujo grande + nombre) y AnimalSelector (rejilla
+    de los 28, con las sugerencias de la foto arriba). showAnimalSelector() lo
+    abre a pantalla casi completa. Se han borrado el DropdownButtonFormField
+    de la pantalla de la foto y el SimpleDialog de nombres de la coleccion: ya
+    no queda ninguna lista de texto para elegir animal en toda la app.
+  - 3.1.3 En el panel del resultado, las sugerencias (la principal y sus
+    alternativas) salen como fichas con la primera ya marcada, mas un boton
+    "Es otro" que abre la rejilla completa. El caso normal es un toque.
+  - 3.2 La foto se identifica sola al elegirla (selectAndClassifyPhoto). Ha
+    desaparecido el boton "¿Que animal es?" y tambien el menu intermedio de
+    camara/galeria: la camara es el boton grande y la galeria queda debajo
+    como accion secundaria. Camara -> Guardar son dos toques.
+  - 3.3.2 La coleccion se queda con dos filtros, "Los que tengo" y "Los que
+    faltan". Se han borrado los de fecha y cantidad, su enum y su ordenacion.
+  - 3.4 La navegacion pinta una pastilla de color por seccion (naranja, verde
+    y amarillo del tema) con el icono a 32 dp dentro, en los dos estados. El
+    destino "Perfil" pasa a llamarse "Adultos" y lleva candado: es la puerta
+    de la FASE 5.
+  - 3.3.1 no ha necesitado codigo nuevo: los 64 dp los aplica el tema desde la
+    FASE 1 y test/app_theme_test.dart ya lo comprueba. Las fichas nuevas se
+    comprueban en test/features/collection/animal_selector_test.dart.
+
+Lo que queda de esta fase:
+
+  - 3.0.2 y 3.0.3 (declarar assets/animales/ en pubspec.yaml y rellenar los 28
+    imageAsset) no se pueden hacer hasta que existan los dibujos. El codigo ya
+    esta listo: AnimalImage usa imageAsset en cuanto deje de ser nulo y cae al
+    icono si el fichero falla. Es una linea por animal.
+  - 3.0.4 se cumple: el _Fallback sigue vivo para el catalogo legado.
+
+Observacion para la FASE 4, que rehace esta pantalla: en un movil pequeno el
+boton de la camara queda por debajo del pliegue, detras del saludo, la tarjeta
+de consejos y la vista previa. Son dos toques, pero hay que buscarlos.
+
+Comprobaciones: dart format, flutter analyze y los 62 tests de la suite pasan.
 
 Objetivo: menos pasos, dianas mas grandes, y elegir animales con imagenes en
 vez de con listas de texto.

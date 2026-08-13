@@ -1,13 +1,13 @@
-import 'dart:typed_data';
-
 import 'package:animalspredictor/features/classifier/data/photo_picker_service.dart';
 import 'package:animalspredictor/features/classifier/presentation/classifier_controller.dart';
 import 'package:animalspredictor/features/classifier/presentation/classifier_page.dart';
+import 'package:animalspredictor/features/collection/presentation/animal_selector.dart';
 import 'package:animalspredictor/features/profile/data/settings_repository.dart';
 import 'package:animalspredictor/l10n/textos.dart';
 import 'package:animalspredictor/models/prediction.dart';
 import 'package:animalspredictor/services/classifier_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -210,22 +210,87 @@ void main() {
       200,
       scrollable: find.byType(Scrollable).first,
     );
+
+    // Un solo toque: elegir la foto ya la identifica.
     await tester.tap(find.byKey(const Key('classifier-primary-cta')));
     await tester.pumpAndSettle();
-    expect(find.text(TextosNino.usarCamara), findsOneWidget);
-    expect(find.text(TextosNino.usarGaleria), findsOneWidget);
 
-    await tester.tap(find.text(TextosNino.usarGaleria));
-    await tester.pump();
-    expect(find.text(TextosNino.queAnimalEs), findsOneWidget);
-
-    await tester.tap(find.text(TextosNino.queAnimalEs));
-    await tester.pump();
     expect(find.text(TextosNino.yaLoTengo), findsOneWidget);
     expect(find.text(TextosNino.creoQueEs('Vaca')), findsOneWidget);
     expect(find.text(TextosNino.nivelSeguro), findsOneWidget);
-    expect(find.text(TextosNino.tambienPuedeSer), findsOneWidget);
     expect(find.textContaining('%'), findsNothing);
+
+    // La sugerencia principal llega marcada y la alternativa se ofrece con su
+    // propia ficha: no queda ninguna lista de nombres escritos.
+    expect(find.byType(DropdownButtonFormField<String>), findsNothing);
+    final fichas = tester.widgetList<AnimalChoiceCard>(
+      find.byType(AnimalChoiceCard),
+    );
+    expect(fichas.map((ficha) => ficha.animal.name), ['Vaca', 'Caballo']);
+    expect(fichas.first.selected, isTrue);
+    expect(fichas.last.selected, isFalse);
+
+    // Y hay puerta a la rejilla completa para el resto de animales.
+    expect(find.text(TextosNino.esOtro), findsOneWidget);
+  });
+
+  testWidgets('deja elegir cualquier animal en la rejilla completa', (
+    tester,
+  ) async {
+    final controller = ClassifierController(
+      classifier: _FakeClassifier(),
+      photoPicker: _FakePhotoPicker(photo: _photo),
+    );
+    addTearDown(controller.dispose);
+    final settings = SettingsController(_SettingsStub())..load();
+    addTearDown(settings.dispose);
+    // La vibración de confirmación viaja por un canal de plataforma que en un
+    // test no responde solo: sin este doble, guardar se quedaría a medias.
+    final messenger =
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+    messenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      (call) async => null,
+    );
+    addTearDown(
+      () => messenger.setMockMethodCallHandler(SystemChannels.platform, null),
+    );
+    final guardados = <String>[];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ClassifierPage(
+          controller: controller,
+          isAnonymous: false,
+          settings: settings,
+          onConfirmPrediction: (animal) async => guardados.add(animal),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('classifier-primary-cta')),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.byKey(const Key('classifier-primary-cta')));
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(find.text(TextosNino.esOtro));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(TextosNino.esOtro));
+    await tester.pumpAndSettle();
+
+    expect(find.text(TextosNino.cualEs), findsOneWidget);
+    await tester.tap(find.text('Cerdo').first);
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(find.text(TextosNino.guardar));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(TextosNino.guardar));
+    await tester.pumpAndSettle();
+
+    expect(guardados, ['Cerdo']);
   });
 }
 
