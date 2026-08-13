@@ -1,0 +1,20 @@
+#!/bin/sh
+# Revision con Gentleman Guardian Angel sobre los commits que se van a publicar.
+#
+# Modo estricto (.gga): una respuesta ambigua o un fallo del proveedor bloquea
+# el push, pero el commit local se conserva. Documentado en docs/GGA.md.
+#
+# Si la revision supera el TIMEOUT configurado, reintenta cuando el proveedor
+# responda o ejecuta `gga run --ci` a mano para diagnosticarlo. Omitir el hook
+# no debe ser la solucion habitual.
+
+set -e
+
+if ! command -v gga >/dev/null 2>&1; then
+	echo "pre-push: gga no esta instalado o no esta en el PATH." >&2
+	echo "  Instalacion y configuracion en docs/GGA.md." >&2
+	exit 1
+fi
+
+echo "pre-push: revision GGA"
+exec gga run --ci

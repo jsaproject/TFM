@@ -1,0 +1,4 @@
+# core.autocrlf esta activo en Windows. Los hooks los ejecuta Git Bash, y un
+# retorno de carro al final de la linea del shebang los rompe con un error
+# ilegible ("bad interpreter"). Se fuerzan finales de linea LF.
+.githooks/* text eol=lf

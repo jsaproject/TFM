@@ -7,4 +7,4 @@ EXCLUDE_PATTERNS="*.g.dart,*.freezed.dart,*.lock,lib/firebase_options.dart,andro
 RULES_FILE="AGENTS.md"
 STRICT_MODE="true"
 TIMEOUT="300"
-PR_BASE_BRANCH="main"
+PR_BASE_BRANCH="master"

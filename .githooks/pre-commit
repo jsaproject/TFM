@@ -1,0 +1,48 @@
+#!/bin/sh
+# Comprobaciones deterministas antes de cada commit: formato, analisis y tests.
+#
+# No sustituyen a la revision de pre-push ni al build de CI. Documentado en
+# docs/GGA.md. Activar con:
+#
+#   git config --local core.hooksPath .githooks
+
+set -e
+
+# Flutter no siempre esta en el PATH de Git Bash en Windows, asi que se busca
+# tambien en las ubicaciones habituales antes de rendirse.
+resolve_flutter() {
+	if command -v flutter >/dev/null 2>&1; then
+		command -v flutter
+		return 0
+	fi
+	for candidate in \
+		"${FLUTTER_ROOT:-}/bin/flutter" \
+		/c/src/flutter/bin/flutter \
+		"${HOME}/flutter/bin/flutter" \
+		/usr/local/flutter/bin/flutter; do
+		if [ -f "$candidate" ]; then
+			printf '%s\n' "$candidate"
+			return 0
+		fi
+	done
+	return 1
+}
+
+if ! FLUTTER="$(resolve_flutter)"; then
+	echo "pre-commit: no se encuentra flutter." >&2
+	echo "  Anadelo al PATH o exporta FLUTTER_ROOT con la raiz del SDK." >&2
+	exit 1
+fi
+
+DART="$(dirname "$FLUTTER")/dart"
+
+echo "pre-commit: formato"
+"$DART" format --output=none --set-exit-if-changed .
+
+echo "pre-commit: analisis"
+"$FLUTTER" analyze
+
+echo "pre-commit: pruebas"
+"$FLUTTER" test
+
+echo "pre-commit: correcto"
