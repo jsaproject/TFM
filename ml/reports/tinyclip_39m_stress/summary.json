@@ -1,0 +1,120 @@
+{
+  "schema_version": 1,
+  "status": "completed_not_production_validation",
+  "evaluation_scope": "tinyclip_stress_human_reviewed",
+  "catalog_version": 1,
+  "catalog_sha256": "9dc195148c003aff7becd63a450fbe892a2ace5c781ab581993c727da58bc971",
+  "model_id": "wkcn/TinyCLIP-ViT-39M-16-Text-19M-YFCC15M",
+  "model_revision": "07a4b0bc751cb64fecd2b661c048c1dd98d69444",
+  "weights_sha256": "112bdfb07ebc8994e9afba7a2a314e278493a675033595cf48e54cf8a17ae587",
+  "weights_bytes": 332443148,
+  "images": 52,
+  "catalog_labels": 29,
+  "accuracy_with_fallback": 0.8269,
+  "accuracy_animals_only": 0.6346,
+  "fallback_predictions": 13,
+  "elapsed_seconds": 97.149,
+  "cpu_threads": 4,
+  "note": "Los scores cero-shot no son confianza calibrada; este piloto no sustituye un test independiente.",
+  "per_class": {
+    "vaca": {
+      "images": 3,
+      "correct": 3,
+      "accuracy": 1.0,
+      "animal_only_accuracy": 1.0
+    },
+    "caballo": {
+      "images": 3,
+      "correct": 2,
+      "accuracy": 0.6667,
+      "animal_only_accuracy": 0.6667
+    },
+    "cerdo": {
+      "images": 5,
+      "correct": 4,
+      "accuracy": 0.8,
+      "animal_only_accuracy": 0.8
+    },
+    "oveja": {
+      "images": 1,
+      "correct": 1,
+      "accuracy": 1.0,
+      "animal_only_accuracy": 1.0
+    },
+    "gallina": {
+      "images": 1,
+      "correct": 0,
+      "accuracy": 0.0,
+      "animal_only_accuracy": 0.0
+    },
+    "perro": {
+      "images": 7,
+      "correct": 5,
+      "accuracy": 0.7143,
+      "animal_only_accuracy": 0.8571
+    },
+    "gato": {
+      "images": 3,
+      "correct": 3,
+      "accuracy": 1.0,
+      "animal_only_accuracy": 1.0
+    },
+    "pez": {
+      "images": 2,
+      "correct": 2,
+      "accuracy": 1.0,
+      "animal_only_accuracy": 1.0
+    },
+    "leon": {
+      "images": 2,
+      "correct": 2,
+      "accuracy": 1.0,
+      "animal_only_accuracy": 1.0
+    },
+    "elefante": {
+      "images": 3,
+      "correct": 3,
+      "accuracy": 1.0,
+      "animal_only_accuracy": 1.0
+    },
+    "hipopotamo": {
+      "images": 5,
+      "correct": 5,
+      "accuracy": 1.0,
+      "animal_only_accuracy": 1.0
+    },
+    "pinguino": {
+      "images": 2,
+      "correct": 2,
+      "accuracy": 1.0,
+      "animal_only_accuracy": 1.0
+    }
+  },
+  "per_group": {
+    "app_asset_rejection": {
+      "images": 5,
+      "correct": 2,
+      "accuracy": 0.4
+    },
+    "app_asset_supported": {
+      "images": 7,
+      "correct": 5,
+      "accuracy": 0.7143
+    },
+    "open_images_depiction": {
+      "images": 16,
+      "correct": 16,
+      "accuracy": 1.0
+    },
+    "unsupported_animal": {
+      "images": 10,
+      "correct": 9,
+      "accuracy": 0.9
+    },
+    "weak_class_photo": {
+      "images": 14,
+      "correct": 11,
+      "accuracy": 0.7857
+    }
+  }
+}

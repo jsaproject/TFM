@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "human_visual_review_passed",
+  "images": 52,
+  "groups": {
+    "app_asset_rejection": 5,
+    "app_asset_supported": 7,
+    "open_images_depiction": 16,
+    "unsupported_animal": 10,
+    "weak_class_photo": 14
+  },
+  "note": "Banco pequeño para decidir integración; no es un dataset de entrenamiento."
+}

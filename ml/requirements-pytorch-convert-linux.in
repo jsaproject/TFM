@@ -1,0 +1,2 @@
+-r requirements-pytorch.in
+litert-torch==0.9.3

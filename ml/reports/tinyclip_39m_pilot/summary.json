@@ -1,0 +1,196 @@
+{
+  "schema_version": 1,
+  "status": "completed_not_production_validation",
+  "evaluation_scope": "pilot_v4_human_reviewed_photos",
+  "catalog_version": 1,
+  "catalog_sha256": "9dc195148c003aff7becd63a450fbe892a2ace5c781ab581993c727da58bc971",
+  "model_id": "wkcn/TinyCLIP-ViT-39M-16-Text-19M-YFCC15M",
+  "model_revision": "07a4b0bc751cb64fecd2b661c048c1dd98d69444",
+  "weights_sha256": "112bdfb07ebc8994e9afba7a2a314e278493a675033595cf48e54cf8a17ae587",
+  "weights_bytes": 332443148,
+  "images": 140,
+  "catalog_labels": 29,
+  "accuracy_with_fallback": 0.9714,
+  "accuracy_animals_only": 0.9714,
+  "fallback_predictions": 0,
+  "elapsed_seconds": 18.807,
+  "cpu_threads": 4,
+  "note": "Los scores cero-shot no son confianza calibrada; este piloto no sustituye un test independiente.",
+  "per_class": {
+    "vaca": {
+      "images": 5,
+      "correct": 4,
+      "accuracy": 0.8,
+      "animal_only_accuracy": 0.8
+    },
+    "caballo": {
+      "images": 5,
+      "correct": 5,
+      "accuracy": 1.0,
+      "animal_only_accuracy": 1.0
+    },
+    "cerdo": {
+      "images": 5,
+      "correct": 4,
+      "accuracy": 0.8,
+      "animal_only_accuracy": 0.8
+    },
+    "oveja": {
+      "images": 5,
+      "correct": 5,
+      "accuracy": 1.0,
+      "animal_only_accuracy": 1.0
+    },
+    "cabra": {
+      "images": 5,
+      "correct": 4,
+      "accuracy": 0.8,
+      "animal_only_accuracy": 0.8
+    },
+    "burro": {
+      "images": 5,
+      "correct": 5,
+      "accuracy": 1.0,
+      "animal_only_accuracy": 1.0
+    },
+    "gallina": {
+      "images": 5,
+      "correct": 5,
+      "accuracy": 1.0,
+      "animal_only_accuracy": 1.0
+    },
+    "pato": {
+      "images": 5,
+      "correct": 5,
+      "accuracy": 1.0,
+      "animal_only_accuracy": 1.0
+    },
+    "perro": {
+      "images": 5,
+      "correct": 5,
+      "accuracy": 1.0,
+      "animal_only_accuracy": 1.0
+    },
+    "gato": {
+      "images": 5,
+      "correct": 5,
+      "accuracy": 1.0,
+      "animal_only_accuracy": 1.0
+    },
+    "conejo": {
+      "images": 5,
+      "correct": 5,
+      "accuracy": 1.0,
+      "animal_only_accuracy": 1.0
+    },
+    "hamster": {
+      "images": 5,
+      "correct": 5,
+      "accuracy": 1.0,
+      "animal_only_accuracy": 1.0
+    },
+    "tortuga": {
+      "images": 5,
+      "correct": 5,
+      "accuracy": 1.0,
+      "animal_only_accuracy": 1.0
+    },
+    "pez": {
+      "images": 5,
+      "correct": 4,
+      "accuracy": 0.8,
+      "animal_only_accuracy": 0.8
+    },
+    "loro": {
+      "images": 5,
+      "correct": 5,
+      "accuracy": 1.0,
+      "animal_only_accuracy": 1.0
+    },
+    "leon": {
+      "images": 5,
+      "correct": 5,
+      "accuracy": 1.0,
+      "animal_only_accuracy": 1.0
+    },
+    "tigre": {
+      "images": 5,
+      "correct": 5,
+      "accuracy": 1.0,
+      "animal_only_accuracy": 1.0
+    },
+    "elefante": {
+      "images": 5,
+      "correct": 5,
+      "accuracy": 1.0,
+      "animal_only_accuracy": 1.0
+    },
+    "jirafa": {
+      "images": 5,
+      "correct": 5,
+      "accuracy": 1.0,
+      "animal_only_accuracy": 1.0
+    },
+    "cebra": {
+      "images": 5,
+      "correct": 5,
+      "accuracy": 1.0,
+      "animal_only_accuracy": 1.0
+    },
+    "mono": {
+      "images": 5,
+      "correct": 5,
+      "accuracy": 1.0,
+      "animal_only_accuracy": 1.0
+    },
+    "panda": {
+      "images": 5,
+      "correct": 5,
+      "accuracy": 1.0,
+      "animal_only_accuracy": 1.0
+    },
+    "oso": {
+      "images": 5,
+      "correct": 5,
+      "accuracy": 1.0,
+      "animal_only_accuracy": 1.0
+    },
+    "hipopotamo": {
+      "images": 5,
+      "correct": 5,
+      "accuracy": 1.0,
+      "animal_only_accuracy": 1.0
+    },
+    "rinoceronte": {
+      "images": 5,
+      "correct": 5,
+      "accuracy": 1.0,
+      "animal_only_accuracy": 1.0
+    },
+    "cocodrilo": {
+      "images": 5,
+      "correct": 5,
+      "accuracy": 1.0,
+      "animal_only_accuracy": 1.0
+    },
+    "pinguino": {
+      "images": 5,
+      "correct": 5,
+      "accuracy": 1.0,
+      "animal_only_accuracy": 1.0
+    },
+    "koala": {
+      "images": 5,
+      "correct": 5,
+      "accuracy": 1.0,
+      "animal_only_accuracy": 1.0
+    }
+  },
+  "per_group": {
+    "pilot_photo": {
+      "images": 140,
+      "correct": 136,
+      "accuracy": 0.9714
+    }
+  }
+}

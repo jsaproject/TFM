@@ -1,0 +1,182 @@
+schema_version: 1
+catalog_version: 1
+locale: es
+fallback_id: otro
+
+# El orden de esta lista define el orden del tensor de salida. Los scripts
+# deben derivar el número de clases de aquí; nunca deben codificar "29".
+classes:
+  - id: vaca
+    display_name: Vaca
+    category: granja
+    active: true
+    include: [vaca, ternero]
+    exclude: [bufalo, bisonte]
+  - id: caballo
+    display_name: Caballo
+    category: granja
+    active: true
+    include: [caballo, potro]
+    exclude: [cebra, burro]
+  - id: cerdo
+    display_name: Cerdo
+    category: granja
+    active: true
+    include: [cerdo, lechon]
+    exclude: [jabali]
+  - id: oveja
+    display_name: Oveja
+    category: granja
+    active: true
+    include: [oveja, cordero]
+    exclude: [cabra]
+  - id: cabra
+    display_name: Cabra
+    category: granja
+    active: true
+    include: [cabra, cabrito]
+    exclude: [oveja, antilope]
+  - id: burro
+    display_name: Burro
+    category: granja
+    active: true
+    include: [burro]
+    exclude: [caballo, cebra]
+  - id: gallina
+    display_name: Gallina
+    category: granja
+    active: true
+    include: [gallina, gallo, pollito]
+    exclude: []
+  - id: pato
+    display_name: Pato
+    category: granja
+    active: true
+    include: [pato, patito]
+    exclude: [ganso, cisne]
+  - id: perro
+    display_name: Perro
+    category: domestico
+    active: true
+    include: [perro, cachorro]
+    exclude: [lobo, zorro]
+  - id: gato
+    display_name: Gato
+    category: domestico
+    active: true
+    include: [gato, gatito]
+    exclude: [felino_salvaje]
+  - id: conejo
+    display_name: Conejo
+    category: domestico
+    active: true
+    include: [conejo]
+    exclude: [liebre_ambigua]
+  - id: hamster
+    display_name: Hámster
+    category: domestico
+    active: true
+    include: [hamster]
+    exclude: [cobaya, raton, rata]
+  - id: tortuga
+    display_name: Tortuga
+    category: domestico
+    active: true
+    include: [tortuga_terrestre, tortuga_acuatica]
+    exclude: []
+  - id: pez
+    display_name: Pez
+    category: domestico
+    active: true
+    include: [pez, pez_acuario]
+    exclude: []
+  - id: loro
+    display_name: Loro
+    category: domestico
+    active: true
+    include: [loro, periquito, guacamayo, cacatua]
+    exclude: []
+  - id: leon
+    display_name: León
+    category: zoo
+    active: true
+    include: [leon, cachorro_leon]
+    exclude: []
+  - id: tigre
+    display_name: Tigre
+    category: zoo
+    active: true
+    include: [tigre, cachorro_tigre]
+    exclude: []
+  - id: elefante
+    display_name: Elefante
+    category: zoo
+    active: true
+    include: [elefante_africano, elefante_asiatico]
+    exclude: []
+  - id: jirafa
+    display_name: Jirafa
+    category: zoo
+    active: true
+    include: [jirafa]
+    exclude: []
+  - id: cebra
+    display_name: Cebra
+    category: zoo
+    active: true
+    include: [cebra]
+    exclude: [caballo, burro]
+  - id: mono
+    display_name: Mono
+    category: zoo
+    active: true
+    include: [mono, simio]
+    exclude: []
+  - id: panda
+    display_name: Panda
+    category: zoo
+    active: true
+    include: [panda_gigante]
+    exclude: [panda_rojo]
+  - id: oso
+    display_name: Oso
+    category: zoo
+    active: true
+    include: [oso_pardo, oso_negro, oso_polar]
+    exclude: [panda_gigante]
+  - id: hipopotamo
+    display_name: Hipopótamo
+    category: zoo
+    active: true
+    include: [hipopotamo]
+    exclude: []
+  - id: rinoceronte
+    display_name: Rinoceronte
+    category: zoo
+    active: true
+    include: [rinoceronte]
+    exclude: []
+  - id: cocodrilo
+    display_name: Cocodrilo
+    category: zoo
+    active: true
+    include: [cocodrilo, aligator]
+    exclude: []
+  - id: pinguino
+    display_name: Pingüino
+    category: zoo
+    active: true
+    include: [pinguino]
+    exclude: []
+  - id: koala
+    display_name: Koala
+    category: zoo
+    active: true
+    include: [koala]
+    exclude: []
+  - id: otro
+    display_name: No reconocido
+    category: rechazo
+    active: true
+    include: [fondo, objeto, persona, animal_fuera_catalogo, entrada_ambigua]
+    exclude: []

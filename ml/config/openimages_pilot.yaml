@@ -1,0 +1,117 @@
+schema_version: 1
+catalog_version: 1
+images_per_animal: 5
+
+open_images:
+  split: validation
+  class_descriptions_url: https://storage.googleapis.com/openimages/v7/oidv7-class-descriptions-boxable.csv
+  annotations_url: https://storage.googleapis.com/openimages/v5/validation-annotations-bbox.csv
+  image_metadata_url: https://storage.googleapis.com/openimages/2018_04/validation/validation-images-with-rotation.csv
+  image_url_template: https://open-images-dataset.s3.amazonaws.com/validation/{image_id}.jpg
+  required_license: https://creativecommons.org/licenses/by/2.0/
+  crop_padding_ratio: 0.20
+  minimum_box_area: 0.05
+  minimum_crop_side: 224
+  require_flags:
+    IsOccluded: 0
+    IsTruncated: 0
+    IsGroupOf: 0
+    IsDepiction: 0
+    IsInside: 0
+
+# Nombres exactos de las clases con cajas de Open Images. Las exclusiones son
+# decisiones de revisión visual: impiden que vuelvan a entrar especies
+# parecidas, animales muertos, estatuas, dibujos, juguetes o personas visibles.
+open_images_classes:
+  vaca:
+    name: Cattle
+    exclude_image_ids: [fc1bfe886053765a, 9033984d077095a0]
+  caballo: {name: Horse}
+  oveja:
+    name: Sheep
+    count: 3
+    exclude_image_ids: [aec7e46930318100, 3d8ecbd83a6dd29e, 832dfca068646e7d, 552c721172c26452, 0d7726d7d5cd9640]
+  cabra:
+    name: Goat
+    exclude_image_ids: [09ca65e2cb286877]
+  gallina: {name: Chicken}
+  pato:
+    name: Duck
+    count: 4
+    exclude_image_ids: [3ca2e517fb3fe473, a0c526719a3f9b0f, 8b17a8c79a847ff2]
+  perro:
+    name: Dog
+    exclude_image_ids: [bdcfeb9cd9714cda]
+  gato: {name: Cat}
+  conejo: {name: Rabbit}
+  pez:
+    name: Fish
+    count: 4
+    exclude_image_ids: [8e0a05b3a033a483, 8d234caaa33bb7f4]
+  loro: {name: Parrot}
+  leon:
+    name: Lion
+    count: 4
+    exclude_image_ids: [5df42986952af22c, eef6108b4d6ab116, 5088db320f662d3b]
+  tigre:
+    name: Tiger
+    count: 2
+    exclude_image_ids: [d06bafcf99ccb263, 09270cfd3d9cff39, 7fa03cf6e86daaae, ce05c78f65ee8ade]
+  elefante: {name: Elephant}
+  jirafa: {name: Giraffe, minimum_box_area: 0.01, minimum_crop_side: 128}
+  cebra:
+    name: Zebra
+    count: 4
+    exclude_image_ids: [4486243570118b0a, 61ead689dba1ebc5]
+  mono: {name: Monkey}
+  oso:
+    name: Bear
+    count: 4
+    exclude_image_ids: [7d8bf3ff2ae7948e, d3c47da83afb39a6, c1da127032a26a86]
+  hipopotamo: {name: Hippopotamus}
+  rinoceronte:
+    name: Rhinoceros
+    exclude_image_ids: [cab0c3dcf204cc5f]
+  cocodrilo:
+    name: Crocodile
+    count: 3
+    exclude_image_ids: [a85d9a1a904ff539, d5adb79ebdb42107, 7b9046755a3681e3, 2b8f4f9aa64e8962]
+  pinguino:
+    name: Penguin
+    exclude_image_ids: [a76339c122dbfce8]
+  koala:
+    name: Koala
+    exclude_image_ids: [317993967134700a]
+
+# Open Images validation no aporta cinco cajas limpias para estas clases. Se
+# reutilizan fotografías concretas ya inspeccionadas del piloto iNaturalist;
+# los índices son 1-based dentro de cada hoja de contacto de pilot_v1.
+reviewed_inaturalist:
+  burro: [2, 3, 4, 7, 8]
+  oveja: [1, 2]
+  pato: [5]
+  hamster: [2, 4, 6, 7, 9]
+  pez: [1]
+  leon: [5]
+  tigre: [1, 2, 5]
+  cebra: [3]
+  panda: [1, 4, 5, 6, 7]
+  oso: [5]
+  cocodrilo: [10, 9]
+
+# Fotos concretas consultadas de nuevo mediante la API de iNaturalist. Esta
+# lista se usa cuando el primer piloto no tenía suficientes ejemplares vivos y
+# claros de la especie solicitada.
+reviewed_inaturalist_photos:
+  cerdo:
+    - {observation_id: 248642273, photo_id: 444312346}
+    - {observation_id: 100644577, photo_id: 168002734}
+    - {observation_id: 25419721, photo_id: 39366086}
+    - {observation_id: 195190402, photo_id: 343314499}
+    - {observation_id: 153723838, photo_id: 265539353}
+  tortuga:
+    - {observation_id: 51481405, photo_id: 81798982}
+    - {observation_id: 270575818, photo_id: 486621885}
+    - {observation_id: 29131545, photo_id: 45450888}
+    - {observation_id: 145316763, photo_id: 249603544}
+    - {observation_id: 320938148, photo_id: 580346966}

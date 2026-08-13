@@ -1,0 +1,53 @@
+schema_version: 1
+catalog_version: 1
+
+model:
+  id: wkcn/TinyCLIP-ViT-8M-16-Text-3M-YFCC15M
+  revision: a2a8c6eaa2549ad66eb7c31b85022bf58273a26c
+
+# TinyCLIP fue entrenado principalmente con texto en inglés. Varias plantillas
+# reducen la dependencia de una única formulación y permiten probar también
+# ilustraciones y juguetes sin cambiar el código.
+templates:
+  - a photo of {subject}
+  - a close-up photo of {subject}
+  - a clear picture of {subject}
+  - a children's illustration of {subject}
+  - a toy shaped like {subject}
+
+classes:
+  vaca: {subjects: [a cow, cattle]}
+  caballo: {subjects: [a horse]}
+  cerdo: {subjects: [a domestic pig, a piglet]}
+  oveja: {subjects: [a sheep, a lamb]}
+  cabra: {subjects: [a goat]}
+  burro: {subjects: [a donkey]}
+  gallina: {subjects: [a chicken, a rooster, a chick]}
+  pato: {subjects: [a duck]}
+  perro: {subjects: [a domestic dog, a puppy]}
+  gato: {subjects: [a domestic cat, a kitten]}
+  conejo: {subjects: [a rabbit]}
+  hamster: {subjects: [a hamster]}
+  tortuga: {subjects: [a turtle, a tortoise]}
+  pez: {subjects: [a fish]}
+  loro: {subjects: [a parrot, a macaw, a cockatoo, a parakeet]}
+  leon: {subjects: [a lion]}
+  tigre: {subjects: [a tiger]}
+  elefante: {subjects: [an elephant]}
+  jirafa: {subjects: [a giraffe]}
+  cebra: {subjects: [a zebra]}
+  mono: {subjects: [a monkey, an ape]}
+  panda: {subjects: [a giant panda]}
+  oso: {subjects: [a bear, a brown bear, a black bear, a polar bear]}
+  hipopotamo: {subjects: [a hippopotamus]}
+  rinoceronte: {subjects: [a rhinoceros]}
+  cocodrilo: {subjects: [a crocodile, an alligator]}
+  pinguino: {subjects: [a penguin]}
+  koala: {subjects: [a koala]}
+  otro:
+    prompts:
+      - a photo without a supported animal
+      - a photo of an object
+      - a photo of a person
+      - scenery without an animal
+      - an animal outside the supported list

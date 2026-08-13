@@ -1,0 +1,54 @@
+schema_version: 1
+catalog_version: 1
+
+license_policy:
+  # No se admiten por defecto CC BY-NC, CC BY-ND ni copyright reservado.
+  allowed_codes: [cc0, cc-by, cc-by-sa]
+  license_urls:
+    cc0: https://creativecommons.org/publicdomain/zero/1.0/
+    cc-by: https://creativecommons.org/licenses/by/4.0/
+    cc-by-sa: https://creativecommons.org/licenses/by-sa/4.0/
+
+sources:
+  inaturalist:
+    api_url: https://api.inaturalist.org/v1/observations
+    user_agent: AnimalsPredictorML/1.0 (licensed pilot for local on-device app)
+    image_size: medium
+    minimum_width: 224
+    minimum_height: 224
+    maximum_download_bytes: 10485760
+    api_request_delay_seconds: 1.05
+    image_request_delay_seconds: 0.05
+
+# Nombres científicos enviados a la API. Una lista permite cubrir grupos
+# infantiles amplios sin escribir lógica especial en el descargador.
+classes:
+  vaca: [Bos taurus]
+  caballo: [Equus caballus]
+  cerdo: [Sus scrofa domesticus]
+  oveja: [Ovis aries]
+  cabra: [Capra hircus]
+  burro: [Equus asinus]
+  gallina: [Gallus gallus domesticus]
+  pato: [Anas platyrhynchos domesticus]
+  perro: [Canis familiaris]
+  gato: [Felis catus]
+  conejo: [Oryctolagus cuniculus]
+  hamster: [Mesocricetus auratus]
+  tortuga: [Testudines]
+  pez: [Actinopterygii]
+  loro: [Psittaciformes]
+  leon: [Panthera leo]
+  tigre: [Panthera tigris]
+  elefante: [Elephantidae]
+  jirafa: [Giraffa]
+  cebra: [Equus quagga]
+  mono: [Simiiformes]
+  panda: [Ailuropoda melanoleuca]
+  oso: [Ursus arctos, Ursus americanus, Ursus maritimus]
+  hipopotamo: [Hippopotamus amphibius]
+  rinoceronte: [Rhinocerotidae]
+  cocodrilo: [Crocodylia]
+  pinguino: [Spheniscidae]
+  koala: [Phascolarctos cinereus]
+  otro: [Vulpes vulpes, Lepidoptera, Serpentes, Anura, Cervidae, Accipitridae]

@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "status": "passed_quality_gate_pending_mobile",
+  "model_id": "wkcn/TinyCLIP-ViT-39M-16-Text-19M-YFCC15M",
+  "model_revision": "07a4b0bc751cb64fecd2b661c048c1dd98d69444",
+  "weights_bytes": 332443148,
+  "float_onnx_bytes": 154538383,
+  "quantized_onnx_bytes": 40610279,
+  "quantized_onnx_sha256": "e679c42e5dc54e820b656e20444bd2404f3a10123acd4404a9ad731cfa8c133d",
+  "metadata_sha256": "a0579344bf581a9e2b95f773e96f7f323c04c33c5cd761c2618e8129478d9e84",
+  "random_output_cosine": 0.999887,
+  "random_output_maximum_error": 0.0090913,
+  "desktop_onnx_latency_median_ms": 54.773,
+  "desktop_onnx_latency_p95_ms": 65.335,
+  "calibration": {
+    "selection_strategy": "best_macro_meeting_quality_gates",
+    "minimum_similarity": 0.2091085,
+    "minimum_margin": 0.0,
+    "balanced_accuracy": 0.9079,
+    "positive_accuracy": 0.9492,
+    "rejection_recall": 0.8667,
+    "pilot_photos": {
+      "images": 140,
+      "correct": 136,
+      "accuracy": 0.9714
+    },
+    "stress_supported": {
+      "images": 37,
+      "correct": 32,
+      "accuracy": 0.8649
+    },
+    "stress_rejection": {
+      "images": 15,
+      "correct": 13,
+      "accuracy": 0.8667
+    },
+    "warning": "Umbrales calibrados sobre un banco pequeño; necesitan validación independiente antes de publicar."
+  }
+}

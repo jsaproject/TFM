@@ -1,0 +1,41 @@
+schema_version: 1
+catalog_version: 1
+visual_review_status: passed
+
+# Conjunto pequeño y deliberadamente difícil. Los índices son 1-based y
+# corresponden a las hojas de contacto ya revisadas del piloto de iNaturalist.
+pilot_v1_selections:
+  perro: [6, 7, 8, 9]
+  hipopotamo: [1, 2, 5, 8, 9]
+  otro: [1, 3, 5, 8, 11, 13, 15, 17, 26, 29]
+
+# Candidatos locales inspeccionados visualmente: se excluyen expresamente los
+# esqueletos y los jabalíes del primer piloto de cerdo.
+local_images:
+  cerdo:
+    - ml/cache/inaturalist_review/cerdo/06.jpeg
+    - ml/cache/inaturalist_review/cerdo/07.jpg
+    - ml/cache/inaturalist_review/cerdo/08.jpeg
+    - ml/cache/inaturalist_review/cerdo/12.jpeg
+    - ml/cache/inaturalist_review/cerdo/13.jpg
+  caballo: [assets/caballo.jpg]
+  elefante: [assets/elefante.jpg]
+  gallina: [assets/gallina.jpg]
+  gato: [assets/gato.jpg]
+  oveja: [assets/oveja.jpg]
+  perro: [assets/perro.jpg]
+  vaca: [assets/vaca.jpg]
+  otro:
+    - assets/arana.jpg
+    - assets/ardilla.jpg
+    - assets/mariposa.jpg
+    - assets/granja.jpg
+    - assets/farm_animals.png
+
+# Open Images marca estas cajas como IsDepiction=1 (dibujos, figuras o
+# representaciones). La selección es determinista por área y se conserva con
+# URL, licencia y caja exacta en el manifiesto generado.
+open_images_depictions:
+  images_per_class: 2
+  classes: [vaca, caballo, perro, gato, pez, leon, elefante, pinguino]
+  minimum_box_area: 0.03

@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "catalog_version": 1,
+  "catalog_sha256": "9dc195148c003aff7becd63a450fbe892a2ace5c781ab581993c727da58bc971",
+  "output_count": 29,
+  "tensorflow_version": "2.19.1",
+  "keras_version": "3.15.1",
+  "keras_hub_version": "0.31.0",
+  "results": [
+    {
+      "candidate_id": "mnv3_small_project_weights",
+      "status": "passed",
+      "parameters": 955853,
+      "artifact": "artifacts/smoke/mnv3_small_project_weights.tflite",
+      "size_bytes": 1092024,
+      "size_mib": 1.041,
+      "input_shape": [
+        1,
+        224,
+        224,
+        3
+      ],
+      "input_dtype": "float32",
+      "output_shape": [
+        1,
+        29
+      ],
+      "output_dtype": "float32",
+      "desktop_cpu_threads": 4,
+      "desktop_latency_median_ms": 13.057,
+      "desktop_latency_p95_ms": 52.261,
+      "note": "La latencia de escritorio solo valida ejecución; no sustituye la medición release en móvil."
+    },
+    {
+      "candidate_id": "efficientnet_lite0_project_weights",
+      "status": "passed",
+      "parameters": 3450173,
+      "artifact": "artifacts/smoke/efficientnet_lite0_project_weights.tflite",
+      "size_bytes": 3670976,
+      "size_mib": 3.501,
+      "input_shape": [
+        1,
+        224,
+        224,
+        3
+      ],
+      "input_dtype": "float32",
+      "output_shape": [
+        1,
+        29
+      ],
+      "output_dtype": "float32",
+      "desktop_cpu_threads": 4,
+      "desktop_latency_median_ms": 77.165,
+      "desktop_latency_p95_ms": 169.413,
+      "note": "La latencia de escritorio solo valida ejecución; no sustituye la medición release en móvil."
+    }
+  ]
+}

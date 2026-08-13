@@ -1,0 +1,127 @@
+schema_version: 1
+catalog_version: 1
+selection_status: no_winner
+cost_policy: zero_monetary_cost
+
+# "admitted" significa que puede pasar al smoke test. Un modelo descargable
+# pero restringido a investigación no cumple el contrato de esta aplicación.
+candidates:
+  - id: tinyclip_vit_8m_text_3m
+    family: tinyclip
+    approach: vision_language
+    framework: pytorch_transformers
+    initialization: official_yfcc15m_checkpoint
+    input_size: 224
+    status: rejected
+    production_eligible: true
+    monetary_cost: zero
+    code_license: MIT
+    weights_license: MIT
+    source:
+      model: https://huggingface.co/wkcn/TinyCLIP-ViT-8M-16-Text-3M-YFCC15M
+      license: https://github.com/wkcn/TinyCLIP/blob/main/LICENSE
+    export:
+      target: onnx
+      route: onnxruntime_android
+      smoke_status: passed_runtime_failed_mobile_budget
+    rationale: Permite añadir etiquetas mediante texto, pero TFLite falla al invocar y ONNX Runtime mide 298 ms de mediana y añade más de 32 MB en arm64.
+
+  - id: dinov2_small_prototypes
+    family: dinov2_vits14
+    approach: embedding_prototypes
+    framework: pytorch
+    initialization: official_lvd142m_checkpoint
+    input_size: 224
+    status: rejected
+    production_eligible: true
+    monetary_cost: zero
+    code_license: Apache-2.0
+    weights_license: Apache-2.0
+    source:
+      model: https://huggingface.co/facebook/dinov2-small
+      license: https://github.com/facebookresearch/dinov2/blob/main/LICENSE
+    export:
+      target: onnx
+      route: onnxruntime_android
+      smoke_status: skipped_dominated_by_tinyclip
+    rationale: Puede ampliar clases con prototipos, pero su ONNX de 23,76 MiB ya es mayor y más lento que TinyCLIP, que incumple el presupuesto con el mismo runtime.
+
+  - id: mnv3_small_project_weights
+    family: mobilenet_v3_small
+    approach: direct_classifier
+    framework: tensorflow_keras
+    initialization: random
+    input_size: 224
+    status: admitted
+    production_eligible: true
+    monetary_cost: zero
+    code_license: Apache-2.0
+    weights_license: project_owned
+    source:
+      architecture: https://keras.io/api/applications/mobilenet/#mobilenetv3small-function
+      code_license: https://github.com/keras-team/keras/blob/master/LICENSE
+    export:
+      target: tflite
+      route: tensorflow_lite_converter
+      smoke_status: passed_android
+    rationale: Baseline móvil maduro, pequeño y con pesos creados por el proyecto.
+
+  - id: efficientnet_lite0_project_weights
+    family: efficientnet_lite0
+    approach: direct_classifier
+    framework: tensorflow
+    initialization: random
+    input_size: 224
+    status: admitted
+    production_eligible: true
+    monetary_cost: zero
+    code_license: Apache-2.0
+    weights_license: project_owned
+    source:
+      architecture: https://github.com/tensorflow/tpu/tree/master/models/official/efficientnet/lite
+      code_license: https://github.com/tensorflow/tpu/blob/master/LICENSE
+    export:
+      target: tflite
+      route: tensorflow_lite_converter
+      smoke_status: passed_android
+    rationale: Clasificador diseñado para CPU/GPU móvil y cuantización sencilla.
+
+  - id: siglip2_base_patch32_reference
+    family: siglip2_base
+    approach: vision_language
+    framework: pytorch_transformers
+    initialization: official_checkpoint
+    input_size: 256
+    status: rejected
+    production_eligible: true
+    monetary_cost: zero
+    code_license: Apache-2.0
+    weights_license: Apache-2.0
+    source:
+      model: https://huggingface.co/google/siglip2-base-patch32-256
+      license: https://huggingface.co/google/siglip2-base-patch32-256
+    export:
+      target: none
+      route: none
+      smoke_status: skipped_size_gate
+    rationale: Licencia válida y buena flexibilidad, pero el checkpoint base completo supera ampliamente el presupuesto móvil.
+
+  - id: mobileclip2_s0_reference
+    family: mobileclip2_s0
+    approach: vision_language
+    framework: pytorch_open_clip
+    initialization: apple_checkpoint
+    input_size: 256
+    status: rejected
+    production_eligible: false
+    monetary_cost: zero
+    code_license: MIT
+    weights_license: Apple-ML-Research-Model-TOU
+    source:
+      model: https://github.com/apple/ml-mobileclip
+      weights_license: https://github.com/apple/ml-mobileclip/blob/main/LICENSE_MODELS
+    export:
+      target: none
+      route: none
+      smoke_status: skipped_license_gate
+    rationale: Es gratuito, pero su licencia limita pesos y derivados a investigación y excluye desarrollo de producto.

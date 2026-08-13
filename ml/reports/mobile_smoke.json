@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "measured_at": "2026-08-12",
+  "device": {
+    "manufacturer": "Samsung",
+    "model": "SM-S918B",
+    "android_api": 36,
+    "architecture": "arm64-v8a"
+  },
+  "conditions": {
+    "threads": 4,
+    "warmup_runs": 5,
+    "note": "Entradas deterministas y pesos sin entrenar: estas medidas validan ejecución y coste, no precisión."
+  },
+  "results": [
+    {
+      "candidate_id": "mnv3_small_project_weights",
+      "runtime": "TensorFlow Lite con XNNPACK",
+      "status": "passed",
+      "model_size_bytes": 1092024,
+      "initialization_ms": 19.118,
+      "latency_average_ms": 2.82698,
+      "latency_median_ms": 2.626,
+      "latency_p95_ms": 3.743,
+      "memory_overall_delta_mib": 9.93,
+      "output_shape": [1, 29]
+    },
+    {
+      "candidate_id": "efficientnet_lite0_project_weights",
+      "runtime": "TensorFlow Lite con XNNPACK",
+      "status": "passed",
+      "model_size_bytes": 3670976,
+      "initialization_ms": 11.995,
+      "latency_average_ms": 38.393,
+      "latency_median_ms": 39.033,
+      "latency_p95_ms": 42.644,
+      "memory_overall_delta_mib": 23.21,
+      "output_shape": [1, 29]
+    },
+    {
+      "candidate_id": "tinyclip_vit_8m_text_3m",
+      "runtime": "TensorFlow Lite con XNNPACK",
+      "status": "failed_invoke",
+      "model_size_bytes": 33313752,
+      "error": "Fill dimensions must be >= 0 got 2; node 20 FILL failed to invoke",
+      "note": "Los tiempos de los intentos fallidos no son válidos."
+    },
+    {
+      "candidate_id": "tinyclip_vit_8m_text_3m",
+      "runtime": "ONNX Runtime Android 1.29.0",
+      "status": "passed_but_failed_budget",
+      "model_size_bytes": 9433757,
+      "runtime_arm64_size_bytes": 32204216,
+      "debug_apk_size_bytes": 40163546,
+      "initialization_ms": 439.955,
+      "latency_median_ms": 298.306,
+      "latency_p95_ms": 383.794,
+      "output_shape": [1, 29],
+      "note": "La inferencia es correcta, pero el runtime y la latencia no son prácticos frente a los candidatos TFLite."
+    },
+    {
+      "candidate_id": "dinov2_small_prototypes",
+      "runtime": "ONNX Runtime Android",
+      "status": "skipped_dominated",
+      "model_size_bytes": 24909371,
+      "note": "Se detiene antes de instalar: supera en tamaño y latencia de escritorio a TinyCLIP, que ya incumplió las puertas móviles con el mismo runtime."
+    }
+  ]
+}
