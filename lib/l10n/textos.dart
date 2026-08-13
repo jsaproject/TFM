@@ -26,6 +26,7 @@ abstract final class TextosNino {
   static const navegacionInicio = 'Inicio';
   static const navegacionColeccion = 'Colección';
   static const navegacionAdultos = 'Adultos';
+  static const perfilSinNombre = 'Michi';
 
   // Bienvenida.
   static const bienvenidaPasoGaleria = 'O busca una foto';
@@ -185,6 +186,7 @@ abstract final class TextosNino {
     navegacionInicio,
     navegacionColeccion,
     navegacionAdultos,
+    perfilSinNombre,
     bienvenidaPasoGaleria,
     bienvenidaPasoColeccion,
     bienvenidaBoton,
@@ -358,6 +360,15 @@ abstract final class TextosAdulto {
 
   // Perfil y ajustes.
   static const perfilTitulo = 'Perfil y ajustes';
+  static const puertaAdultosTitulo = 'Solo para adultos';
+  static const puertaAdultosTexto =
+      'Resuelve esta cuenta para abrir los ajustes.';
+  static String puertaAdultosPregunta(String cuenta) => '¿Cuánto es $cuenta?';
+  static const puertaAdultosRespuesta = 'Resultado';
+  static const puertaAdultosError =
+      'Ese resultado no es correcto. Prueba otra vez.';
+  static const puertaAdultosAbrir = 'Abrir ajustes';
+  static const puertaAdultosSemantica = 'Puerta para adultos';
   static const cuentaInvitado = 'Invitado';
   static const cuentaUsuario = 'Usuario';
   static const cuentaInvitadoTexto =

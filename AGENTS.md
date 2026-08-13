@@ -1,4 +1,12 @@
-# TFM code review rules
+# Reglas de revisión de "La granja de Michi"
+
+> **Contexto del proyecto.** El directorio se llama `TFM` por razones
+> históricas: el Trabajo Fin de Máster se entregó en 2021 y está cerrado.
+> Hoy esto es un proyecto personal, sin entrega, sin tribunal y sin plazos, y
+> **sin usuarios en producción**. No justifiques decisiones apelando a
+> requisitos académicos. Y donde estas reglas pidan compatibilidad de datos,
+> recuerda que no hay colecciones reales que preservar: propón el modelo
+> limpio y confirma antes de borrar nada.
 
 ## Review scope
 

@@ -2,13 +2,82 @@ import 'package:animalspredictor/app_theme.dart';
 import 'package:animalspredictor/auth_service.dart';
 import 'package:animalspredictor/features/profile/data/permission_service.dart';
 import 'package:animalspredictor/features/profile/data/settings_repository.dart';
+import 'package:animalspredictor/features/profile/domain/adult_gate_challenge.dart';
 import 'package:animalspredictor/features/profile/model_information.dart';
+import 'package:animalspredictor/features/profile/presentation/adult_gate.dart';
+import 'package:animalspredictor/features/collection/presentation/collection_progress.dart';
 import 'package:animalspredictor/l10n/textos.dart';
+import 'package:animalspredictor/models/user_collection.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-class ProfilePage extends StatefulWidget {
+/// Zona visible para el niño: su avatar, su nombre y su progreso.
+///
+/// Los datos de cuenta y los ajustes viven en [AdultSettingsPage], al que solo
+/// se llega tras superar [AdultGate].
+class ProfilePage extends StatelessWidget {
   const ProfilePage({
+    super.key,
+    required this.displayName,
+    required this.collection,
+    required this.email,
+    required this.isAnonymous,
+    required this.authService,
+    required this.settings,
+    required this.permissionService,
+    this.adultGateChallenge,
+  });
+
+  final String? displayName;
+  final UserCollection? collection;
+  final String? email;
+  final bool isAnonymous;
+  final AuthService authService;
+  final SettingsController settings;
+  final PermissionService permissionService;
+  final AdultGateChallenge? adultGateChallenge;
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(title: const Text(TextosNino.navegacionAdultos)),
+    body: Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(
+          maxWidth: MichiTokens.contentMaxWidth,
+        ),
+        child: ListView(
+          padding: MichiTokens.pagePadding,
+          children: [
+            _ChildProfileCard(displayName: displayName),
+            if (collection != null) ...[
+              const SizedBox(height: MichiTokens.space24),
+              CollectionProgress(collection: collection!),
+            ],
+            const SizedBox(height: MichiTokens.space24),
+            AdultGate(
+              challenge: adultGateChallenge,
+              onUnlocked: () => Navigator.of(context).push<void>(
+                MaterialPageRoute<void>(
+                  builder: (_) => AdultSettingsPage(
+                    email: email,
+                    isAnonymous: isAnonymous,
+                    authService: authService,
+                    settings: settings,
+                    permissionService: permissionService,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+/// Ajustes, datos de cuenta y acciones destructivas, solo para adultos.
+class AdultSettingsPage extends StatefulWidget {
+  const AdultSettingsPage({
     super.key,
     required this.email,
     required this.isAnonymous,
@@ -24,10 +93,10 @@ class ProfilePage extends StatefulWidget {
   final PermissionService permissionService;
 
   @override
-  State<ProfilePage> createState() => _ProfilePageState();
+  State<AdultSettingsPage> createState() => _AdultSettingsPageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
+class _AdultSettingsPageState extends State<AdultSettingsPage> {
   bool _signingOut = false;
   bool _deleting = false;
   PermissionOverview? _permissions;
@@ -276,6 +345,39 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
     ),
   );
+}
+
+class _ChildProfileCard extends StatelessWidget {
+  const _ChildProfileCard({this.displayName});
+
+  final String? displayName;
+
+  @override
+  Widget build(BuildContext context) {
+    final name = displayName?.trim();
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(MichiTokens.space16),
+        child: Row(
+          children: [
+            CircleAvatar(
+              radius: MichiTokens.iconSizeLarge / 2,
+              child: const Icon(Icons.face_outlined),
+            ),
+            const SizedBox(width: MichiTokens.space16),
+            Expanded(
+              child: Text(
+                name == null || name.isEmpty
+                    ? TextosNino.perfilSinNombre
+                    : name,
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _AccountCard extends StatelessWidget {

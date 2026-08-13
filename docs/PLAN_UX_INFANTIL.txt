@@ -762,8 +762,30 @@ ACEPTACION
 
 
 ================================================================================
-FASE 5 - ZONA DE ADULTOS
+FASE 5 - ZONA DE ADULTOS   [COMPLETADA 2026-08-13]
 ================================================================================
+
+ESTADO: COMPLETADA (2026-08-13)
+
+Que se ha hecho:
+
+  - La pestana con candado muestra ahora solo el perfil del nino: avatar,
+    nombre y progreso. No carga permisos ni contiene ajustes o datos de cuenta.
+  - AdultGate pide resolver una multiplicacion de dos cifras, generada al
+    abrir la pestana. Es una barrera de edad ligera, no autenticacion: una
+    respuesta incorrecta se explica y no abre nada.
+  - Tras superar la puerta, AdultSettingsPage abre como ruta separada con la
+    cuenta, tema, sonido, vibracion, permisos, privacidad, modelo, cierre de
+    sesion y borrado. La consulta de permisos empieza solo en esa ruta.
+  - La informacion de privacidad y del modelo queda exclusivamente en la
+    zona adulta; la pantalla de la foto no contiene esos tecnicismos.
+  - Tambien un invitado tiene que cruzar AdultGate antes de llegar al dialogo
+    de eliminacion. Dentro se conserva su confirmacion explicita.
+
+Tests anadidos: adult_gate_challenge_test.dart (resultado de la operacion),
+adult_gate_test.dart (rechazo y apertura) y profile_page_test.dart (la zona
+infantil no consulta permisos ni expone el borrado; el invitado solo llega
+despues de cruzar la puerta).
 
 Objetivo: separar lo que es del nino de lo que es del padre o la madre, y que
 el nino no pueda romper nada.
