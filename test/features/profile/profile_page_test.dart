@@ -77,6 +77,131 @@ void main() {
     expect(find.text(TextosAdulto.eliminarCuentaCasilla), findsOneWidget);
     expect(find.byType(TextField), findsNothing);
   });
+
+  testWidgets('cerrar sesión vuelve a la primera ruta', (tester) async {
+    final auth = _AuthServiceStub();
+    await _openAdultSettings(tester, auth);
+
+    final signOutButton = find.widgetWithText(
+      FilledButton,
+      TextosAdulto.cerrarSesion,
+    );
+    await _scrollToAction(tester, signOutButton);
+    await tester.tap(signOutButton);
+    await tester.pumpAndSettle();
+
+    expect(auth.signOutCalls, 1);
+    expect(find.text(_rootRouteText), findsOneWidget);
+    expect(find.byType(AdultSettingsPage), findsNothing);
+  });
+
+  testWidgets('eliminar una cuenta invitada vuelve a la primera ruta', (
+    tester,
+  ) async {
+    final auth = _AuthServiceStub();
+    await _openAdultSettings(tester, auth);
+
+    final deleteButton = find.widgetWithText(
+      OutlinedButton,
+      TextosAdulto.eliminarCuenta,
+    );
+    await _scrollToAction(tester, deleteButton);
+    await tester.tap(deleteButton);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(CheckboxListTile));
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.widgetWithText(FilledButton, TextosAdulto.eliminarCuentaBoton),
+    );
+    await tester.pumpAndSettle();
+
+    expect(auth.deleteAccountCalls, 1);
+    expect(auth.deletedWithPassword, isNull);
+    expect(find.text(_rootRouteText), findsOneWidget);
+    expect(find.byType(AdultSettingsPage), findsNothing);
+  });
+
+  testWidgets('eliminar una cuenta registrada conserva la reautenticación', (
+    tester,
+  ) async {
+    final auth = _AuthServiceStub();
+    await _openAdultSettings(
+      tester,
+      auth,
+      isAnonymous: false,
+      email: 'ana@example.com',
+    );
+
+    final deleteButton = find.widgetWithText(
+      OutlinedButton,
+      TextosAdulto.eliminarCuenta,
+    );
+    await _scrollToAction(tester, deleteButton);
+    await tester.tap(deleteButton);
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), 'secreto');
+    await tester.tap(find.byType(CheckboxListTile));
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.widgetWithText(FilledButton, TextosAdulto.eliminarCuentaBoton),
+    );
+    await tester.pumpAndSettle();
+
+    expect(auth.deleteAccountCalls, 1);
+    expect(auth.deletedWithPassword, 'secreto');
+    expect(find.text(_rootRouteText), findsOneWidget);
+    expect(find.byType(AdultSettingsPage), findsNothing);
+  });
+}
+
+const _rootRouteText = 'Pantalla de acceso de prueba';
+
+Future<void> _openAdultSettings(
+  WidgetTester tester,
+  AuthService authService, {
+  bool isAnonymous = true,
+  String? email,
+}) async {
+  final settings = SettingsController(_SettingsRepositoryStub());
+  addTearDown(settings.dispose);
+  await settings.load();
+
+  await tester.pumpWidget(
+    MaterialApp(
+      theme: MichiTheme.light(),
+      home: Builder(
+        builder: (context) => Scaffold(
+          body: Center(
+            child: FilledButton(
+              onPressed: () => Navigator.of(context).push<void>(
+                MaterialPageRoute<void>(
+                  builder: (_) => AdultSettingsPage(
+                    email: email,
+                    isAnonymous: isAnonymous,
+                    authService: authService,
+                    settings: settings,
+                    permissionService: _PermissionServiceStub(),
+                  ),
+                ),
+              ),
+              child: const Text(_rootRouteText),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+  await tester.tap(find.text(_rootRouteText));
+  await tester.pumpAndSettle();
+}
+
+Future<void> _scrollToAction(WidgetTester tester, Finder action) async {
+  final scrollable = find.descendant(
+    of: find.byType(AdultSettingsPage),
+    matching: find.byType(Scrollable),
+  );
+  await tester.scrollUntilVisible(action, 500, scrollable: scrollable);
+  await tester.pumpAndSettle();
 }
 
 class _PermissionServiceStub implements PermissionService {
@@ -110,11 +235,18 @@ class _SettingsRepositoryStub implements SettingsRepository {
 }
 
 class _AuthServiceStub implements AuthService {
+  var signOutCalls = 0;
+  var deleteAccountCalls = 0;
+  String? deletedWithPassword;
+
   @override
   Stream<User?> get changes => const Stream<User?>.empty();
 
   @override
-  Future<void> deleteAccount({String? password}) async {}
+  Future<void> deleteAccount({String? password}) async {
+    deleteAccountCalls++;
+    deletedWithPassword = password;
+  }
 
   @override
   Future<void> sendPasswordResetEmail(String email) async {}
@@ -126,7 +258,7 @@ class _AuthServiceStub implements AuthService {
   Future<void> signInAnonymously() async {}
 
   @override
-  Future<void> signOut() async {}
+  Future<void> signOut() async => signOutCalls++;
 
   @override
   Future<void> signUp(String email, String password) async {}

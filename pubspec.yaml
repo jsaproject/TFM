@@ -38,6 +38,7 @@ flutter:
     - assets/vaca.jpg
     - assets/models/
     - assets/sonidos/
+    - assets/sonidos/animales/
   fonts:
     - family: Andika
       fonts:

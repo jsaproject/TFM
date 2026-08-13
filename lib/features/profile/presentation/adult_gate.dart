@@ -11,7 +11,8 @@ import 'package:flutter/services.dart';
 class AdultGate extends StatefulWidget {
   const AdultGate({super.key, required this.onUnlocked, this.challenge});
 
-  final VoidCallback onUnlocked;
+  /// Completa cuando se cierra la zona de adultos protegida.
+  final Future<void> Function() onUnlocked;
 
   /// Permite una operación fija en pruebas; la app crea una nueva al abrirse.
   final AdultGateChallenge? challenge;
@@ -24,7 +25,7 @@ class _AdultGateState extends State<AdultGate> {
   late final AdultGateChallenge _challenge;
   final _answerController = TextEditingController();
   String? _errorText;
-  bool _unlocked = false;
+  bool _openingSettings = false;
 
   @override
   void initState() {
@@ -38,8 +39,8 @@ class _AdultGateState extends State<AdultGate> {
     super.dispose();
   }
 
-  void _submit() {
-    if (_unlocked) return;
+  Future<void> _submit() async {
+    if (_openingSettings) return;
     if (!_challenge.accepts(_answerController.text)) {
       setState(() {
         _errorText = TextosAdulto.puertaAdultosError;
@@ -47,8 +48,22 @@ class _AdultGateState extends State<AdultGate> {
       });
       return;
     }
-    setState(() => _unlocked = true);
-    widget.onUnlocked();
+    setState(() {
+      _openingSettings = true;
+      _errorText = null;
+    });
+
+    try {
+      await widget.onUnlocked();
+    } finally {
+      if (mounted) {
+        _answerController.clear();
+        setState(() {
+          _openingSettings = false;
+          _errorText = null;
+        });
+      }
+    }
   }
 
   @override
@@ -83,7 +98,7 @@ class _AdultGateState extends State<AdultGate> {
           TextField(
             controller: _answerController,
             autofocus: false,
-            enabled: !_unlocked,
+            enabled: !_openingSettings,
             keyboardType: TextInputType.number,
             textInputAction: TextInputAction.done,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -99,7 +114,7 @@ class _AdultGateState extends State<AdultGate> {
           const SizedBox(height: MichiTokens.space12),
           FilledButton.icon(
             key: const Key('adult-gate-submit'),
-            onPressed: _unlocked ? null : _submit,
+            onPressed: _openingSettings ? null : _submit,
             icon: const Icon(Icons.lock_open_outlined),
             label: const Text(TextosAdulto.puertaAdultosAbrir),
           ),

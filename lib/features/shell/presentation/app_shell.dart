@@ -144,6 +144,7 @@ class _AppShellState extends State<AppShell> {
         userId: widget.user.uid,
         isAnonymous: widget.user.isAnonymous,
         repository: widget.collectionRepository,
+        settings: widget.settings,
         onStartIdentifying: () => setState(() => _selectedIndex = 0),
       ),
       ProfilePage(
