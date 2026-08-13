@@ -1,16 +1,24 @@
 import 'package:animalspredictor/app_theme.dart';
 import 'package:flutter/material.dart';
 
+/// Color con el que se reconoce cada sección de la app.
+///
+/// Un niño que no lee distingue las secciones por el color de la pastilla del
+/// icono, no por la etiqueta. Los tres valores salen del esquema del tema.
+enum ShellAccent { primary, secondary, tertiary }
+
 class ShellDestination {
   const ShellDestination({
     required this.label,
     required this.icon,
     required this.selectedIcon,
+    required this.accent,
   });
 
   final String label;
   final IconData icon;
   final IconData selectedIcon;
+  final ShellAccent accent;
 }
 
 class AdaptiveNavigationShell extends StatelessWidget {
@@ -43,8 +51,16 @@ class AdaptiveNavigationShell extends StatelessWidget {
               destinations: destinations
                   .map(
                     (destination) => NavigationRailDestination(
-                      icon: Icon(destination.icon),
-                      selectedIcon: Icon(destination.selectedIcon),
+                      icon: _DestinationBadge(
+                        icon: destination.icon,
+                        accent: destination.accent,
+                        selected: false,
+                      ),
+                      selectedIcon: _DestinationBadge(
+                        icon: destination.selectedIcon,
+                        accent: destination.accent,
+                        selected: true,
+                      ),
                       label: Text(destination.label),
                     ),
                   )
@@ -63,8 +79,16 @@ class AdaptiveNavigationShell extends StatelessWidget {
           destinations: destinations
               .map(
                 (destination) => NavigationDestination(
-                  icon: Icon(destination.icon),
-                  selectedIcon: Icon(destination.selectedIcon),
+                  icon: _DestinationBadge(
+                    icon: destination.icon,
+                    accent: destination.accent,
+                    selected: false,
+                  ),
+                  selectedIcon: _DestinationBadge(
+                    icon: destination.selectedIcon,
+                    accent: destination.accent,
+                    selected: true,
+                  ),
                   label: destination.label,
                 ),
               )
@@ -73,4 +97,49 @@ class AdaptiveNavigationShell extends StatelessWidget {
       );
     },
   );
+}
+
+/// Pastilla de color con el icono de la sección dentro.
+///
+/// Sustituye al indicador de Material (que el tema deja transparente) para que
+/// cada sección tenga su propio color en los dos estados.
+class _DestinationBadge extends StatelessWidget {
+  const _DestinationBadge({
+    required this.icon,
+    required this.accent,
+    required this.selected,
+  });
+
+  final IconData icon;
+  final ShellAccent accent;
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final (background, foreground) = switch (accent) {
+      ShellAccent.primary =>
+        selected
+            ? (colors.primary, colors.onPrimary)
+            : (colors.primaryContainer, colors.onPrimaryContainer),
+      ShellAccent.secondary =>
+        selected
+            ? (colors.secondary, colors.onSecondary)
+            : (colors.secondaryContainer, colors.onSecondaryContainer),
+      ShellAccent.tertiary =>
+        selected
+            ? (colors.tertiary, colors.onTertiary)
+            : (colors.tertiaryContainer, colors.onTertiaryContainer),
+    };
+    return DecoratedBox(
+      decoration: ShapeDecoration(
+        color: background,
+        shape: const StadiumBorder(),
+      ),
+      child: Padding(
+        padding: MichiTokens.navigationBadgePadding,
+        child: Icon(icon, size: MichiTokens.iconSizeMedium, color: foreground),
+      ),
+    );
+  }
 }

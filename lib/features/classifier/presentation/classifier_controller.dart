@@ -119,6 +119,14 @@ class ClassifierController extends ChangeNotifier {
     }
   }
 
+  /// Elegir la foto ya la identifica: el niño no tiene que pulsar un segundo
+  /// botón para preguntar qué animal es.
+  Future<void> selectAndClassifyPhoto(ImageSource source) async {
+    await selectPhoto(source);
+    if (_state.status != ClassifierStatus.previewing) return;
+    await classifySelectedPhoto();
+  }
+
   Future<void> classifySelectedPhoto() async {
     final path = _state.photoPath;
     final image = _state.image;

@@ -1,6 +1,7 @@
 import 'package:animalspredictor/animal_catalog.dart';
 import 'package:animalspredictor/app_theme.dart';
 import 'package:animalspredictor/features/classifier/domain/confidence_level.dart';
+import 'package:animalspredictor/features/collection/presentation/animal_selector.dart';
 import 'package:animalspredictor/features/profile/data/settings_repository.dart';
 import 'package:animalspredictor/l10n/textos.dart';
 import 'package:flutter/material.dart';
@@ -54,52 +55,19 @@ class _ClassifierPageState extends State<ClassifierPage> {
     if (animal != _selectedAnimal) setState(() => _selectedAnimal = animal);
   }
 
-  Future<void> _choosePhoto() async {
-    final source = await showModalBottomSheet<ImageSource>(
-      context: context,
-      showDragHandle: true,
-      builder: (context) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(
-            MichiTokens.space24,
-            MichiTokens.space8,
-            MichiTokens.space24,
-            MichiTokens.space24,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                TextosNino.eligeUnaFoto,
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: MichiTokens.space12),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(
-                  Icons.camera_alt_outlined,
-                  size: MichiTokens.iconSizeMedium,
-                ),
-                title: const Text(TextosNino.usarCamara),
-                onTap: () => Navigator.pop(context, ImageSource.camera),
-              ),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(
-                  Icons.photo_library_outlined,
-                  size: MichiTokens.iconSizeMedium,
-                ),
-                title: const Text(TextosNino.usarGaleria),
-                onTap: () => Navigator.pop(context, ImageSource.gallery),
-              ),
-            ],
-          ),
-        ),
-      ),
+  /// La cámara es la acción principal y la galería la secundaria: no hay un
+  /// menú intermedio entre el niño y la foto.
+  Future<void> _choosePhoto(ImageSource source) =>
+      widget.controller.selectAndClassifyPhoto(source);
+
+  Future<void> _chooseAnimal(List<String> suggestions) async {
+    final chosen = await showAnimalSelector(
+      context,
+      selected: _selectedAnimal,
+      suggestions: suggestions,
     );
-    if (!mounted || source == null) return;
-    await widget.controller.selectPhoto(source);
+    if (!mounted || chosen == null) return;
+    setState(() => _selectedAnimal = chosen);
   }
 
   Future<void> _confirm() async {
@@ -158,19 +126,6 @@ class _ClassifierPageState extends State<ClassifierPage> {
                       state: state,
                     ),
                   ),
-                  if (state.status == ClassifierStatus.previewing) ...[
-                    const SizedBox(height: MichiTokens.space16),
-                    FilledButton.icon(
-                      onPressed: widget.controller.classifySelectedPhoto,
-                      icon: const Icon(Icons.auto_awesome_outlined),
-                      label: const Text(TextosNino.queAnimalEs),
-                    ),
-                    const SizedBox(height: MichiTokens.space8),
-                    TextButton(
-                      onPressed: _choosePhoto,
-                      child: const Text(TextosNino.elegirOtraFoto),
-                    ),
-                  ],
                   if (state.status == ClassifierStatus.success ||
                       state.status == ClassifierStatus.unrecognized)
                     _PredictionPanel(
@@ -179,6 +134,7 @@ class _ClassifierPageState extends State<ClassifierPage> {
                       saving: _saving,
                       onChanged: (value) =>
                           setState(() => _selectedAnimal = value),
+                      onChooseAnimal: _chooseAnimal,
                       onConfirm: _confirm,
                     ),
                   if (state.noticeMessage != null)
@@ -196,9 +152,22 @@ class _ClassifierPageState extends State<ClassifierPage> {
                     key: const Key('classifier-primary-cta'),
                     onPressed: state.isBusy || !widget.controller.isModelReady
                         ? null
-                        : _choosePhoto,
+                        : () => _choosePhoto(ImageSource.camera),
                     icon: const Icon(Icons.add_a_photo_outlined),
-                    label: const Text(TextosNino.hazUnaFoto),
+                    label: Text(
+                      state.hasPhoto
+                          ? TextosNino.elegirOtraFoto
+                          : TextosNino.hazUnaFoto,
+                    ),
+                  ),
+                  const SizedBox(height: MichiTokens.space8),
+                  TextButton.icon(
+                    key: const Key('classifier-gallery-cta'),
+                    onPressed: state.isBusy || !widget.controller.isModelReady
+                        ? null
+                        : () => _choosePhoto(ImageSource.gallery),
+                    icon: const Icon(Icons.photo_library_outlined),
+                    label: const Text(TextosNino.usarGaleria),
                   ),
                 ],
               ),
@@ -361,6 +330,7 @@ class _PredictionPanel extends StatelessWidget {
     required this.selectedAnimal,
     required this.saving,
     required this.onChanged,
+    required this.onChooseAnimal,
     required this.onConfirm,
   });
 
@@ -368,6 +338,7 @@ class _PredictionPanel extends StatelessWidget {
   final String? selectedAnimal;
   final bool saving;
   final ValueChanged<String?> onChanged;
+  final ValueChanged<List<String>> onChooseAnimal;
   final VoidCallback onConfirm;
 
   @override
@@ -378,6 +349,17 @@ class _PredictionPanel extends StatelessWidget {
       reliable: reliable,
       confidence: result.primary.confidence,
     );
+    final suggestions = <String>[
+      result.primary.animal,
+      for (final alternative in result.alternatives) alternative.animal,
+    ];
+    // Si el niño ya ha elegido otro animal en la rejilla, su ficha se queda a
+    // la vista junto a las sugerencias para que pueda cambiar de opinión.
+    final choices = animalsByName(<String>[
+      ...suggestions,
+      if (selectedAnimal != null && !suggestions.contains(selectedAnimal))
+        selectedAnimal!,
+    ]);
     return Padding(
       padding: const EdgeInsets.only(top: MichiTokens.space16),
       child: Card(
@@ -398,31 +380,37 @@ class _PredictionPanel extends StatelessWidget {
               if (!reliable) const Text(TextosNino.puedesCambiarlo),
               const SizedBox(height: MichiTokens.space8),
               _ConfidenceBadge(level: level),
-              if (result.alternatives.isNotEmpty) ...[
-                const SizedBox(height: MichiTokens.space12),
-                Text(
-                  TextosNino.tambienPuedeSer,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: MichiTokens.space4),
-                ...result.alternatives.map(
-                  (alternative) => Text(alternative.animal),
-                ),
-              ],
               const SizedBox(height: MichiTokens.space12),
-              DropdownButtonFormField<String>(
-                initialValue: selectedAnimal,
-                isExpanded: true,
-                decoration: const InputDecoration(labelText: TextosNino.esEste),
-                items: animalCatalog
-                    .map(
-                      (animal) => DropdownMenuItem(
-                        value: animal.name,
-                        child: Text(animal.name),
+              Text(
+                TextosNino.esEste,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: MichiTokens.space8),
+              SizedBox(
+                height: MichiTokens.animalChoiceExtent,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: choices.length,
+                  separatorBuilder: (_, _) =>
+                      const SizedBox(width: MichiTokens.space12),
+                  itemBuilder: (context, index) {
+                    final animal = choices[index];
+                    return SizedBox(
+                      width: MichiTokens.animalChoiceMaxWidth,
+                      child: AnimalChoiceCard(
+                        animal: animal,
+                        selected: animal.name == selectedAnimal,
+                        onTap: saving ? null : () => onChanged(animal.name),
                       ),
-                    )
-                    .toList(),
-                onChanged: saving ? null : onChanged,
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: MichiTokens.space12),
+              OutlinedButton.icon(
+                onPressed: saving ? null : () => onChooseAnimal(suggestions),
+                icon: const Icon(Icons.grid_view_outlined),
+                label: const Text(TextosNino.esOtro),
               ),
               const SizedBox(height: MichiTokens.space12),
               FilledButton.icon(

@@ -21,7 +21,13 @@ class Animal {
   final String? imageAsset;
 }
 
-/// Las 28 especies que reconoce el modelo actual y que forman el progreso.
+/// Los 28 animales que reconoce el modelo actual y que forman el progreso.
+///
+/// Mientras no lleguen las ilustraciones, el icono es lo único que distingue a
+/// un animal de otro para un niño que no lee, así que ninguno repite icono
+/// dentro de esta lista (lo comprueba `test/animal_catalog_test.dart`). Son
+/// iconos de Material, no dibujos: se eligen por la pista que dan (las orejas
+/// del burro, la rueda del hámster, las rayas del tigre), no por parecido.
 const animalCatalog = <Animal>[
   Animal(
     name: 'Vaca',
@@ -32,7 +38,7 @@ const animalCatalog = <Animal>[
   Animal(
     name: 'Caballo',
     description: 'Rápido, fuerte y elegante.',
-    icon: Icons.pets,
+    icon: Icons.directions_run,
     imageAsset: 'assets/caballo.jpg',
   ),
   Animal(
@@ -54,7 +60,7 @@ const animalCatalog = <Animal>[
   Animal(
     name: 'Burro',
     description: 'Paciente, resistente y de orejas larguísimas.',
-    icon: Icons.pets,
+    icon: Icons.hearing,
   ),
   Animal(
     name: 'Gallina',
@@ -76,7 +82,7 @@ const animalCatalog = <Animal>[
   Animal(
     name: 'Gato',
     description: 'Curioso, suave y maestro de las siestas.',
-    icon: Icons.pets,
+    icon: Icons.bedtime,
     imageAsset: 'assets/gato.jpg',
   ),
   Animal(
@@ -87,7 +93,7 @@ const animalCatalog = <Animal>[
   Animal(
     name: 'Hámster',
     description: 'Pequeño, redondito y siempre atareado.',
-    icon: Icons.pets,
+    icon: Icons.autorenew,
   ),
   Animal(
     name: 'Tortuga',
@@ -107,17 +113,17 @@ const animalCatalog = <Animal>[
   Animal(
     name: 'León',
     description: 'Una gran melena y un rugido impresionante.',
-    icon: Icons.pets,
+    icon: Icons.brightness_7,
   ),
   Animal(
     name: 'Tigre',
     description: 'Cada tigre tiene un dibujo de rayas único.',
-    icon: Icons.pets,
+    icon: Icons.line_weight,
   ),
   Animal(
     name: 'Elefante',
     description: 'Gigante amable con una trompa muy útil.',
-    icon: Icons.pets,
+    icon: Icons.shower,
     imageAsset: 'assets/elefante.jpg',
   ),
   Animal(
@@ -128,12 +134,12 @@ const animalCatalog = <Animal>[
   Animal(
     name: 'Cebra',
     description: 'Sus rayas no se repiten jamás.',
-    icon: Icons.pets,
+    icon: Icons.contrast,
   ),
   Animal(
     name: 'Mono',
     description: 'Manos hábiles y mirada muy curiosa.',
-    icon: Icons.pets,
+    icon: Icons.back_hand,
   ),
   Animal(
     name: 'Panda',
@@ -143,22 +149,22 @@ const animalCatalog = <Animal>[
   Animal(
     name: 'Oso',
     description: 'Grande, fuerte y sorprendentemente buen nadador.',
-    icon: Icons.pets,
+    icon: Icons.hive,
   ),
   Animal(
     name: 'Hipopótamo',
     description: 'Pasa el día fresquito dentro del agua.',
-    icon: Icons.water,
+    icon: Icons.pool,
   ),
   Animal(
     name: 'Rinoceronte',
     description: 'Piel gruesa, gran cuerno y pasos poderosos.',
-    icon: Icons.pets,
+    icon: Icons.change_history,
   ),
   Animal(
     name: 'Cocodrilo',
     description: 'Espera inmóvil bajo el agua.',
-    icon: Icons.water,
+    icon: Icons.visibility,
   ),
   Animal(
     name: 'Pingüino',
@@ -168,7 +174,7 @@ const animalCatalog = <Animal>[
   Animal(
     name: 'Koala',
     description: 'Abraza los eucaliptos y duerme muchas horas.',
-    icon: Icons.park,
+    icon: Icons.spa,
   ),
 ];
 

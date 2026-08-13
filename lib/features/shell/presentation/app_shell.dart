@@ -71,16 +71,20 @@ class _AppShellState extends State<AppShell> {
         label: TextosNino.navegacionInicio,
         icon: Icons.home_outlined,
         selectedIcon: Icons.home,
+        accent: ShellAccent.primary,
       ),
       ShellDestination(
         label: TextosNino.navegacionColeccion,
         icon: Icons.collections_bookmark_outlined,
         selectedIcon: Icons.collections_bookmark,
+        accent: ShellAccent.secondary,
       ),
+      // Perfil es la puerta de la zona de adultos (FASE 5): candado y nombre.
       ShellDestination(
-        label: TextosNino.navegacionPerfil,
-        icon: Icons.person_outline,
-        selectedIcon: Icons.person,
+        label: TextosNino.navegacionAdultos,
+        icon: Icons.lock_outline,
+        selectedIcon: Icons.lock,
+        accent: ShellAccent.tertiary,
       ),
     ],
     children: [
