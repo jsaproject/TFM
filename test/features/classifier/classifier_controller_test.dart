@@ -127,6 +127,27 @@ void main() {
     },
   );
 
+  test('vuelve a listo y limpia el resultado tras confirmar', () async {
+    final controller = ClassifierController(
+      classifier: _FakeClassifier(),
+      photoPicker: _FakePhotoPicker(photo: _photo),
+    );
+    addTearDown(controller.dispose);
+
+    await controller.load();
+    await controller.selectPhoto(ImageSource.camera);
+    await controller.classifySelectedPhoto();
+    expect(controller.state.status, ClassifierStatus.success);
+
+    controller.reset();
+
+    expect(controller.state.status, ClassifierStatus.ready);
+    expect(controller.state.result, isNull);
+    expect(controller.state.image, isNull);
+    expect(controller.state.photoPath, isNull);
+    expect(controller.state.noticeMessage, 'Guardado');
+  });
+
   test('respeta la decisión de rechazo calibrada del modelo', () async {
     final accepted = ClassifierController(
       classifier: _FakeClassifier(

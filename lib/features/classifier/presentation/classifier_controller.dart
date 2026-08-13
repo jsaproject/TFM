@@ -152,6 +152,14 @@ class ClassifierController extends ChangeNotifier {
     }
   }
 
+  void reset() {
+    _state = const ClassifierState(
+      status: ClassifierStatus.ready,
+      noticeMessage: 'Guardado',
+    );
+    notifyListeners();
+  }
+
   /// Los modelos con rechazo calibrado deciden de forma explícita. Se conserva
   /// la heurística anterior para fakes y clasificadores antiguos.
   static bool _isReliable(ClassificationResult result) =>

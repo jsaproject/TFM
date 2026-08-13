@@ -106,6 +106,7 @@ class _ClassifierPageState extends State<ClassifierPage> {
       await widget.onConfirmPrediction(animal);
       await widget.settings.provideConfirmationFeedback();
       if (!mounted) return;
+      widget.controller.reset();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(

@@ -1,0 +1,894 @@
+================================================================================
+PLAN DE MEJORA UX/UI INFANTIL - LA GRANJA DE MICHI
+================================================================================
+
+Fecha:            2026-08-13
+Codigo analizado: master @ 085acb3 (4.762 lineas de Dart en lib/)
+Publico objetivo: ninos de 4 a 8 anos, muchos de ellos aun sin leer con soltura
+Objetivo global:  que un nino pueda usar la app entero sin saber leer y sin
+                  ayuda de un adulto, y que todo el color y el tamano de la
+                  interfaz salgan de un unico fichero.
+
+Este documento esta ordenado por fases. Cada fase se puede cerrar y probar por
+separado. Las fases 0 y 1 son requisito de las demas: la 0 porque hoy hay un
+fallo que rompe el flujo principal, y la 1 porque el resto de fases van a tocar
+colores y tamanos y conviene que ya exista un sitio unico donde tocarlos.
+
+
+--------------------------------------------------------------------------------
+DIAGNOSTICO RESUMIDO
+--------------------------------------------------------------------------------
+
+Lo que ya esta bien y NO hay que rehacer:
+
+  - Ya existe un tema centralizado en lib/app_theme.dart (MichiTokens +
+    MichiTheme) y casi toda la app lo usa. Solo quedan 2 colores sueltos en todo
+    el proyecto. El problema no es que cada componente pinte por su cuenta: es
+    que el tema es demasiado pobre y demasiado adulto.
+  - Hay etiquetas de accesibilidad (Semantics) en la vista previa de la foto,
+    en las fichas de animal, en los permisos y en el onboarding. No romperlas.
+  - Hay 10 ficheros de test. Tres de ellos tocan interfaz y van a romper cuando
+    se cambien textos: test/widget_test.dart,
+    test/features/collection/collection_page_test.dart y
+    test/features/shell/adaptive_navigation_shell_test.dart.
+
+Lo que esta mal, por orden de gravedad:
+
+  1. Al pulsar "Confirmar resultado" la tarjeta del resultado no desaparece.
+     Es el sintoma que ya se ha detectado usando la app. Detalle en la FASE 0.
+  2. Se puede pulsar "Confirmar resultado" varias veces y guardar el mismo
+     animal repetido en la coleccion.
+  3. El tema es de app de adultos: paleta apagada generada a partir de un verde
+     oscuro, tipografia por defecto de Material, botones de 48 dp.
+  4. Los textos estan escritos para un adulto: "prediccion", "clasificacion",
+     "fiabilidad", "confianza: 87,3 %", "Firestore", "analitica", "haptica".
+  5. De los 28 animales del catalogo, solo 7 tienen dibujo. Los otros 21 se
+     pintan como un cuadro gris con un icono de Material, y 12 de ellos
+     comparten exactamente el mismo icono (Icons.pets). Para un nino que no
+     lee, doce animales de la coleccion son indistinguibles.
+  6. Elegir un animal a mano se hace en una lista desplegable de 28 nombres
+     escritos. Un nino de 5 anos no puede usar eso.
+  7. Identificar una foto cuesta 4 toques como minimo.
+  8. Confirmar un animal nuevo no celebra nada: solo sale un mensajito gris
+     abajo que se va solo.
+  9. "Eliminar cuenta y coleccion" esta a un toque de distancia, sin ninguna
+     barrera para adultos.
+
+
+--------------------------------------------------------------------------------
+PRINCIPIOS QUE APLICAN A TODAS LAS FASES
+--------------------------------------------------------------------------------
+
+  P1. Un icono o una foto siempre acompana a un texto. Nunca texto solo.
+  P2. Ninguna frase de la interfaz pasa de 8 palabras.
+  P3. Nada que se pueda tocar mide menos de 64 dp de alto (Material pide 48,
+      que es la medida de un dedo adulto).
+  P4. Cero porcentajes, cero decimales, cero tecnicismos.
+  P5. Todo color, tamano, radio y espacio sale de lib/app_theme.dart. Si hay
+      que escribir Color(0x...) o un numero suelto en una pantalla, es que
+      falta un token.
+  P6. Cada accion del nino responde con algo visible en menos de 100 ms.
+  P7. Nada destructivo es alcanzable por un nino sin pasar una puerta de
+      adulto.
+  P8. No se rompe ningun Semantics existente: un nino con lector de pantalla
+      tambien usa la app.
+
+
+================================================================================
+FASE 0 - ARREGLAR LO QUE ROMPE EL USO   [COMPLETADA 2026-08-13]
+================================================================================
+
+Objetivo: que el flujo "foto -> identificar -> confirmar" termine limpio.
+Sin esto, cualquier mejora visual se monta encima de un flujo roto.
+
+ESTADO: completada. ClassifierController tiene un metodo reset() que vuelve
+el estado a ready y limpia image/photoPath/result con noticeMessage
+"Guardado"; classifier_page.dart lo llama en _confirm() solo cuando
+onConfirmPrediction() termina bien (0.1). El doble guardado por doble toque
+(0.2) ya estaba cubierto por el flag _saving, verificado sin cambios. La
+tarea 0.3 (sustituir el SnackBar) se deja identificada para la FASE 4, como
+indicaba el plan. Test nuevo en classifier_controller_test.dart. flutter
+analyze y los 41 tests de la suite pasan.
+
+PROBLEMA 0.1 - La tarjeta del resultado no se va al confirmar
+-------------------------------------------------------------
+
+  Donde: lib/features/classifier/presentation/classifier_page.dart:101-130
+         lib/features/classifier/presentation/classifier_controller.dart
+
+  Que pasa: el metodo _confirm() guarda el animal, lanza la vibracion y
+  muestra un SnackBar, pero nunca cambia el estado del controlador. El panel
+  de resultado se pinta cuando state.status vale success o unrecognized
+  (classifier_page.dart:171-180), y ese estado sigue igual despues de
+  confirmar. Resultado: la foto, el resultado y el boton "Confirmar
+  resultado" siguen en pantalla como si no hubieras hecho nada.
+
+  Por que no se puede arreglar solo en la pantalla: ClassifierController no
+  tiene ningun metodo para volver atras. Solo expone load(), selectPhoto() y
+  classifySelectedPhoto().
+
+  Tareas:
+    0.1.1 Anadir a ClassifierController un metodo publico que devuelva el
+          estado a ClassifierStatus.ready y limpie image, photoPath y result.
+          Nombre sugerido: confirmPrediction() o reset().
+    0.1.2 Llamarlo desde _confirm() en classifier_page.dart despues de que
+          onConfirmPrediction() haya terminado bien. No llamarlo en el catch:
+          si el guardado falla, el nino debe conservar la foto para reintentar.
+    0.1.3 Al limpiar, dejar un noticeMessage corto tipo "Guardado" para que la
+          pantalla no se quede vacia de golpe.
+
+  Aceptacion: se hace una foto, se confirma, y la pantalla vuelve al estado
+  inicial con el boton grande de hacer foto. No queda ni la foto ni el panel.
+
+  Test a anadir: en test/features/classifier/classifier_controller_test.dart,
+  comprobar que tras el reset el estado es ready y result es null.
+
+
+PROBLEMA 0.2 - Se puede guardar el mismo animal dos veces
+---------------------------------------------------------
+
+  Donde: lib/features/classifier/presentation/classifier_page.dart:101-130
+
+  Que pasa: el flag _saving bloquea el boton mientras se guarda, pero cuando
+  termina vuelve a false y el panel sigue en pantalla (por el problema 0.1).
+  Un nino que pulsa dos veces seguidas suma dos fotos del mismo animal a su
+  coleccion.
+
+  Tareas:
+    0.2.1 Queda resuelto al aplicar 0.1.2, porque el panel desaparece. Aun asi,
+          verificar que _saving sigue impidiendo el doble toque rapido durante
+          la escritura en Firestore.
+
+  Aceptacion: pulsar "Confirmar" dos veces rapido suma 1 al contador, no 2.
+
+
+PROBLEMA 0.3 - El SnackBar es el unico aviso y se va solo
+----------------------------------------------------------
+
+  Donde: classifier_page.dart:109-117 y :120-126
+
+  Que pasa: si el nino esta mirando la foto y no la parte de abajo de la
+  pantalla, no se entera de nada. Y el mensaje de error
+  "La prediccion se ha hecho, pero no se ha podido guardar en la coleccion."
+  es incomprensible a esa edad.
+
+  Tareas:
+    0.3.1 Sustituir el SnackBar de exito por la celebracion de la FASE 4.
+    0.3.2 Sustituir el SnackBar de error por una tarjeta en el sitio donde
+          estaba el resultado, con icono y un boton grande de reintentar.
+
+  Nota: esta tarea se cierra de verdad en la FASE 4. Aqui solo se deja
+  identificada para no arreglar el SnackBar dos veces.
+
+
+================================================================================
+FASE 1 - UN UNICO TEMA, DEFINIDO APARTE Y FACIL DE CAMBIAR
+================================================================================
+
+Objetivo: que cambiar el aspecto entero de la app sea editar un fichero.
+El fichero ya existe (lib/app_theme.dart, 85 lineas). Hay que ampliarlo,
+hacerlo infantil, y quitar los pocos restos que se le escapan.
+
+ESTADO ACTUAL DEL TEMA
+-----------------------
+
+  Lo que ya centraliza bien: espaciados (space4..space32), radios, sombras,
+  duracion de animaciones, forma de las tarjetas, altura minima de botones.
+
+  Lo que le falta:
+
+  1.a  La paleta se genera con ColorScheme.fromSeed a partir de forest
+       (#285943, verde oscuro) en app_theme.dart:38-46. Material saca de ahi
+       una paleta apagada y de bajo contraste. No hay "colorines" posibles
+       mientras la semilla sea esa.
+
+  1.b  MichiTokens.indigo (#324BCD) y MichiTokens.amber (#B86D00) estan
+       declarados en app_theme.dart:6 y :8 y NO se usan en ningun sitio del
+       proyecto. Son tokens muertos.
+
+  1.c  El textTheme solo define headlineSmall y titleLarge
+       (app_theme.dart:52-55). Todo lo demas (bodyLarge, bodyMedium,
+       labelLarge, titleMedium) es el tamano por defecto de Material, pensado
+       para adultos. Casi todo el texto de la app cae ahi.
+
+  1.d  No hay tipografia propia. pubspec.yaml no tiene seccion fonts:. Se usa
+       Roboto, que tiene la "a" de doble piso y la "g" de doble lazo: dos
+       letras que los ninos que empiezan a leer confunden.
+
+  1.e  Los botones miden 48 dp de alto (app_theme.dart:71 y :77).
+
+  1.f  Quedan dos colores fuera del tema:
+         - classifier_page.dart:302, Color(0x33000000), el velo gris sobre la
+           foto mientras identifica.
+         - app_theme.dart:26, cardShadow, que si esta en el tema pero es un
+           negro fijo que no se adapta al modo oscuro.
+
+  1.g  welcome_gate.dart usa numeros sueltos en vez de tokens: 24 (linea 79),
+       20 (89), 24 (95), 28 (113), 8 (141), 16 (148), 30 (147), 72 (86), y un
+       TextStyle inline en la linea 156.
+
+TAREAS
+------
+
+  1.1  Reescribir la paleta. Ver el ANEXO PALETA al final del documento: trae
+       tres propuestas con los valores ya elegidos y el contraste comprobado.
+       Borrar indigo y amber si no entran en la paleta elegida, o darles uso.
+
+       Lo importante de ese anexo, resumido: NO se puede seguir usando
+       ColorScheme.fromSeed a secas. Material 3 fuerza primary a un tono
+       oscuro en modo claro, asi que la semilla naranja #E8590C acaba
+       convertida en un marron #A23A00. Se probaron las variantes fidelity,
+       vibrant y rainbow y todas hacen lo mismo. Para tener colores vivos hay
+       que sobrescribir primary, secondary y tertiary a mano.
+
+  1.2  Ampliar el textTheme con la escala completa y subida de tamano:
+       displaySmall, headlineMedium, headlineSmall, titleLarge, titleMedium,
+       bodyLarge, bodyMedium, labelLarge. Suelo recomendado: ningun texto de
+       interfaz por debajo de 18 sp, y el cuerpo normal en 20 sp.
+
+  1.3  Anadir una tipografia infantil. Buscar una con "a" de un solo piso
+       (tipo Andika, Lexend, Atkinson Hyperlegible o Quicksand), meterla en
+       assets/fonts/, declararla en pubspec.yaml bajo flutter: fonts:, y
+       ponerla como fontFamily del ThemeData. Comprobar que trae los acentos
+       y la enye.
+
+  1.4  Subir la altura minima de los botones de 48 a 64 dp en
+       filledButtonTheme y outlinedButtonTheme, y anadir el mismo criterio a
+       iconButtonTheme, chipTheme y listTileTheme, que hoy no estan en el
+       tema y por tanto van con el tamano por defecto.
+
+  1.5  Anadir tokens nuevos que hoy faltan y que las fases 3 y 4 van a
+       necesitar:
+         - tamano de icono grande / mediano / pequeno
+         - altura minima de diana tactil (64)
+         - radio extra grande para las tarjetas de animal
+         - color y opacidad del velo de "identificando" (mueve el
+           Color(0x33000000) de classifier_page.dart:302 aqui)
+         - duracion de la animacion de celebracion
+
+  1.6  Limpiar welcome_gate.dart para que use MichiTokens en vez de numeros
+       sueltos, y mover el TextStyle de la linea 156 al textTheme.
+
+  1.7  Revisar el modo oscuro. Hoy se genera con la misma semilla
+       (app_theme.dart:43-46) y no se ha mirado nunca con la paleta nueva.
+       Si el modo oscuro no queda bien con colores saturados, decidir
+       conscientemente: o se ajusta, o se quita la opcion del perfil.
+
+ACEPTACION
+----------
+
+  - grep de Color(0x en lib/ solo devuelve resultados dentro de app_theme.dart.
+  - grep de fontSize: y TextStyle( en lib/ solo devuelve resultados dentro de
+    app_theme.dart.
+  - Cambiar el valor de primary en app_theme.dart cambia el color de la app
+    entera sin tocar ningun otro fichero. Esta es la prueba de fuego de lo que
+    se ha pedido.
+  - Ningun numero suelto de espaciado o tamano en las pantallas.
+
+
+================================================================================
+FASE 2 - HABLAR COMO UN NINO DE 5 ANOS
+================================================================================
+
+Objetivo: que ningun texto de la app necesite un adulto al lado.
+
+REGLAS
+------
+
+  - Maximo 8 palabras por frase.
+  - Verbos en imperativo y en segunda persona: "Haz una foto", no "El usuario
+    puede realizar una captura".
+  - Ni una sola palabra de estas: prediccion, clasificacion, identificacion,
+    confianza, fiabilidad, especie, catalogo, modelo, dispositivo, permisos,
+    Firestore, analitica, haptica, sesion.
+  - Los numeros, en cifras y redondos. Nunca decimales.
+  - Todo texto va con icono o ilustracion al lado.
+
+INVENTARIO DE TEXTOS A REESCRIBIR (los peores, con su sitio)
+-------------------------------------------------------------
+
+  classifier_page.dart:363
+    "La foto se parece a {animal}, pero la confianza es baja. Elige el animal
+     correcto antes de guardarlo."
+    -> "Creo que es un {animal}. Puedes cambiarlo."
+
+  classifier_page.dart:366
+    "Confianza: 87.3 %"
+    -> Quitar el numero. Sustituir por tres niveles con icono/color:
+       seguro / casi seguro / no lo se.
+
+  classifier_page.dart:355 y :356
+    "Resultado de la identificacion" / "No reconocido con fiabilidad"
+    -> "Ya lo tengo" / "No lo reconozco"
+
+  classifier_page.dart:371  "Otras posibilidades"
+    -> "Tambien puede ser"
+
+  classifier_page.dart:386  "Confirma el animal"
+    -> "Es este"
+
+  classifier_page.dart:407  "Confirmar resultado"
+    -> "Guardar"
+
+  classifier_page.dart:242  "Prepara la foto"
+    -> "Consejos"
+
+  classifier_page.dart:247
+    "Encuadra un solo animal, con buena luz y sin que quede muy lejos."
+    -> Tres pictogramas con una palabra cada uno: un animal / mucha luz /
+       cerca. Sin frase.
+
+  classifier_page.dart:251-252
+    "Reconoce 28 animales de granja, domesticos y de zoo. Los tienes todos en
+     tu coleccion."
+    -> "Conozco 28 animales."
+
+  classifier_page.dart:260
+    "La imagen se procesa solo en este dispositivo."
+    -> Quitar de la pantalla del nino. Es informacion para el adulto: llevarla
+       a la zona de adultos de la FASE 5.
+
+  classifier_page.dart:310  "Identificando animal..."
+    -> "Mirando la foto..."
+
+  classifier_page.dart:123
+    "La prediccion se ha hecho, pero no se ha podido guardar en la coleccion."
+    -> "No he podido guardarlo. Prueba otra vez."
+
+  classifier_page.dart:226
+    "Tu proxima foto puede ampliar tu coleccion."
+    -> "Busca un animal."
+
+  collection_page.dart:45
+    "Se eliminara del historial y se actualizara el contador de la coleccion."
+    -> "Se borrara de tu coleccion."
+
+  collection_page.dart:101
+    "No se ha podido actualizar la identificacion. Comprueba tu conexion e
+     intentalo de nuevo."
+    -> "No he podido cambiarlo. Prueba otra vez."
+
+  collection_page.dart:295
+    "{n} de 28 especies descubiertas"
+    -> "Tienes {n} animales de 28"
+
+  collection_page.dart:446
+    "Inicia sesion con una cuenta para guardar y consultar tu coleccion."
+    -> "Entra para guardar tus animales."
+
+  collection_page.dart:467
+    "No se ha podido cargar la coleccion. Comprueba tu conexion e intentalo de
+     nuevo."
+    -> "No encuentro tu coleccion. Prueba otra vez."
+
+  collection_page.dart:521
+    "No hay especies que coincidan con este filtro."
+    -> "Aqui no hay nada."
+
+  collection_page.dart:546
+    "Haz tu primera prediccion y confirma el animal para anadirlo."
+    -> "Haz tu primera foto."
+
+  collection_page.dart:342-364 (los filtros)
+    "Descubiertos / Pendientes / Recientes / Cantidad"
+    -> "Los que tengo / Los que faltan / Los ultimos / Los mas vistos".
+       Con icono, y como maximo dos filtros visibles para el nino.
+
+  profile_page.dart:399  (el parrafo de privacidad, 200 caracteres, menciona
+    Firestore)
+    -> Es texto de adulto. Va entero a la zona de adultos de la FASE 5, sin
+       recortar. No se le ensena al nino.
+
+  profile_page.dart:205  "Vibrar brevemente al confirmar acciones compatibles."
+    -> Zona de adultos.
+
+  welcome_gate.dart:91  "Bienvenido a La granja de Michi"
+    -> "La granja de Michi"
+
+  welcome_gate.dart:100, :105, :111 (los tres pasos del onboarding)
+    -> Una frase de 4 palabras cada uno, con la ilustracion mas grande que el
+       texto.
+
+TAREA TRANSVERSAL
+-----------------
+
+  2.1  Sacar todos los textos de la interfaz a un unico fichero de cadenas
+       (por ejemplo lib/l10n/textos.dart o el sistema de localizacion de
+       Flutter). Hoy estan escritos a mano dentro de cada widget, y eso hace
+       que una revision de tono como esta haya que repetirla fichero a
+       fichero. Con un fichero unico, la proxima pasada de lenguaje se hace de
+       una sentada, igual que con los colores.
+
+ACEPTACION
+----------
+
+  - Ninguna frase de la interfaz del nino pasa de 8 palabras.
+  - Ningun porcentaje ni decimal visible.
+  - Ninguna de las palabras prohibidas aparece en pantallas del nino.
+  - Prueba real: un nino de 5 anos completa una identificacion sin que nadie
+    le lea nada.
+
+RIESGO
+------
+
+  Al cambiar los textos rompen test/widget_test.dart,
+  test/features/collection/collection_page_test.dart y
+  test/features/shell/adaptive_navigation_shell_test.dart, que buscan por
+  texto. Hay que actualizarlos en la misma fase. Si en la tarea 2.1 se
+  centralizan las cadenas, los tests pueden pasar a buscar por la constante y
+  dejar de romperse en el futuro.
+
+
+================================================================================
+FASE 3 - QUE UN NINO LO PUEDA TOCAR
+================================================================================
+
+Objetivo: menos pasos, dianas mas grandes, y elegir animales con imagenes en
+vez de con listas de texto.
+
+PROBLEMA 3.0 - 21 de los 28 animales no tienen dibujo (BLOQUEANTE)
+-------------------------------------------------------------------
+
+  Donde: lib/animal_catalog.dart
+         lib/features/collection/presentation/animal_image.dart
+
+  Los numeros: de los 28 animales del catalogo actual, solo 7 tienen
+  imageAsset. Los otros 21 caen en el _Fallback de animal_image.dart:28-47,
+  que pinta un icono de Material sobre un cuadro gris. Y de los 28 iconos, 12
+  son el mismo: Icons.pets.
+
+  Que significa para un nino que no lee: en la rejilla de la coleccion hay
+  doce fichas identicas, cuadro gris con la misma huella, distinguibles solo
+  por el nombre escrito debajo. No puede diferenciar el perro del gato, del
+  leon o del lobo. Esto ya pasa hoy en la pantalla de coleccion.
+
+  Por que es bloqueante: sin dibujos, el selector visual de la tarea 3.1 es
+  inutil. Se cambia una lista de 28 nombres por una rejilla de 21 cuadros
+  grises iguales, que es peor. Toda la FASE 3 y buena parte de la 4 dependen
+  de resolver esto primero.
+
+  ASIGNADA: los 28 dibujos los hace la hermana de Juan. No hay que buscar
+  packs de iconos ni generarlos. Lo que queda del lado del codigo es
+  integrarlos (3.0.2 y 3.0.3).
+
+  Encargo para ella, para que las piezas encajen sin retoques:
+    - 28 dibujos, uno por animal, con la lista de nombres de animalCatalog.
+    - Cuadradas, mismo encuadre, el animal centrado y entero.
+    - Que se lean a tamano pequeno: a 96x96 dp hay que distinguir el perro
+      del lobo. Poca linea fina, formas grandes.
+    - Estilo unico entre las 28. Es lo que mas se nota si falla.
+    - Fondo transparente (PNG) o un fondo plano igual en todas.
+    - Exportar a 3x para pantallas densas: 288x288 px como minimo.
+    - Ojo con los que se confunden: perro/lobo, gato/leon, vaca/toro,
+      oveja/cabra, mariposa/polilla.
+
+  Tareas de codigo:
+    3.0.2 Declararlas en pubspec.yaml. Hoy se listan una a una (lineas 27-38);
+          con 28 conviene declarar el directorio assets/animales/ entero.
+    3.0.3 Rellenar imageAsset en las 28 entradas de animalCatalog.
+    3.0.4 Conservar el _Fallback tal cual. Sigue haciendo falta para el
+          catalogo legado (legacyAnimalCatalog), que tiene animales que ya no
+          reconoce el modelo pero que pueden seguir en la coleccion de alguien.
+    3.0.5 Mientras no haya dibujos, dar un icono distinto a cada uno de los 12
+          animales que hoy comparten Icons.pets. Es un parche barato que
+          mejora la pantalla actual desde el primer dia.
+
+  Aceptacion: dos animales cualesquiera del catalogo se distinguen a simple
+  vista, tapando el texto.
+
+
+PROBLEMA 3.1 - Elegir animal es un desplegable de 28 nombres escritos
+----------------------------------------------------------------------
+
+  Donde: classifier_page.dart:382-397 (DropdownButtonFormField)
+         collection_page.dart:64-77 (SimpleDialog con 28 opciones de texto)
+
+  Es el peor problema de usabilidad infantil de la app. Un nino que no lee no
+  puede usar ninguno de los dos, y los dos hacen lo mismo con dos widgets
+  distintos.
+
+  Requiere la tarea 3.0 hecha.
+
+  Tareas:
+    3.1.1 Crear un widget unico y reutilizable, tipo SelectorDeAnimal, que
+          muestre una rejilla de fichas grandes con el dibujo del animal y el
+          nombre debajo. Reutilizar AnimalImage, que ya resuelve el caso de
+          "no hay dibujo".
+    3.1.2 Usarlo en los dos sitios: al confirmar en classifier_page y al
+          corregir en collection_page. Se borran el Dropdown y el SimpleDialog.
+    3.1.3 Poner arriba de la rejilla las 3 sugerencias del modelo (la
+          principal y las alternativas de result.alternatives), ya
+          preseleccionada la primera. El caso normal es un toque: "si, ese".
+    3.1.4 Ficha minima de 96x96 dp con la imagen ocupando la mayor parte.
+
+PROBLEMA 3.2 - Hacer una foto cuesta 4 toques
+----------------------------------------------
+
+  Donde: classifier_page.dart:195-202 -> _choosePhoto() (bottom sheet de
+         camara/galeria, lineas 56-99) -> boton "Identificar esta foto"
+         (linea 160) -> "Confirmar resultado" (linea 399).
+
+  Tareas:
+    3.2.1 Quitar el paso intermedio: en cuanto hay foto, identificar sola. El
+          boton "Identificar esta foto" desaparece; se deja solo "Elegir otra".
+    3.2.2 Simplificar la eleccion de origen: boton grande de camara como
+          accion principal, y galeria como accion secundaria mas pequena. Hoy
+          las dos opciones son dos ListTile identicos con subtitulo
+          (lineas 78-91).
+    3.2.3 Objetivo: 2 toques del nino, camara -> guardar.
+
+PROBLEMA 3.3 - Dianas pequenas repartidas
+------------------------------------------
+
+  Donde: los FilterChip de collection_page.dart:382-386, los Chip de logros de
+         collection_page.dart:313-319, el IconButton de historial de
+         collection_page.dart:178-182, y los ListTile del bottom sheet de
+         classifier_page.dart:78-91.
+
+  Tareas:
+    3.3.1 Aplicar los tokens de diana tactil de la tarea 1.5 (64 dp minimo).
+    3.3.2 Reducir el numero de controles visibles en la pantalla de coleccion.
+          Hoy hay 4 filtros + historial + rejilla. Para un nino sobran los
+          filtros "Recientes" y "Cantidad".
+
+PROBLEMA 3.4 - La navegacion inferior es la unica pista de donde estas
+-----------------------------------------------------------------------
+
+  Donde: app_shell.dart:68-84, tres destinos con iconos de Material
+         (home, collections_bookmark, person).
+
+  Tareas:
+    3.4.1 Iconos mas grandes y con color de fondo distinto por seccion.
+    3.4.2 El destino "Perfil" pasa a ser la puerta de adultos de la FASE 5, con
+          icono y nombre acordes.
+
+ACEPTACION
+----------
+
+  - Los 28 animales tienen dibujo propio y se distinguen entre si tapando el
+    texto.
+  - Ningun elemento tocable por debajo de 64 dp.
+  - Ninguna lista de texto para elegir animal en toda la app.
+  - Del boton de camara a tener el animal guardado: 2 toques.
+
+
+================================================================================
+FASE 4 - PREMIAR AL NINO
+================================================================================
+
+Objetivo: que confirmar un animal se sienta como ganar algo. Hoy no se siente
+nada.
+
+ESTADO ACTUAL
+-------------
+
+  El unico feedback al guardar es un SnackBar de texto
+  (classifier_page.dart:109-117) y una vibracion opcional que el adulto puede
+  desactivar (settings.provideConfirmationFeedback(), linea 107). Los logros
+  son tres cadenas fijas calculadas dentro del build
+  (collection_page.dart:279-283): "Primera foto", "Cinco especies",
+  "Coleccion completa". No tienen diseno propio, no se guarda cuales son
+  nuevos, y no hay ningun sonido en todo el proyecto.
+
+TAREAS
+------
+
+  4.1  Pantalla o superposicion de celebracion al guardar un animal, con la
+       foto que ha hecho el nino, el nombre del animal grande, y una
+       animacion corta (confeti, sellos, estrellas). Duracion controlada por
+       el token de la tarea 1.5. Debe poder saltarse tocando la pantalla.
+
+  4.2  Distinguir dos casos, porque para el nino no son lo mismo:
+         - animal repetido: celebracion corta.
+         - animal nuevo en la coleccion: celebracion larga, "!Nuevo!".
+       El dato ya esta disponible: collection.counts[animal] antes de guardar.
+
+  4.3  Sonidos. Uno al acertar, uno al guardar, uno al completar un logro.
+       Hay que anadir un paquete de audio (audioplayers o similar) y respetar
+       el ajuste de sonido de la FASE 5. Silencio por defecto si el
+       dispositivo esta en silencio.
+
+  4.4  Rehacer los logros: sacarlos del build de collection_page.dart a su
+       propio modelo, ampliarlos (10 animales, 20 animales, todos los de
+       granja, todos los del zoo...), darles medalla dibujada, y guardar en
+       Firestore cuales ya se han visto para poder ensenar los nuevos con
+       animacion una sola vez.
+
+       SIN MIGRACION. Nadie usa la app, asi que no hay colecciones reales que
+       preservar. Se disena el esquema de Firestore que convenga y punto, sin
+       capa de compatibilidad. AGENTS.md:22 pide ruta de migracion para
+       cambios destructivos, y test/services/collection_migration_test.dart
+       existe por una migracion anterior: ninguna de las dos cosas aplica aqui
+       porque no hay datos que romper. Si en la revision salta esa regla, se
+       justifica y se sigue.
+
+  4.5  Cerrar la tarea 0.3: sustituir los dos SnackBar de classifier_page por
+       la celebracion (exito) y por una tarjeta con icono grande y boton de
+       reintentar (error).
+
+  4.6  Hacer visible el progreso en la pantalla principal, no solo en la de
+       coleccion. Hoy la barra de progreso vive en
+       collection_page.dart:298-301 y el nino no la ve mientras hace fotos.
+
+ACEPTACION
+----------
+
+  - Guardar un animal nuevo produce animacion + sonido + medalla si toca.
+  - El nino puede decir cuantos animales le faltan sin entrar en el menu.
+
+
+================================================================================
+FASE 5 - ZONA DE ADULTOS
+================================================================================
+
+Objetivo: separar lo que es del nino de lo que es del padre o la madre, y que
+el nino no pueda romper nada.
+
+PROBLEMA
+--------
+
+  La pantalla de Perfil (profile_page.dart, 525 lineas) mezcla todo: cuenta,
+  tema, vibracion, permisos, privacidad, informacion del modelo, cerrar sesion
+  y eliminar cuenta. El boton "Eliminar cuenta y coleccion"
+  (profile_page.dart:246-260) esta a un toque desde la barra de navegacion.
+  El dialogo de confirmacion (lineas 437-525) pide contrasena y una casilla,
+  lo cual esta bien, pero un nino invitado (isAnonymous) no necesita
+  contrasena: le basta con marcar la casilla y pulsar el boton rojo.
+
+TAREAS
+------
+
+  5.1  Poner una puerta de adulto delante de la pantalla de ajustes: una
+       operacion que un nino de 4 a 8 anos no resuelva. Lo habitual es una
+       multiplicacion de dos cifras o mantener pulsado varios segundos.
+       Ligera, no es seguridad real: es una barrera de edad.
+
+  5.2  Dividir la pantalla en dos:
+         - Zona del nino: solo su nombre, su avatar y su progreso.
+         - Zona del adulto (tras la puerta): cuenta, tema, sonido, vibracion,
+           permisos, privacidad, informacion del modelo, cerrar sesion,
+           eliminar cuenta.
+
+  5.3  Llevar a la zona de adultos los textos que la FASE 2 saca de las
+       pantallas del nino: el parrafo de privacidad
+       (profile_page.dart:396-404), la informacion del modelo (lineas 411-430)
+       y el aviso de "la imagen se procesa solo en este dispositivo"
+       (classifier_page.dart:260).
+
+  5.4  Anadir el ajuste de sonido que necesita la tarea 4.3, junto al de
+       vibracion que ya existe (profile_page.dart:202-209). Va en
+       SettingsRepository, que ya tiene el patron hecho para haptics.
+
+  5.5  Para el caso invitado, exigir tambien la puerta de adulto antes de
+       eliminar, ya que no hay contrasena que lo frene.
+
+ACEPTACION
+----------
+
+  - Un nino no llega a "Eliminar cuenta" por accidente.
+  - En las pantallas del nino no queda ni una palabra tecnica.
+
+
+================================================================================
+FASE 6 - COMPROBAR QUE FUNCIONA
+================================================================================
+
+  6.1  Actualizar los tres tests de interfaz que rompen con los textos nuevos:
+       test/widget_test.dart,
+       test/features/collection/collection_page_test.dart,
+       test/features/shell/adaptive_navigation_shell_test.dart.
+
+  6.2  Test nuevo del reset del clasificador (tarea 0.1.3).
+
+  6.3  Test nuevo del selector visual de animales (tarea 3.1).
+
+  6.4  Comprobacion de que el tema esta centralizado, la que de verdad
+       responde a lo que se ha pedido:
+         grep -rn "Color(0x" lib/ | grep -v app_theme.dart   -> sin resultados
+         grep -rn "fontSize:" lib/ | grep -v app_theme.dart  -> sin resultados
+
+  6.5  Revisar contraste de la paleta nueva. Los colores saturados suelen
+       fallar el contraste sobre blanco. Minimo 4.5:1 para texto normal.
+       Hacerlo en claro y en oscuro.
+
+  6.6  Pasar la app por TalkBack para confirmar que los Semantics existentes
+       siguen funcionando despues de rehacer los widgets.
+
+  6.7  Prueba con ninos reales. Dos o tres, de 4 a 8 anos, sin explicarles
+       nada. Anotar cada vez que preguntan algo: cada pregunta es un fallo de
+       diseno. Es el unico criterio de aceptacion que vale de verdad para las
+       fases 2, 3 y 4.
+
+
+================================================================================
+ORDEN Y DEPENDENCIAS
+================================================================================
+
+  FASE 0  independiente. Se puede hacer ya. Es un dia de trabajo.
+  FASE 1  independiente, pero conviene antes que 3 y 4 porque estas van a
+          necesitar tokens nuevos.
+  FASE 2  necesita decidir la tarea 2.1 (fichero de cadenas) antes de empezar,
+          o habra que repasar los textos dos veces.
+  FASE 3  necesita la FASE 1 (tokens de diana tactil y tamanos), y dentro de
+          ella la tarea 3.0 bloquea a la 3.1.
+  FASE 4  necesita la FASE 0 (sin el reset, la celebracion se pinta encima de
+          un panel que no se ha ido) y la FASE 1 (tokens de animacion).
+  FASE 5  independiente, pero recoge textos que salen de la FASE 2.
+  FASE 6  al final de cada fase, no solo al final del plan.
+
+  EMPEZAR YA, EN PARALELO: la tarea 3.0 (conseguir 28 dibujos) es la unica que
+  no depende de escribir codigo y la que mas tarda en estar lista, sobre todo
+  si hay que encargarlos o revisar licencias. Arrancarla el primer dia aunque
+  las fases 0 y 1 esten sin hacer; el resto del plan avanza sin ella.
+
+  Camino mas corto para notar la mejora: 0 -> 1 -> 4. Con eso el flujo
+  principal funciona, la app tiene color, y guardar un animal se celebra.
+  Las fases 2 y 3 son las que mas trabajo llevan y las que mas cambian la
+  experiencia real del nino.
+
+  Parche de un rato con efecto inmediato: la tarea 3.0.5 (un icono distinto
+  para cada uno de los 12 animales que hoy comparten Icons.pets). No necesita
+  ninguna otra fase y arregla la pantalla que peor se ve hoy.
+
+
+================================================================================
+ANEXO PALETA - TRES PROPUESTAS CON CONTRASTE COMPROBADO
+================================================================================
+
+  DECISION: se implementa la PROPUESTA A, "Granja al sol".
+
+  Las propuestas B y C se quedan escritas aqui a proposito, con todos sus
+  valores, por si al ver la A montada se prefiere otra. Cambiar de paleta
+  despues de la FASE 1 cuesta editar seis lineas de app_theme.dart, porque
+  para entonces ya no habra colores fuera del tema. No borrar este anexo.
+
+POR QUE NO VALE fromSeed
+-------------------------
+
+  Se generaron las paletas reales con el SDK instalado (Flutter 3.44.9) para
+  la semilla naranja #E8590C con cuatro variantes:
+
+    tonalSpot (la que se usa hoy) -> primary #A23A00 aprox
+    fidelity                      -> primary #A23A00
+    vibrant                       -> primary #A63B00
+    rainbow                       -> primary #9A4520
+
+  Todas devuelven un marron oscuro. Material 3 fija primary al tono 40 en
+  modo claro para garantizar texto blanco encima, y eso mata cualquier color
+  vivo. La documentacion de tonalSpot lo dice literalmente: "builds pastel
+  palettes with a low chroma". Ese es el motivo mecanico de que la app se vea
+  apagada hoy, no la eleccion del verde.
+
+  Consecuencia practica: se sigue usando fromSeed para que los 45 roles del
+  esquema salgan coherentes, pero se sobrescriben a mano primary, onPrimary,
+  secondary, onSecondary, tertiary y onTertiary. fromSeed acepta esos
+  parametros directamente, asi que no hace falta copyWith.
+
+LA REGLA QUE MAS IMPORTA
+-------------------------
+
+  Un color vivo NO admite texto blanco encima. Comprobado:
+
+    amarillo #FAB005 + blanco = 1.86:1   (necesita 4.5:1)
+    verde    #37B24D + blanco = 2.75:1
+    naranja  #F76707 + blanco = 3.04:1
+
+  Los mismos colores con texto oscuro encima pasan de sobra:
+
+    amarillo #FAB005 + tinta  = 9.22:1
+    verde    #37B24D + tinta  = 6.24:1
+    naranja  #F76707 + tinta  = 5.64:1
+
+  Asi que los botones de colores vivos llevan texto oscuro. Es lo contrario
+  de lo que hace la app hoy, y es lo que hacen las apps infantiles.
+
+  Segundo aviso: el amarillo #FAB005 sobre el fondo crema da 1.76:1. Sirve
+  como relleno de un boton grande, pero NUNCA como color de texto, de icono
+  fino ni de borde sobre fondo claro.
+
+
+PROPUESTA A - "GRANJA AL SOL"   << ELEGIDA >>
+----------------------------------------------
+
+  Calida, de campo, y mantiene el parentesco con el verde actual sin heredar
+  su tristeza. El naranja como accion principal es el que mas llama a un nino.
+
+  MODO CLARO
+    primary            #F76707  texto encima #211D18    5.50:1  boton de foto
+    secondary          #37B24D  texto encima #00210A    6.25:1  coleccion
+    tertiary           #FAB005  texto encima #3A2600    7.74:1  celebracion
+    error              #C92A2A  texto encima #FFFFFF    5.46:1
+    surface            #FFF8EC  texto encima #211D18   15.87:1  (el crema que
+                                                                ya tienes)
+
+  MODO OSCURO
+    primary            #FF9F45  texto encima #3D1A00    7.65:1
+    secondary          #6BD47E  texto encima #00320F    7.75:1
+    tertiary           #FFD43B  texto encima #3A2600   10.11:1
+    error              #FF8A8A  texto encima #4A0000    7.17:1
+    surface            #1A1713  texto encima #F0E7DA   14.58:1
+
+  Todos los valores pasan el minimo de 4.5:1 en claro y en oscuro.
+
+
+PROPUESTA B - "MICHI JUGUETON"   (alternativa, no descartada)
+--------------------------------------------------------------
+
+  Violeta y turquesa. Menos granja y mas juguete. Es la mas alejada de la app
+  actual y la unica cuyo primary admite texto blanco, lo que la hace la mas
+  facil de implementar.
+
+  MODO CLARO
+    primary            #7950F2  texto encima #FFFFFF    4.95:1
+    secondary          #0CA678  texto encima #00251A    5.27:1
+    tertiary           #FAB005  texto encima #3A2600    7.74:1
+    error              #E03131  texto encima #FFFFFF    4.51:1
+    surface            #FBF7FF  texto encima #1D1A24   16.20:1
+
+  El primary destaca 4.7:1 sobre el fondo, el mejor de las tres propuestas:
+  el boton principal se ve desde lejos.
+
+
+PROPUESTA C - "VERDE VIVO"   (alternativa, no descartada)
+-----------------------------------------------------------
+
+  Conserva el verde de la identidad actual, pero subido de brillo, con azul
+  de apoyo. La mas continuista.
+
+  MODO CLARO
+    primary            #37B24D  texto encima #00210A    6.25:1
+    secondary          #1971C2  texto encima #FFFFFF    5.02:1
+    tertiary           #FAB005  texto encima #3A2600    7.74:1
+    error              #C92A2A  texto encima #FFFFFF    5.46:1
+    surface            #F4FBEF  texto encima #181D15   16.23:1
+
+  Aviso: el verde destaca solo 3.3:1 sobre su fondo. Pasa el minimo de 3:1
+  para elementos grandes, pero el boton principal llama menos que en A o B.
+
+
+COMO QUEDA EN app_theme.dart (con la propuesta A)
+--------------------------------------------------
+
+  static final _lightScheme = ColorScheme.fromSeed(
+    seedColor: MichiTokens.naranja,
+    brightness: Brightness.light,
+    primary:     MichiTokens.naranja,      // #F76707
+    onPrimary:   MichiTokens.tinta,        // #211D18
+    secondary:   MichiTokens.verde,        // #37B24D
+    onSecondary: MichiTokens.verdeOscuro,  // #00210A
+    tertiary:    MichiTokens.amarillo,     // #FAB005
+    onTertiary:  MichiTokens.ambarOscuro,  // #3A2600
+    surface:     MichiTokens.crema,        // #FFF8EC
+    onSurface:   MichiTokens.tinta,
+  );
+
+  Los containers (primaryContainer, etc.) los sigue calculando fromSeed a
+  partir de la semilla, y quedan coherentes con los roles sobrescritos.
+
+  Comprobar despues del cambio que los sitios que hoy usan containers siguen
+  legibles: collection_page.dart:286 (secondaryContainer),
+  classifier_page.dart:347 (tertiaryContainer) y classifier_page.dart:449
+  (errorContainer).
+
+
+================================================================================
+ANEXO - RESUMEN DE FICHEROS MAS AFECTADOS
+================================================================================
+
+  lib/app_theme.dart                      (85 lineas)   FASE 1 entera
+  lib/features/classifier/presentation/classifier_page.dart   (478)
+                                          FASES 0, 2, 3, 4
+  lib/features/classifier/presentation/classifier_controller.dart (171)
+                                          FASE 0
+  lib/features/collection/presentation/collection_page.dart   (559)
+                                          FASES 2, 3, 4
+  lib/features/profile/presentation/profile_page.dart         (525)
+                                          FASES 2, 5
+  lib/welcome_gate.dart                   (167)         FASES 1, 2
+  lib/features/shell/presentation/app_shell.dart (108)  FASES 3, 5
+  lib/features/profile/data/settings_repository.dart (141)  FASE 5
+  lib/animal_catalog.dart                 (425)         FASE 3 (tarea 3.0)
+  lib/features/collection/presentation/animal_image.dart (47)  FASE 3
+  assets/                                 28 dibujos nuevos (tarea 3.0)
+  pubspec.yaml                            fuentes (1.3), dibujos (3.0.2) y
+                                          audio (4.3)
