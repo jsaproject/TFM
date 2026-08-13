@@ -25,9 +25,23 @@ class AchievementMedal extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     final size = large ? MichiTokens.medalSizeLarge : MichiTokens.medalSize;
+    // Las ganadas brillan con un degradado dorado; las que faltan se quedan
+    // planas y apagadas, para que la diferencia se vea de un vistazo.
     final background = earned
-        ? colors.tertiary
-        : colors.surfaceContainerHighest;
+        ? LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color.lerp(colors.tertiary, Colors.white, 0.25)!,
+              colors.tertiary,
+            ],
+          )
+        : LinearGradient(
+            colors: [
+              colors.surfaceContainerHigh,
+              colors.surfaceContainerHighest,
+            ],
+          );
     final foreground = earned ? colors.onTertiary : colors.onSurfaceVariant;
     return Semantics(
       label: earned
@@ -43,12 +57,23 @@ class AchievementMedal extends StatelessWidget {
                 width: size,
                 height: size,
                 decoration: BoxDecoration(
-                  color: background,
+                  gradient: background,
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: earned ? colors.onTertiaryContainer : colors.outline,
+                    color: earned
+                        ? colors.onTertiaryContainer
+                        : colors.outlineVariant,
                     width: MichiTokens.medalBorderWidth,
                   ),
+                  boxShadow: earned
+                      ? [
+                          BoxShadow(
+                            color: colors.tertiary.withValues(alpha: 0.35),
+                            blurRadius: MichiTokens.space12,
+                            offset: const Offset(0, MichiTokens.space4),
+                          ),
+                        ]
+                      : null,
                 ),
                 child: Icon(
                   earned ? achievement.icon : Icons.lock_outline,
@@ -67,7 +92,7 @@ class AchievementMedal extends StatelessWidget {
                   textAlign: TextAlign.center,
                   maxLines: MichiTokens.medalLabelLines,
                   overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: earned ? colors.onSurface : colors.onSurfaceVariant,
                   ),
                 ),

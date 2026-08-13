@@ -1,10 +1,12 @@
 import 'dart:async';
 
 import 'package:animalspredictor/animal_catalog.dart';
+import 'package:animalspredictor/app_animations.dart';
 import 'package:animalspredictor/app_theme.dart';
 import 'package:animalspredictor/features/classifier/domain/confidence_level.dart';
 import 'package:animalspredictor/features/classifier/presentation/celebration_overlay.dart';
 import 'package:animalspredictor/features/collection/domain/celebration.dart';
+import 'package:animalspredictor/features/collection/presentation/animal_image.dart';
 import 'package:animalspredictor/features/collection/presentation/animal_selector.dart';
 import 'package:animalspredictor/features/collection/presentation/collection_progress.dart';
 import 'package:animalspredictor/features/profile/data/settings_repository.dart';
@@ -145,11 +147,13 @@ class _ClassifierPageState extends State<ClassifierPage> {
               child: ListView(
                 padding: MichiTokens.pagePadding,
                 children: [
-                  _WelcomeHeader(name: widget.greetingName),
-                  const SizedBox(height: MichiTokens.space16),
+                  _WelcomeHeader(name: widget.greetingName).entrance(),
+                  const SizedBox(height: MichiTokens.space20),
                   if (widget.collection != null) ...[
-                    CollectionProgress(collection: widget.collection!),
-                    const SizedBox(height: MichiTokens.space16),
+                    CollectionProgress(
+                      collection: widget.collection!,
+                    ).entrance(step: 1),
+                    const SizedBox(height: MichiTokens.space20),
                   ],
                   AnimatedSwitcher(
                     duration: MichiTokens.durationMedium,
@@ -157,7 +161,7 @@ class _ClassifierPageState extends State<ClassifierPage> {
                       key: ValueKey(state.image),
                       state: state,
                     ),
-                  ),
+                  ).entrance(step: 2),
                   if (state.status == ClassifierStatus.success ||
                       state.status == ClassifierStatus.unrecognized)
                     _PredictionPanel(
@@ -189,6 +193,9 @@ class _ClassifierPageState extends State<ClassifierPage> {
                   const SizedBox(height: MichiTokens.space24),
                   FilledButton.icon(
                     key: const Key('classifier-primary-cta'),
+                    style: FilledButton.styleFrom(
+                      textStyle: MichiTokens.titleMedium,
+                    ),
                     onPressed: state.isBusy || !widget.controller.isModelReady
                         ? null
                         : () => _choosePhoto(ImageSource.camera),
@@ -211,7 +218,7 @@ class _ClassifierPageState extends State<ClassifierPage> {
                   // Los consejos van detrás del botón: son de leer una vez, y
                   // delante dejaban la cámara por debajo del pliegue.
                   const SizedBox(height: MichiTokens.space24),
-                  const _CaptureGuide(),
+                  const _CaptureGuide().entrance(step: 3),
                 ],
               ),
             ),
@@ -228,18 +235,30 @@ class _WelcomeHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final trimmed = name?.trim() ?? '';
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Row(
       children: [
-        Text(
-          trimmed.isEmpty
-              ? TextosNino.saludoSinNombre
-              : TextosNino.saludo(trimmed),
-          style: Theme.of(context).textTheme.headlineSmall,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                trimmed.isEmpty
+                    ? TextosNino.saludoSinNombre
+                    : TextosNino.saludo(trimmed),
+                style: theme.textTheme.headlineMedium,
+              ),
+              const SizedBox(height: MichiTokens.space4),
+              Text(
+                TextosNino.buscaUnAnimal,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
         ),
-        const SizedBox(height: MichiTokens.space4),
-        const Text(TextosNino.buscaUnAnimal),
       ],
     );
   }
@@ -249,45 +268,53 @@ class _CaptureGuide extends StatelessWidget {
   const _CaptureGuide();
 
   @override
-  Widget build(BuildContext context) => Card(
-    child: Padding(
-      padding: const EdgeInsets.all(MichiTokens.space16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            TextosNino.consejosTitulo,
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          const SizedBox(height: MichiTokens.space12),
-          const Row(
-            children: [
-              Expanded(
-                child: _CaptureTip(
-                  icon: Icons.pets,
-                  label: TextosNino.consejoUnAnimal,
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(MichiTokens.space20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(TextosNino.consejosTitulo, style: theme.textTheme.titleLarge),
+            const SizedBox(height: MichiTokens.space16),
+            const Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: _CaptureTip(
+                    icon: Icons.pets,
+                    label: TextosNino.consejoUnAnimal,
+                  ),
                 ),
-              ),
-              Expanded(
-                child: _CaptureTip(
-                  icon: Icons.wb_sunny_outlined,
-                  label: TextosNino.consejoLuz,
+                SizedBox(width: MichiTokens.space8),
+                Expanded(
+                  child: _CaptureTip(
+                    icon: Icons.wb_sunny_outlined,
+                    label: TextosNino.consejoLuz,
+                  ),
                 ),
-              ),
-              Expanded(
-                child: _CaptureTip(
-                  icon: Icons.zoom_in,
-                  label: TextosNino.consejoCerca,
+                SizedBox(width: MichiTokens.space8),
+                Expanded(
+                  child: _CaptureTip(
+                    icon: Icons.zoom_in,
+                    label: TextosNino.consejoCerca,
+                  ),
                 ),
+              ],
+            ),
+            const SizedBox(height: MichiTokens.space16),
+            Text(
+              TextosNino.conozcoAnimales(animalCatalog.length),
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
               ),
-            ],
-          ),
-          const SizedBox(height: MichiTokens.space12),
-          Text(TextosNino.conozcoAnimales(animalCatalog.length)),
-        ],
+            ),
+          ],
+        ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 class _CaptureTip extends StatelessWidget {
@@ -296,22 +323,40 @@ class _CaptureTip extends StatelessWidget {
   final String label;
 
   @override
-  Widget build(BuildContext context) => Semantics(
-    label: label,
-    child: ExcludeSemantics(
-      child: Column(
-        children: [
-          Icon(
-            icon,
-            size: MichiTokens.iconSizeLarge,
-            color: Theme.of(context).colorScheme.primary,
-          ),
-          const SizedBox(height: MichiTokens.space8),
-          Text(label, textAlign: TextAlign.center),
-        ],
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return Semantics(
+      label: label,
+      child: ExcludeSemantics(
+        child: Column(
+          children: [
+            // Icono dentro de un círculo de color: los tres consejos se leen
+            // como una fila de tres piezas iguales, no como tres dibujos
+            // sueltos de distinto tamaño.
+            Container(
+              width: MichiTokens.touchTargetMin,
+              height: MichiTokens.touchTargetMin,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: colors.primaryContainer,
+              ),
+              child: Icon(
+                icon,
+                size: MichiTokens.iconSizeMedium,
+                color: colors.onPrimaryContainer,
+              ),
+            ),
+            const SizedBox(height: MichiTokens.space8),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
+        ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 class _PhotoPreview extends StatelessWidget {
@@ -319,52 +364,84 @@ class _PhotoPreview extends StatelessWidget {
   final ClassifierState state;
 
   @override
-  Widget build(BuildContext context) => Semantics(
-    label: state.image == null
-        ? TextosNino.dibujoDeAnimales
-        : TextosNino.tuFoto,
-    image: true,
-    child: AspectRatio(
-      aspectRatio: MichiTokens.squareImageAspectRatio,
-      child: Card(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final cacheWidth =
-                (constraints.maxWidth * MediaQuery.devicePixelRatioOf(context))
-                    .round();
-            return Stack(
-              fit: StackFit.expand,
-              children: [
-                if (state.image != null)
-                  Image.memory(
-                    state.image!,
-                    fit: BoxFit.cover,
-                    cacheWidth: cacheWidth,
-                    errorBuilder: (context, error, stackTrace) =>
-                        const Center(child: Text(TextosNino.noVeoLaFoto)),
-                  )
-                else
-                  Image.asset('assets/farm_animals.png', fit: BoxFit.contain),
-                if (state.isBusy)
-                  const ColoredBox(color: MichiTokens.veilOverlay),
-                if (state.isBusy)
-                  const Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        CircularProgressIndicator(),
-                        SizedBox(height: MichiTokens.space12),
-                        Text(TextosNino.mirandoLaFoto),
-                      ],
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return Semantics(
+      label: state.image == null
+          ? TextosNino.dibujoDeAnimales
+          : TextosNino.tuFoto,
+      image: true,
+      child: AspectRatio(
+        aspectRatio: MichiTokens.squareImageAspectRatio,
+        child: Card(
+          shape: MichiTokens.animalCardShape.copyWith(
+            side: BorderSide(
+              color: colors.outlineVariant,
+              width: MichiTokens.cardBorderWidth,
+            ),
+          ),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final cacheWidth =
+                  (constraints.maxWidth *
+                          MediaQuery.devicePixelRatioOf(context))
+                      .round();
+              return Stack(
+                fit: StackFit.expand,
+                children: [
+                  if (state.image != null)
+                    Image.memory(
+                      state.image!,
+                      fit: BoxFit.cover,
+                      cacheWidth: cacheWidth,
+                      errorBuilder: (context, error, stackTrace) =>
+                          const Center(child: Text(TextosNino.noVeoLaFoto)),
+                    )
+                  else
+                    DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            colors.primaryContainer,
+                            colors.tertiaryContainer,
+                          ],
+                        ),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(MichiTokens.space24),
+                        child: Image.asset(
+                          'assets/farm_animals.png',
+                          fit: BoxFit.contain,
+                        ),
+                      ),
                     ),
-                  ),
-              ],
-            );
-          },
+                  if (state.isBusy) ...[
+                    const ColoredBox(color: MichiTokens.veilOverlay),
+                    Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const CircularProgressIndicator(color: Colors.white),
+                          const SizedBox(height: MichiTokens.space16),
+                          Text(
+                            TextosNino.mirandoLaFoto,
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(color: Colors.white),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ],
+              );
+            },
+          ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 class _PredictionPanel extends StatelessWidget {
@@ -405,40 +482,61 @@ class _PredictionPanel extends StatelessWidget {
       if (selectedAnimal != null && !suggestions.contains(selectedAnimal))
         selectedAnimal!,
     ]);
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.only(top: MichiTokens.space16),
       child: Card(
-        color: reliable
-            ? null
-            : Theme.of(context).colorScheme.tertiaryContainer,
+        color: reliable ? null : theme.colorScheme.tertiaryContainer,
         child: Padding(
-          padding: const EdgeInsets.all(MichiTokens.space16),
+          padding: const EdgeInsets.all(MichiTokens.space20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                reliable ? TextosNino.yaLoTengo : TextosNino.noLoReconozco,
-                style: Theme.of(context).textTheme.titleLarge,
+              Row(
+                children: [
+                  AnimalAvatar(
+                    animal: currentAnimalByName[result.primary.animal],
+                  ),
+                  const SizedBox(width: MichiTokens.space12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          reliable
+                              ? TextosNino.yaLoTengo
+                              : TextosNino.noLoReconozco,
+                          style: theme.textTheme.titleLarge,
+                        ),
+                        Text(
+                          TextosNino.creoQueEs(result.primary.animal),
+                          style: theme.textTheme.bodyMedium,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: MichiTokens.space8),
-              Text(TextosNino.creoQueEs(result.primary.animal)),
-              if (!reliable) const Text(TextosNino.puedesCambiarlo),
-              const SizedBox(height: MichiTokens.space8),
-              _ConfidenceBadge(level: level),
-              if (selectedAnimal != null &&
-                  AppSound.forAnimal(selectedAnimal!) != null) ...[
-                const SizedBox(height: MichiTokens.space12),
-                FilledButton.tonalIcon(
-                  onPressed: saving ? null : onPlaySound,
-                  icon: const Icon(Icons.volume_up_outlined),
-                  label: const Text(TextosNino.escucharAnimal),
+              if (!reliable) ...[
+                const SizedBox(height: MichiTokens.space4),
+                Text(
+                  TextosNino.puedesCambiarlo,
+                  style: theme.textTheme.bodyMedium,
                 ),
               ],
               const SizedBox(height: MichiTokens.space12),
-              Text(
-                TextosNino.esEste,
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
+              _ConfidenceBadge(level: level),
+              if (selectedAnimal != null &&
+                  AppSound.forAnimal(selectedAnimal!) != null) ...[
+                const SizedBox(height: MichiTokens.space16),
+                FilledButton.tonalIcon(
+                  onPressed: saving ? null : onPlaySound,
+                  icon: const Icon(Icons.volume_up_rounded),
+                  label: const Text(TextosNino.escucharAnimal),
+                ),
+              ],
+              const SizedBox(height: MichiTokens.space20),
+              Text(TextosNino.esEste, style: theme.textTheme.titleMedium),
               const SizedBox(height: MichiTokens.space8),
               SizedBox(
                 height: MichiTokens.animalChoiceExtent,
@@ -495,32 +593,62 @@ class _ConfidenceBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    final (icon, label, color) = switch (level) {
+    final (icon, label, background, foreground) = switch (level) {
       ConfidenceLevel.sure => (
         Icons.sentiment_very_satisfied,
         TextosNino.nivelSeguro,
-        colors.secondary,
+        colors.secondaryContainer,
+        colors.onSecondaryContainer,
       ),
       ConfidenceLevel.almostSure => (
         Icons.sentiment_satisfied,
         TextosNino.nivelCasiSeguro,
+        colors.tertiaryContainer,
         colors.onTertiaryContainer,
       ),
       ConfidenceLevel.unsure => (
         Icons.help_outline,
         TextosNino.nivelNoLoSe,
-        colors.onTertiaryContainer,
+        colors.surfaceContainerHigh,
+        colors.onSurfaceVariant,
       ),
     };
     return Semantics(
       label: label,
       child: ExcludeSemantics(
-        child: Row(
-          children: [
-            Icon(icon, size: MichiTokens.iconSizeMedium, color: color),
-            const SizedBox(width: MichiTokens.space8),
-            Text(label, style: Theme.of(context).textTheme.titleMedium),
-          ],
+        // Una pastilla en vez de un icono suelto: la confianza se lee como una
+        // etiqueta, igual que los filtros de la colección.
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: DecoratedBox(
+            decoration: ShapeDecoration(
+              color: background,
+              shape: const StadiumBorder(),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: MichiTokens.space16,
+                vertical: MichiTokens.space8,
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    icon,
+                    size: MichiTokens.iconSizeMedium,
+                    color: foreground,
+                  ),
+                  const SizedBox(width: MichiTokens.space8),
+                  Text(
+                    label,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.titleMedium?.copyWith(color: foreground),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
       ),
     );

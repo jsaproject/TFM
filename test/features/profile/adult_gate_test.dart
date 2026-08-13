@@ -33,6 +33,13 @@ void main() {
 
     expect(unlocked, isFalse);
     expect(find.text(TextosAdulto.puertaAdultosError), findsOneWidget);
+    // El aviso es una frase entera: a una sola línea se cortaba en "Prueba
+    // otra v…" y el adulto no llegaba a leer qué hacer.
+    final aviso = tester.widget<Text>(
+      find.text(TextosAdulto.puertaAdultosError),
+    );
+    expect(aviso.maxLines, greaterThan(1));
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('abre los ajustes con el resultado correcto', (tester) async {

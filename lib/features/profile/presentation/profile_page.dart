@@ -364,15 +364,35 @@ class _ChildProfileCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     final name = displayName?.trim();
     return Card(
+      shape: MichiTokens.animalCardShape.copyWith(
+        side: BorderSide(
+          color: colors.outlineVariant,
+          width: MichiTokens.cardBorderWidth,
+        ),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(MichiTokens.space16),
         child: Row(
           children: [
-            CircleAvatar(
-              radius: MichiTokens.iconSizeLarge / 2,
-              child: const Icon(Icons.face_outlined),
+            Container(
+              width: MichiTokens.iconSizeLarge,
+              height: MichiTokens.iconSizeLarge,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [colors.primaryContainer, colors.tertiaryContainer],
+                ),
+              ),
+              child: Icon(
+                Icons.face_outlined,
+                size: MichiTokens.iconSizeMedium,
+                color: colors.onPrimaryContainer,
+              ),
             ),
             const SizedBox(width: MichiTokens.space16),
             Expanded(

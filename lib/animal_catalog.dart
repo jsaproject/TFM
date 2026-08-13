@@ -1,10 +1,10 @@
-import 'package:flutter/material.dart';
-
 /// Fuente única de los datos que se muestran en la colección.
 ///
 /// Los nombres deben coincidir exactamente con las claves de
 /// `assets/imagenet_animal_groups.json`: son la misma entidad vista desde el
 /// modelo y desde la interfaz.
+library;
+
 /// Dónde vive un animal, visto por un niño.
 ///
 /// Es lo que agrupa las medallas de "toda la granja", "todos los de casa" y
@@ -15,20 +15,26 @@ class Animal {
   const Animal({
     required this.name,
     required this.description,
-    required this.icon,
+    required this.emoji,
     this.habitat,
     this.imageAsset,
   });
 
   final String name;
   final String description;
-  final IconData icon;
+
+  /// Retrato del animal mientras no hay ilustración propia.
+  ///
+  /// Sustituye a los iconos de Material que se usaban antes: una colmena para
+  /// el oso o un triángulo para el rinoceronte no le dicen nada a un niño que
+  /// no lee, y un dibujo del animal sí.
+  final String emoji;
 
   /// Nulo solo en [legacyAnimalCatalog]: los grupos antiguos ya no cuentan
   /// para el progreso ni para las medallas.
   final AnimalHabitat? habitat;
 
-  /// Ilustración del catálogo. Nula mientras el grupo no tenga una propia.
+  /// Fotografía del catálogo. Nula mientras el grupo no tenga una propia.
   final String? imageAsset;
 }
 
@@ -40,186 +46,184 @@ List<Animal> animalsInHabitat(AnimalHabitat habitat) => [
 
 /// Los 28 animales que reconoce el modelo actual y que forman el progreso.
 ///
-/// Mientras no lleguen las ilustraciones, el icono es lo único que distingue a
-/// un animal de otro para un niño que no lee, así que ninguno repite icono
-/// dentro de esta lista (lo comprueba `test/animal_catalog_test.dart`). Son
-/// iconos de Material, no dibujos: se eligen por la pista que dan (las orejas
-/// del burro, la rueda del hámster, las rayas del tigre), no por parecido.
+/// Mientras no lleguen las fotografías, el retrato es lo único que distingue a
+/// un animal de otro para un niño que no lee, así que ninguno lo repite dentro
+/// de esta lista (lo comprueba `test/animal_catalog_test.dart`).
 const animalCatalog = <Animal>[
   Animal(
     name: 'Vaca',
     habitat: AnimalHabitat.granja,
     description: 'Tranquila, curiosa y experta en pastar.',
-    icon: Icons.agriculture,
+    emoji: '🐄',
     imageAsset: 'assets/vaca.jpg',
   ),
   Animal(
     name: 'Caballo',
     habitat: AnimalHabitat.granja,
     description: 'Rápido, fuerte y elegante.',
-    icon: Icons.directions_run,
+    emoji: '🐴',
     imageAsset: 'assets/caballo.jpg',
   ),
   Animal(
     name: 'Cerdo',
     habitat: AnimalHabitat.granja,
     description: 'Listo, sociable y con un gran olfato.',
-    icon: Icons.savings,
+    emoji: '🐖',
   ),
   Animal(
     name: 'Oveja',
     habitat: AnimalHabitat.granja,
     description: 'Su lana parece una nube calentita.',
-    icon: Icons.cloud_outlined,
+    emoji: '🐑',
     imageAsset: 'assets/oveja.jpg',
   ),
   Animal(
     name: 'Cabra',
     habitat: AnimalHabitat.granja,
     description: 'Inquieta, ágil y amiga de las alturas.',
-    icon: Icons.terrain,
+    emoji: '🐐',
   ),
   Animal(
     name: 'Burro',
     habitat: AnimalHabitat.granja,
     description: 'Paciente, resistente y de orejas larguísimas.',
-    icon: Icons.hearing,
+    emoji: '🫏',
   ),
   Animal(
     name: 'Gallina',
     habitat: AnimalHabitat.granja,
     description: 'Picotea, cacarea y cuida de sus pollitos.',
-    icon: Icons.egg_alt,
+    emoji: '🐔',
     imageAsset: 'assets/gallina.jpg',
   ),
   Animal(
     name: 'Pato',
     habitat: AnimalHabitat.granja,
     description: 'Nada, vuela y camina con mucho salero.',
-    icon: Icons.waves,
+    emoji: '🦆',
   ),
   Animal(
     name: 'Perro',
     habitat: AnimalHabitat.casa,
     description: 'Compañero fiel, juguetón y cariñoso.',
-    icon: Icons.pets,
+    emoji: '🐕',
     imageAsset: 'assets/perro.jpg',
   ),
   Animal(
     name: 'Gato',
     habitat: AnimalHabitat.casa,
     description: 'Curioso, suave y maestro de las siestas.',
-    icon: Icons.bedtime,
+    emoji: '🐈',
     imageAsset: 'assets/gato.jpg',
   ),
   Animal(
     name: 'Conejo',
     habitat: AnimalHabitat.casa,
     description: 'Orejas largas, nariz inquieta y grandes saltos.',
-    icon: Icons.cruelty_free,
+    emoji: '🐇',
   ),
   Animal(
     name: 'Hámster',
     habitat: AnimalHabitat.casa,
     description: 'Pequeño, redondito y siempre atareado.',
-    icon: Icons.autorenew,
+    emoji: '🐹',
   ),
   Animal(
     name: 'Tortuga',
     habitat: AnimalHabitat.casa,
     description: 'Lleva su casa siempre encima.',
-    icon: Icons.eco,
+    emoji: '🐢',
   ),
   Animal(
     name: 'Pez',
     habitat: AnimalHabitat.casa,
     description: 'Nada entre burbujas y colores.',
-    icon: Icons.set_meal,
+    emoji: '🐠',
   ),
   Animal(
     name: 'Loro',
     habitat: AnimalHabitat.casa,
     description: 'Plumas brillantes y una voz muy divertida.',
-    icon: Icons.flutter_dash,
+    emoji: '🦜',
   ),
   Animal(
     name: 'León',
     habitat: AnimalHabitat.salvaje,
     description: 'Una gran melena y un rugido impresionante.',
-    icon: Icons.brightness_7,
+    emoji: '🦁',
   ),
   Animal(
     name: 'Tigre',
     habitat: AnimalHabitat.salvaje,
     description: 'Cada tigre tiene un dibujo de rayas único.',
-    icon: Icons.line_weight,
+    emoji: '🐅',
   ),
   Animal(
     name: 'Elefante',
     habitat: AnimalHabitat.salvaje,
     description: 'Gigante amable con una trompa muy útil.',
-    icon: Icons.shower,
+    emoji: '🐘',
     imageAsset: 'assets/elefante.jpg',
   ),
   Animal(
     name: 'Jirafa',
     habitat: AnimalHabitat.salvaje,
     description: 'Su largo cuello alcanza las hojas más altas.',
-    icon: Icons.park_outlined,
+    emoji: '🦒',
   ),
   Animal(
     name: 'Cebra',
     habitat: AnimalHabitat.salvaje,
     description: 'Sus rayas no se repiten jamás.',
-    icon: Icons.contrast,
+    emoji: '🦓',
   ),
   Animal(
     name: 'Mono',
     habitat: AnimalHabitat.salvaje,
     description: 'Manos hábiles y mirada muy curiosa.',
-    icon: Icons.back_hand,
+    emoji: '🐒',
   ),
   Animal(
     name: 'Panda',
     habitat: AnimalHabitat.salvaje,
     description: 'Un oso blanco y negro al que le encanta el bambú.',
-    icon: Icons.forest,
+    emoji: '🐼',
   ),
   Animal(
     name: 'Oso',
     habitat: AnimalHabitat.salvaje,
     description: 'Grande, fuerte y sorprendentemente buen nadador.',
-    icon: Icons.hive,
+    emoji: '🐻',
   ),
   Animal(
     name: 'Hipopótamo',
     habitat: AnimalHabitat.salvaje,
     description: 'Pasa el día fresquito dentro del agua.',
-    icon: Icons.pool,
+    emoji: '🦛',
   ),
   Animal(
     name: 'Rinoceronte',
     habitat: AnimalHabitat.salvaje,
     description: 'Piel gruesa, gran cuerno y pasos poderosos.',
-    icon: Icons.change_history,
+    emoji: '🦏',
   ),
   Animal(
     name: 'Cocodrilo',
     habitat: AnimalHabitat.salvaje,
     description: 'Espera inmóvil bajo el agua.',
-    icon: Icons.visibility,
+    emoji: '🐊',
   ),
   Animal(
     name: 'Pingüino',
     habitat: AnimalHabitat.salvaje,
     description: 'Parece llevar esmoquin y nada rapidísimo.',
-    icon: Icons.ac_unit,
+    emoji: '🐧',
   ),
   Animal(
     name: 'Koala',
     habitat: AnimalHabitat.salvaje,
     description: 'Abraza los eucaliptos y duerme muchas horas.',
-    icon: Icons.spa,
+    emoji: '🐨',
   ),
 ];
 
@@ -230,222 +234,218 @@ const legacyAnimalCatalog = <Animal>[
   Animal(
     name: 'Anfibio',
     description: 'Vive entre el agua y la tierra.',
-    icon: Icons.water,
+    emoji: '🐸',
   ),
   Animal(
     name: 'Antílope',
     description: 'Corredor veloz de las praderas.',
-    icon: Icons.terrain,
+    emoji: '🦌',
   ),
   Animal(
     name: 'Araña y escorpión',
     description: 'Ocho patas y mucha paciencia.',
-    icon: Icons.bug_report,
+    emoji: '🕷️',
     imageAsset: 'assets/arana.jpg',
   ),
   Animal(
     name: 'Ave acuática',
     description: 'Nada, vuela y anida junto al agua.',
-    icon: Icons.waves,
+    emoji: '🦢',
   ),
   Animal(
     name: 'Ave de corral',
     description: 'Un ave habitual de la granja.',
-    icon: Icons.egg_alt,
+    emoji: '🐔',
     imageAsset: 'assets/gallina.jpg',
   ),
   Animal(
     name: 'Ave pequeña',
     description: 'Pequeña, inquieta y cantarina.',
-    icon: Icons.flutter_dash,
+    emoji: '🐦',
   ),
   Animal(
     name: 'Ave rapaz',
     description: 'Vista afilada y vuelo silencioso.',
-    icon: Icons.air,
+    emoji: '🦅',
   ),
   Animal(
     name: 'Avestruz',
     description: 'El ave más grande, y no vuela.',
-    icon: Icons.flutter_dash,
+    emoji: '🪶',
   ),
   Animal(
     name: 'Bovino',
     description: 'Una tranquila habitante de la granja.',
-    icon: Icons.agriculture,
+    emoji: '🐄',
     imageAsset: 'assets/vaca.jpg',
   ),
   Animal(
     name: 'Caballo',
     description: 'Rápido, fuerte y elegante.',
-    icon: Icons.pets,
+    emoji: '🐴',
     imageAsset: 'assets/caballo.jpg',
   ),
   Animal(
     name: 'Camello y llama',
     description: 'Aguanta lo que haga falta.',
-    icon: Icons.terrain,
+    emoji: '🐪',
   ),
   Animal(
     name: 'Cebra',
     description: 'Sus rayas no se repiten jamás.',
-    icon: Icons.pets,
+    emoji: '🦓',
   ),
   Animal(
     name: 'Cerdo',
     description: 'Listo, sociable y con buen olfato.',
-    icon: Icons.savings,
+    emoji: '🐖',
   ),
   Animal(
     name: 'Cocodrilo',
     description: 'Espera inmóvil bajo el agua.',
-    icon: Icons.water,
+    emoji: '🐊',
   ),
   Animal(
     name: 'Conejo y liebre',
     description: 'Orejas largas y salto rápido.',
-    icon: Icons.cruelty_free,
+    emoji: '🐇',
   ),
   Animal(
     name: 'Crustáceo',
     description: 'Caparazón duro y pinzas firmes.',
-    icon: Icons.set_meal,
+    emoji: '🦀',
   ),
   Animal(
     name: 'Elefante',
     description: 'El mamífero terrestre más grande.',
-    icon: Icons.pets,
+    emoji: '🐘',
     imageAsset: 'assets/elefante.jpg',
   ),
   Animal(
     name: 'Escarabajo',
     description: 'Coraza brillante y andar tranquilo.',
-    icon: Icons.bug_report,
+    emoji: '🪲',
   ),
   Animal(
     name: 'Felino salvaje',
     description: 'El sigilo hecho músculo.',
-    icon: Icons.pets,
+    emoji: '🐆',
   ),
   Animal(
     name: 'Gato',
     description: 'Curioso, ágil e independiente.',
-    icon: Icons.pets,
+    emoji: '🐈',
     imageAsset: 'assets/gato.jpg',
   ),
   Animal(
     name: 'Hipopótamo',
     description: 'Enorme y sorprendentemente rápido.',
-    icon: Icons.water,
+    emoji: '🦛',
   ),
   Animal(
     name: 'Invertebrado marino',
     description: 'Vida sin huesos en el fondo del mar.',
-    icon: Icons.waves,
+    emoji: '🦑',
   ),
   Animal(
     name: 'Lagarto',
     description: 'Toma el sol sobre las piedras.',
-    icon: Icons.terrain,
+    emoji: '🦎',
   ),
   Animal(
     name: 'Lobo y zorro',
     description: 'El pariente salvaje del perro.',
-    icon: Icons.forest,
+    emoji: '🐺',
   ),
   Animal(
     name: 'Loro',
     description: 'Colorido, ruidoso y muy listo.',
-    icon: Icons.flutter_dash,
+    emoji: '🦜',
   ),
   Animal(
     name: 'Mamífero marino',
     description: 'Respira aire y vive en el mar.',
-    icon: Icons.waves,
+    emoji: '🐬',
   ),
   Animal(
     name: 'Mariposa',
     description: 'Un insecto de alas llenas de color.',
-    icon: Icons.flutter_dash,
+    emoji: '🦋',
     imageAsset: 'assets/mariposa.jpg',
   ),
   Animal(
     name: 'Marsupial',
     description: 'Cría a sus hijos en una bolsa.',
-    icon: Icons.pets,
+    emoji: '🦘',
   ),
   Animal(
     name: 'Molusco',
     description: 'Cuerpo blando, a veces con concha.',
-    icon: Icons.set_meal,
+    emoji: '🐌',
   ),
   Animal(
     name: 'Mustélido',
     description: 'Cuerpo alargado y mucha energía.',
-    icon: Icons.pets,
+    emoji: '🦡',
   ),
-  Animal(
-    name: 'Oso',
-    description: 'Grande, fuerte y goloso.',
-    icon: Icons.pets,
-  ),
+  Animal(name: 'Oso', description: 'Grande, fuerte y goloso.', emoji: '🐻'),
   Animal(
     name: 'Otros insectos',
     description: 'Seis patas y un mundo por descubrir.',
-    icon: Icons.hive,
+    emoji: '🐜',
   ),
   Animal(
     name: 'Otros mamíferos',
     description: 'No encaja en ningún grupo, y ahí está su gracia.',
-    icon: Icons.pets,
+    emoji: '🐾',
   ),
   Animal(
     name: 'Ovino y caprino',
     description: 'Su lana la protege del frío.',
-    icon: Icons.agriculture,
+    emoji: '🐑',
     imageAsset: 'assets/oveja.jpg',
   ),
   Animal(
     name: 'Perro',
     description: 'Un compañero fiel y juguetón.',
-    icon: Icons.pets,
+    emoji: '🐕',
     imageAsset: 'assets/perro.jpg',
   ),
   Animal(
     name: 'Pez',
     description: 'Respira bajo el agua con branquias.',
-    icon: Icons.set_meal,
+    emoji: '🐟',
   ),
   Animal(
     name: 'Pingüino',
     description: 'Nada mejor de lo que camina.',
-    icon: Icons.ac_unit,
+    emoji: '🐧',
   ),
   Animal(
     name: 'Primate',
     description: 'Manos hábiles y mirada curiosa.',
-    icon: Icons.pets,
+    emoji: '🐒',
   ),
   Animal(
     name: 'Roedor',
     description: 'Pequeño, veloz y recolector.',
-    icon: Icons.forest,
+    emoji: '🐿️',
     imageAsset: 'assets/ardilla.jpg',
   ),
   Animal(
     name: 'Serpiente',
     description: 'Se mueve sin patas y sin ruido.',
-    icon: Icons.grass,
+    emoji: '🐍',
   ),
   Animal(
     name: 'Tiburón y raya',
     description: 'Esqueleto de cartílago, no de hueso.',
-    icon: Icons.set_meal,
+    emoji: '🦈',
   ),
   Animal(
     name: 'Tortuga',
     description: 'Lleva su casa siempre encima.',
-    icon: Icons.eco,
+    emoji: '🐢',
   ),
 ];
 

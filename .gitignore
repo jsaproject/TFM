@@ -49,3 +49,6 @@ ml/mobile_smoke/**/.gradle/
 ml/reports/pilot*/contact_sheets/
 ml/reports/pilot*/manifest.jsonl
 ml/reports/pilot*/review.csv
+
+# Capturas de diseño: se regeneran a mano y cada máquina pinta distinto.
+test/design/goldens/

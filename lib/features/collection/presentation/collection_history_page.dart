@@ -1,5 +1,6 @@
 import 'package:animalspredictor/animal_catalog.dart';
 import 'package:animalspredictor/app_theme.dart';
+import 'package:animalspredictor/features/collection/presentation/animal_image.dart';
 import 'package:animalspredictor/features/collection/presentation/prediction_edit_action.dart';
 import 'package:animalspredictor/l10n/textos.dart';
 import 'package:animalspredictor/services/collection_repository.dart';
@@ -110,7 +111,7 @@ class _PredictionHistoryListState extends State<PredictionHistoryList> {
       padding: const EdgeInsets.only(bottom: MichiTokens.space8),
       child: Card(
         child: ListTile(
-          leading: Icon(animal?.icon ?? Icons.pets),
+          leading: AnimalAvatar(animal: animal),
           title: Text(prediction.animal),
           subtitle: Text(_dateLabel(prediction.createdAt)),
           trailing: isUpdating

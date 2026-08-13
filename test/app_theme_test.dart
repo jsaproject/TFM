@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('aplica Andika a los temas claro y oscuro', () {
+  test('reparte las dos familias: Andika titula y Atkinson lee', () {
     for (final theme in [MichiTheme.light(), MichiTheme.dark()]) {
       for (final style in [
         theme.textTheme.displaySmall,
@@ -13,11 +13,31 @@ void main() {
         theme.textTheme.headlineSmall,
         theme.textTheme.titleLarge,
         theme.textTheme.titleMedium,
+        theme.textTheme.titleSmall,
+      ]) {
+        expect(style?.fontFamily, MichiTokens.fontFamily);
+      }
+      for (final style in [
         theme.textTheme.bodyLarge,
+        theme.textTheme.bodyMedium,
+        theme.textTheme.bodySmall,
+        theme.textTheme.labelLarge,
+        theme.textTheme.labelMedium,
+      ]) {
+        expect(style?.fontFamily, MichiTokens.fontFamilyLectura);
+      }
+    }
+  });
+
+  test('escribe todos los textos con el color del tema', () {
+    for (final theme in [MichiTheme.light(), MichiTheme.dark()]) {
+      for (final style in [
+        theme.textTheme.headlineSmall,
+        theme.textTheme.titleLarge,
         theme.textTheme.bodyMedium,
         theme.textTheme.labelLarge,
       ]) {
-        expect(style?.fontFamily, MichiTokens.fontFamily);
+        expect(style?.color, theme.colorScheme.onSurface);
       }
     }
   });

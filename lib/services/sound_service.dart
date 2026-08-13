@@ -75,6 +75,20 @@ abstract class SoundService {
   Future<void> dispose();
 }
 
+/// Lo único que [AudioPlayersSoundService] necesita de un reproductor.
+///
+/// Existe para poder sustituir `audioplayers` en los tests: el plugin nativo
+/// no está disponible fuera del móvil.
+abstract class SoundPlayer {
+  /// Reproduce un audio empaquetado, desde el principio.
+  Future<void> play(String asset);
+
+  /// Corta lo que estuviera sonando y deja el audio rebobinado.
+  Future<void> stop();
+
+  Future<void> dispose();
+}
+
 /// No suena nada. Es lo que se usa en los tests y en las plataformas donde no
 /// hay reproductor.
 class SilentSoundService implements SoundService {
@@ -88,22 +102,32 @@ class SilentSoundService implements SoundService {
 }
 
 class AudioPlayersSoundService implements SoundService {
-  AudioPlayersSoundService({AudioPlayer Function()? createPlayer})
-    : _createPlayer = createPlayer ?? AudioPlayer.new;
+  AudioPlayersSoundService({SoundPlayer? player})
+    : _player = player ?? AudioPlayersSoundPlayer();
 
-  /// El reproductor se crea con el primer sonido, no al arrancar: así el
-  /// plugin nativo solo entra en juego si de verdad va a sonar algo.
-  final AudioPlayer Function() _createPlayer;
-  AudioPlayer? _player;
+  final SoundPlayer _player;
+
+  /// Los toques de un niño llegan más rápido que el audio. Encadenar las
+  /// peticiones evita que dos sonidos se pisen a medio preparar.
+  Future<void> _pending = Future<void>.value();
   bool _disposed = false;
 
   @override
-  Future<void> play(AppSound sound) async {
+  Future<void> play(AppSound sound) {
+    if (_disposed) return Future<void>.value();
+    return _pending = _pending.then((_) => _playNow(sound));
+  }
+
+  Future<void> _playNow(AppSound sound) async {
     if (_disposed) return;
     try {
-      final player = await _ready();
+      // Parar antes de sonar no es un adorno: el reproductor de baja latencia
+      // no rebobina solo al terminar, así que sin esto el mismo sonido dos
+      // veces seguidas (abrir el mismo animal, volver y abrirlo otra vez) se
+      // queda mudo la segunda vez.
+      await _player.stop();
       if (_disposed) return;
-      await player.play(AssetSource(sound.asset));
+      await _player.play(sound.asset);
     } catch (error, stackTrace) {
       // Que no suene un audio no puede tumbar la pantalla ni merece un
       // aviso al niño: se deja rastro para el desarrollador y se sigue.
@@ -116,6 +140,40 @@ class AudioPlayersSoundService implements SoundService {
         ),
       );
     }
+  }
+
+  @override
+  Future<void> dispose() async {
+    if (_disposed) return;
+    _disposed = true;
+    // Se deja terminar lo que estuviera en marcha para no soltar el
+    // reproductor a media preparación.
+    await _pending;
+    await _player.dispose();
+  }
+}
+
+/// Reproductor real, sobre `audioplayers`.
+class AudioPlayersSoundPlayer implements SoundPlayer {
+  AudioPlayersSoundPlayer({AudioPlayer Function()? createPlayer})
+    : _createPlayer = createPlayer ?? AudioPlayer.new;
+
+  /// El reproductor se crea con el primer sonido, no al arrancar: así el
+  /// plugin nativo solo entra en juego si de verdad va a sonar algo.
+  final AudioPlayer Function() _createPlayer;
+  AudioPlayer? _player;
+
+  @override
+  Future<void> play(String asset) async {
+    final player = await _ready();
+    await player.play(AssetSource(asset));
+  }
+
+  @override
+  Future<void> stop() async {
+    // Sin reproductor no hay nada que parar, y crearlo aquí solo para pararlo
+    // encendería el plugin nativo antes de tiempo.
+    await _player?.stop();
   }
 
   Future<AudioPlayer> _ready() async {
@@ -134,8 +192,8 @@ class AudioPlayersSoundService implements SoundService {
 
   @override
   Future<void> dispose() async {
-    if (_disposed) return;
-    _disposed = true;
-    await _player?.dispose();
+    final player = _player;
+    _player = null;
+    await player?.dispose();
   }
 }

@@ -1,6 +1,7 @@
 import 'package:animalspredictor/animal_catalog.dart';
 import 'package:animalspredictor/app_theme.dart';
 import 'package:animalspredictor/features/collection/presentation/animal_image.dart';
+import 'package:animalspredictor/features/collection/presentation/animal_name.dart';
 import 'package:animalspredictor/l10n/textos.dart';
 import 'package:flutter/material.dart';
 
@@ -32,14 +33,14 @@ class AnimalChoiceCard extends StatelessWidget {
       child: ExcludeSemantics(
         child: Card(
           color: selected ? colors.primaryContainer : null,
-          shape: selected
-              ? MichiTokens.animalCardShape.copyWith(
-                  side: BorderSide(
-                    color: colors.primary,
-                    width: MichiTokens.selectionBorderWidth,
-                  ),
-                )
-              : MichiTokens.animalCardShape,
+          shape: MichiTokens.animalCardShape.copyWith(
+            side: BorderSide(
+              color: selected ? colors.primary : colors.outlineVariant,
+              width: selected
+                  ? MichiTokens.selectionBorderWidth
+                  : MichiTokens.cardBorderWidth,
+            ),
+          ),
           child: InkWell(
             onTap: onTap,
             child: Column(
@@ -48,16 +49,22 @@ class AnimalChoiceCard extends StatelessWidget {
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
-                      AnimalImage(animal: animal),
+                      AnimalPortrait(animal: animal),
                       if (selected)
                         Align(
                           alignment: Alignment.topRight,
                           child: Padding(
-                            padding: const EdgeInsets.all(MichiTokens.space4),
-                            child: Icon(
-                              Icons.check_circle,
-                              size: MichiTokens.iconSizeMedium,
-                              color: colors.primary,
+                            padding: const EdgeInsets.all(MichiTokens.space8),
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: colors.primary,
+                              ),
+                              child: Icon(
+                                Icons.check,
+                                size: MichiTokens.iconSizeSmall,
+                                color: colors.onPrimary,
+                              ),
                             ),
                           ),
                         ),
@@ -65,13 +72,14 @@ class AnimalChoiceCard extends StatelessWidget {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(MichiTokens.space8),
-                  child: Text(
-                    animal.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: MichiTokens.space8,
+                    vertical: MichiTokens.space12,
+                  ),
+                  child: AnimalName(
+                    name: animal.name,
                     style: Theme.of(context).textTheme.titleMedium,
+                    color: selected ? colors.onPrimaryContainer : null,
                   ),
                 ),
               ],
