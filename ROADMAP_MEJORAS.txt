@@ -89,7 +89,7 @@ Estado: completada.
 
 [x] Instalar GGA v2.10.1 y usar Codex como proveedor.
 [x] Versionar .gga, AGENTS.md y reglas Flutter/Firebase/ML.
-[x] Instalar y verificar el hook pre-commit local.
+[x] Instalar y verificar hooks locales: checks deterministas pre-commit y GGA pre-push.
 [x] Mantener CI determinista con formato, análisis, tests y build.
 [x] Validar una revisión real sobre código Dart con STATUS: PASSED.
 
@@ -178,27 +178,28 @@ FASE 5 — PERFIL, AJUSTES Y PRIVACIDAD
 -------------------------------------
 Duración estimada: 1-2 días.
 
-[ ] Perfil con datos mínimos de cuenta y estado de invitado.
-[ ] Mover cierre de sesión a Perfil.
-[ ] Tema claro, oscuro y sistema.
-[ ] Preferencia de feedback háptico.
-[ ] Estado de permisos con acceso a Ajustes.
-[ ] Política de privacidad: fotos locales y datos guardados en Firestore.
-[ ] Eliminación de cuenta y colección con confirmación y reautenticación.
-[ ] Información del modelo: versión, clases y limitaciones.
-[ ] No introducir analítica sin consentimiento explícito.
+[x] Perfil con datos mínimos de cuenta y estado de invitado.
+[x] Mover cierre de sesión a Perfil.
+[x] Tema claro, oscuro y sistema.
+[x] Preferencia de feedback háptico.
+[x] Estado de permisos con acceso a Ajustes.
+[x] Política de privacidad: fotos locales y datos guardados en Firestore.
+[x] Eliminación de cuenta y colección con confirmación y reautenticación.
+[x] Información del modelo: versión, clases y limitaciones.
+[x] No introducir analítica sin consentimiento explícito.
 
 
 FASE 6 — ACCESIBILIDAD, TESTS Y RENDIMIENTO
 -------------------------------------------
 Duración estimada: 3-5 días.
+Estado: en curso.
 
 [ ] Validar contraste AA, foco, teclado, lector de pantalla y texto al 200%.
 [ ] Golden tests de login, inicio, resultado, colección y perfil en dos tamaños.
 [ ] Tests de repositorios con fakes/emulador Firestore.
 [ ] Smoke test Android: login, foto, confirmación, colección y logout.
 [ ] Medir arranque, inferencia, memoria, jank y tamaño APK/AAB.
-[ ] Definir presupuestos de rendimiento y tamaño.
+[x] Definir presupuestos de rendimiento y tamaño.
 [ ] Migrar Firebase y permission_handler por grupos pequeños.
 [ ] Revisar permisos Android/iOS y eliminar los innecesarios.
 [ ] Evaluar Crashlytics u otra herramienta sin registrar datos sensibles.

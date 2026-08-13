@@ -1,6 +1,6 @@
 # Gentleman Guardian Angel en TFM
 
-Este repositorio usa [Gentleman Guardian Angel](https://github.com/Gentleman-Programming/gentleman-guardian-angel) como revisor IA pre-commit. GGA revisa exclusivamente los archivos staged contra `AGENTS.md`; no sustituye a `dart format`, `flutter analyze`, los tests ni el build de CI.
+Este repositorio usa [Gentleman Guardian Angel](https://github.com/Gentleman-Programming/gentleman-guardian-angel) como revisor IA antes de publicar cambios. El pre-commit ejecuta comprobaciones deterministas y el pre-push usa GGA contra `AGENTS.md`; no sustituye al build de CI.
 
 ## Configuración del proyecto
 
@@ -9,7 +9,7 @@ Este repositorio usa [Gentleman Guardian Angel](https://github.com/Gentleman-Pro
 - Reglas especializadas: `docs/code-review/`.
 - Configuración: `.gga`.
 - Modo estricto: una respuesta ambigua o un fallo del proveedor bloquea el commit.
-- Timeout diario: 300 segundos.
+- Timeout máximo del proveedor: 300 segundos.
 - Tests Dart incluidos en la revisión; archivos generados, secretos locales y configuración Firebase generada excluidos.
 
 ## Preparación de una máquina nueva
@@ -20,10 +20,16 @@ Este repositorio usa [Gentleman Guardian Angel](https://github.com/Gentleman-Pro
 
 ```bash
 gga config
-gga install
+git config --local core.hooksPath .githooks
 ```
 
-4. Confirmar que `.git/hooks/pre-commit` contiene el bloque delimitado por `GGA START` y `GGA END`.
+4. Confirmar que Git usa los hooks versionados:
+
+```bash
+git config --get core.hooksPath
+```
+
+Debe devolver `.githooks`. El pre-commit ejecuta formato, análisis y tests; el pre-push ejecuta GGA en modo CI sobre los commits desde el upstream.
 
 La instalación local validada usa GGA `v2.10.1`. Al actualizar GGA, revisar primero su changelog y volver a ejecutar una prueba pequeña.
 
@@ -36,7 +42,7 @@ git add <archivos>
 git commit -m "tipo: descripción"
 ```
 
-El hook llama a `gga run`. También puede ejecutarse manualmente:
+Al confirmar, Git ejecuta formato, análisis y tests. Al publicar, Git ejecuta GGA. También puede ejecutarse manualmente:
 
 ```bash
 gga run --no-cache
@@ -48,11 +54,11 @@ Mantener los commits pequeños y centrados en una responsabilidad. Una auditorí
 
 ## Si una revisión supera el tiempo límite
 
-El hook usa `exec gga run`, por lo que Git recibe directamente el resultado de
-la revisión. Si Codex no responde antes del valor `TIMEOUT` configurado (300
-segundos), el commit falla de forma segura: no se crea ningún commit y no hay
-que desinstalar ni omitir el hook. Divide el cambio en commits coherentes,
-vuelve a ejecutar las comprobaciones deterministas y repite el commit.
+El pre-push usa `gga run --ci`, por lo que Git recibe directamente el resultado
+de la revisión. Si Codex no responde antes del valor `TIMEOUT` configurado (300
+segundos), el push falla de forma segura, pero el commit local se conserva.
+Reintenta cuando el proveedor responda o ejecuta `gga run --ci` manualmente
+para diagnosticarlo. No omitas el hook como solución habitual.
 
 ## Qué bloquea
 
@@ -66,7 +72,7 @@ vuelve a ejecutar las comprobaciones deterministas y repite el commit.
 
 ## Validación determinista
 
-Antes de publicar una rama o PR también deben pasar:
+El pre-commit ejecuta los tres primeros comandos. Antes de publicar una rama o PR también deben pasar:
 
 ```bash
 dart format --output=none --set-exit-if-changed .

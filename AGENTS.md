@@ -10,6 +10,7 @@
 
 - Flutter and Dart rules: `docs/code-review/flutter-dart.md`
 - Firebase and on-device ML rules: `docs/code-review/firebase-ml.md`
+- Classifier model, contract and how to extend it: `docs/MODELO.md`
 - Modernization direction: `ROADMAP_MEJORAS.txt`
 
 ## Critical rules
