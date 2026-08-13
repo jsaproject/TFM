@@ -1,0 +1,112 @@
+{
+  "schema_version": 1,
+  "model_id": "wkcn/TinyCLIP-ViT-39M-16-Text-19M-YFCC15M",
+  "model_revision": "07a4b0bc751cb64fecd2b661c048c1dd98d69444",
+  "weights_sha256": "112bdfb07ebc8994e9afba7a2a314e278493a675033595cf48e54cf8a17ae587",
+  "catalog_version": 1,
+  "catalog_sha256": "9dc195148c003aff7becd63a450fbe892a2ace5c781ab581993c727da58bc971",
+  "class_ids": [
+    "vaca",
+    "caballo",
+    "cerdo",
+    "oveja",
+    "cabra",
+    "burro",
+    "gallina",
+    "pato",
+    "perro",
+    "gato",
+    "conejo",
+    "hamster",
+    "tortuga",
+    "pez",
+    "loro",
+    "leon",
+    "tigre",
+    "elefante",
+    "jirafa",
+    "cebra",
+    "mono",
+    "panda",
+    "oso",
+    "hipopotamo",
+    "rinoceronte",
+    "cocodrilo",
+    "pinguino",
+    "koala"
+  ],
+  "display_names": [
+    "Vaca",
+    "Caballo",
+    "Cerdo",
+    "Oveja",
+    "Cabra",
+    "Burro",
+    "Gallina",
+    "Pato",
+    "Perro",
+    "Gato",
+    "Conejo",
+    "Hámster",
+    "Tortuga",
+    "Pez",
+    "Loro",
+    "León",
+    "Tigre",
+    "Elefante",
+    "Jirafa",
+    "Cebra",
+    "Mono",
+    "Panda",
+    "Oso",
+    "Hipopótamo",
+    "Rinoceronte",
+    "Cocodrilo",
+    "Pingüino",
+    "Koala"
+  ],
+  "fallback_id": "otro",
+  "input": {
+    "shape": [
+      1,
+      224,
+      224,
+      3
+    ],
+    "layout": "NHWC_RGB",
+    "resize": "shortest_edge_224_then_center_crop_224",
+    "resample": "bicubic",
+    "scale": "pixel_divided_by_255",
+    "mean": [
+      0.48145466,
+      0.4578275,
+      0.40821073
+    ],
+    "std": [
+      0.26862954,
+      0.26130258,
+      0.27577711
+    ]
+  },
+  "output": {
+    "shape": [
+      1,
+      28
+    ],
+    "value": "cosine_similarity",
+    "softmax_logit_scale": 50.0043182
+  },
+  "rejection": {
+    "minimum_similarity": 0.2091085,
+    "minimum_margin": 0.0
+  },
+  "runtime": {
+    "format": "tflite",
+    "precision": "dynamic_range_int8",
+    "delegate": "xnnpack"
+  },
+  "artifact": {
+    "file": "tinyclip_39m_classifier.tflite",
+    "sha256": "39210f9c865a27ee936c7ae6990743382c490b6318f7c3addcf9ca1b0c786460"
+  }
+}

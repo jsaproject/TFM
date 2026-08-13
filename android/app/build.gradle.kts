@@ -16,7 +16,10 @@ if (releasePropertiesFile.exists()) {
 
 android {
     namespace = "com.tfm.animalspredictor"
-    compileSdk = flutter.compileSdkVersion
+    // permission_handler_android 14 requiere compilar contra Android API 37.
+    // targetSdk se mantiene gestionado por Flutter para no introducir cambios
+    // de comportamiento en tiempo de ejecución junto con esta actualización.
+    compileSdk = 37
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -33,6 +36,7 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     signingConfigs {
@@ -47,6 +51,11 @@ android {
     }
 
     buildTypes {
+        debug {
+            // Permite probar la modernización junto a una instalación antigua
+            // firmada con otra clave, sin desinstalarla ni perder sus datos.
+            applicationIdSuffix = ".debug"
+        }
         release {
             // El plugin TFLite heredado referencia delegados GPU opcionales que
             // R8 no puede resolver. Se conserva el código nativo sin minimizar.
@@ -77,4 +86,10 @@ kotlin {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    implementation("org.tensorflow:tensorflow-lite:2.17.0")
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    androidTestImplementation("androidx.test:runner:1.6.2")
 }
