@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:animalspredictor/animal_catalog.dart';
 import 'package:animalspredictor/app_theme.dart';
 import 'package:animalspredictor/features/collection/presentation/animal_detail_page.dart';
@@ -6,9 +8,11 @@ import 'package:animalspredictor/features/collection/presentation/animal_selecto
 import 'package:animalspredictor/features/collection/presentation/collection_history_page.dart';
 import 'package:animalspredictor/features/collection/presentation/collection_progress.dart';
 import 'package:animalspredictor/features/collection/presentation/prediction_edit_action.dart';
+import 'package:animalspredictor/features/profile/data/settings_repository.dart';
 import 'package:animalspredictor/l10n/textos.dart';
 import 'package:animalspredictor/models/user_collection.dart';
 import 'package:animalspredictor/services/collection_repository.dart';
+import 'package:animalspredictor/services/sound_service.dart';
 import 'package:flutter/material.dart';
 
 /// Solo dos filtros: para un niño, "los que tengo" y "los que faltan" son las
@@ -21,12 +25,14 @@ class CollectionPage extends StatefulWidget {
     required this.userId,
     required this.isAnonymous,
     required this.repository,
+    required this.settings,
     required this.onStartIdentifying,
   });
 
   final String userId;
   final bool isAnonymous;
   final CollectionRepository repository;
+  final SettingsController settings;
   final VoidCallback onStartIdentifying;
 
   @override
@@ -96,6 +102,21 @@ class _CollectionPageState extends State<CollectionPage> {
 
   void _retry() => setState(() => _refreshKey++);
 
+  void _openAnimal(Animal animal) {
+    final sound = AppSound.forAnimal(animal.name);
+    if (sound != null) unawaited(widget.settings.playSound(sound));
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => AnimalDetailPage(
+          animal: animal,
+          repository: widget.repository,
+          userId: widget.userId,
+          onEdit: _editPrediction,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (widget.isAnonymous) return const _GuestCollection();
@@ -115,16 +136,7 @@ class _CollectionPageState extends State<CollectionPage> {
           collection: collection,
           filter: _filter,
           onFilterChanged: (filter) => setState(() => _filter = filter),
-          onOpenAnimal: (animal) => Navigator.of(context).push(
-            MaterialPageRoute<void>(
-              builder: (_) => AnimalDetailPage(
-                animal: animal,
-                repository: widget.repository,
-                userId: widget.userId,
-                onEdit: _editPrediction,
-              ),
-            ),
-          ),
+          onOpenAnimal: _openAnimal,
           onOpenHistory: () => Navigator.of(context).push(
             MaterialPageRoute<void>(
               builder: (_) => CollectionHistoryPage(

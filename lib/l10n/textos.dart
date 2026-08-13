@@ -60,6 +60,7 @@ abstract final class TextosNino {
   static const nivelSeguro = 'Seguro';
   static const nivelCasiSeguro = 'Casi seguro';
   static const nivelNoLoSe = 'No lo sé';
+  static const escucharAnimal = 'Escuchar su voz';
   static const tambienPuedeSer = 'También puede ser';
   static const esEste = 'Es este';
   static const esOtro = 'Es otro';
@@ -212,6 +213,7 @@ abstract final class TextosNino {
     nivelSeguro,
     nivelCasiSeguro,
     nivelNoLoSe,
+    escucharAnimal,
     tambienPuedeSer,
     esEste,
     esOtro,
@@ -385,8 +387,8 @@ abstract final class TextosAdulto {
       'Vibrar brevemente al confirmar acciones compatibles.';
   static const sonidoTitulo = 'Sonidos';
   static const sonidoTexto =
-      'Campanillas al reconocer un animal, al guardarlo y al ganar una '
-      'medalla. Si el dispositivo está en silencio, no suenan.';
+      'Voces reales de animales y campanillas al guardar o ganar una medalla. '
+      'Si el dispositivo está en silencio, no suenan.';
   static const permisosTitulo = 'Permisos';
   static const permisoCamara = 'Cámara';
   static const permisoFotos = 'Fotos';

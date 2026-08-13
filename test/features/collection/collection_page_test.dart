@@ -1,18 +1,32 @@
 import 'package:animalspredictor/animal_catalog.dart';
 import 'package:animalspredictor/features/collection/presentation/collection_page.dart';
+import 'package:animalspredictor/features/profile/data/settings_repository.dart';
 import 'package:animalspredictor/l10n/textos.dart';
 import 'package:animalspredictor/models/user_collection.dart';
 import 'package:animalspredictor/services/collection_repository.dart';
+import 'package:animalspredictor/services/sound_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  late SettingsController settings;
+  late _RecordingSoundService sounds;
+
+  setUp(() async {
+    sounds = _RecordingSoundService();
+    settings = SettingsController(_SettingsRepositoryStub(), sounds: sounds);
+    await settings.load();
+  });
+
+  tearDown(() => settings.dispose());
+
   Widget buildPage(_CollectionRepositoryStub repository) => MaterialApp(
     home: Scaffold(
       body: CollectionPage(
         userId: 'user-1',
         isAnonymous: false,
         repository: repository,
+        settings: settings,
         onStartIdentifying: () {},
       ),
     ),
@@ -109,6 +123,7 @@ void main() {
       findsOneWidget,
     );
     expect(find.text(TextosNino.tusFotosDe('Vaca')), findsOneWidget);
+    expect(sounds.played, [AppSound.cow]);
   });
 
   testWidgets('enseña las medallas ganadas y las que faltan', (tester) async {
@@ -162,6 +177,30 @@ void main() {
     );
     semantics.dispose();
   });
+}
+
+class _RecordingSoundService implements SoundService {
+  final played = <AppSound>[];
+
+  @override
+  Future<void> play(AppSound sound) async => played.add(sound);
+
+  @override
+  Future<void> dispose() async {}
+}
+
+class _SettingsRepositoryStub implements SettingsRepository {
+  @override
+  Future<ProfileSettings> load() async => const ProfileSettings();
+
+  @override
+  Future<void> saveHapticsEnabled(bool enabled) async {}
+
+  @override
+  Future<void> saveSoundEnabled(bool enabled) async {}
+
+  @override
+  Future<void> saveTheme(AppThemePreference theme) async {}
 }
 
 class _CollectionRepositoryStub implements CollectionRepository {

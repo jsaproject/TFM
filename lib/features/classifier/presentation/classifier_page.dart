@@ -65,7 +65,9 @@ class _ClassifierPageState extends State<ClassifierPage> {
     final state = widget.controller.state;
     if (state.status != _lastStatus) {
       if (state.status == ClassifierStatus.success) {
-        unawaited(widget.settings.playSound(AppSound.success));
+        final animal = state.prediction?.animal;
+        final sound = animal == null ? null : AppSound.forAnimal(animal);
+        unawaited(widget.settings.playSound(sound ?? AppSound.success));
       }
       _lastStatus = state.status;
       // El fallo al guardar es de la foto anterior: en cuanto cambia el
@@ -91,6 +93,12 @@ class _ClassifierPageState extends State<ClassifierPage> {
     );
     if (!mounted || chosen == null) return;
     setState(() => _selectedAnimal = chosen);
+  }
+
+  void _playSelectedAnimalSound() {
+    final animal = _selectedAnimal;
+    final sound = animal == null ? null : AppSound.forAnimal(animal);
+    if (sound != null) unawaited(widget.settings.playSound(sound));
   }
 
   Future<void> _confirm() async {
@@ -159,6 +167,7 @@ class _ClassifierPageState extends State<ClassifierPage> {
                       onChanged: (value) =>
                           setState(() => _selectedAnimal = value),
                       onChooseAnimal: _chooseAnimal,
+                      onPlaySound: _playSelectedAnimalSound,
                       onConfirm: _confirm,
                     ),
                   if (_saveError != null)
@@ -365,6 +374,7 @@ class _PredictionPanel extends StatelessWidget {
     required this.saving,
     required this.onChanged,
     required this.onChooseAnimal,
+    required this.onPlaySound,
     required this.onConfirm,
   });
 
@@ -373,6 +383,7 @@ class _PredictionPanel extends StatelessWidget {
   final bool saving;
   final ValueChanged<String?> onChanged;
   final ValueChanged<List<String>> onChooseAnimal;
+  final VoidCallback onPlaySound;
   final VoidCallback onConfirm;
 
   @override
@@ -414,6 +425,15 @@ class _PredictionPanel extends StatelessWidget {
               if (!reliable) const Text(TextosNino.puedesCambiarlo),
               const SizedBox(height: MichiTokens.space8),
               _ConfidenceBadge(level: level),
+              if (selectedAnimal != null &&
+                  AppSound.forAnimal(selectedAnimal!) != null) ...[
+                const SizedBox(height: MichiTokens.space12),
+                FilledButton.tonalIcon(
+                  onPressed: saving ? null : onPlaySound,
+                  icon: const Icon(Icons.volume_up_outlined),
+                  label: const Text(TextosNino.escucharAnimal),
+                ),
+              ],
               const SizedBox(height: MichiTokens.space12),
               Text(
                 TextosNino.esEste,

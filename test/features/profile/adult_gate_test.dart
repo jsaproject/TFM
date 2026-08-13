@@ -19,7 +19,7 @@ void main() {
               leftFactor: 14,
               rightFactor: 23,
             ),
-            onUnlocked: () => unlocked = true,
+            onUnlocked: () async => unlocked = true,
           ),
         ),
       ),
@@ -46,7 +46,7 @@ void main() {
               leftFactor: 14,
               rightFactor: 23,
             ),
-            onUnlocked: () => unlocked = true,
+            onUnlocked: () async => unlocked = true,
           ),
         ),
       ),
@@ -57,5 +57,56 @@ void main() {
     await tester.pump();
 
     expect(unlocked, isTrue);
+  });
+
+  testWidgets('limpia el resultado y permite volver a abrir los ajustes', (
+    tester,
+  ) async {
+    final navigatorKey = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navigatorKey,
+        theme: MichiTheme.light(),
+        home: Builder(
+          builder: (context) => Scaffold(
+            body: AdultGate(
+              challenge: const AdultGateChallenge(
+                leftFactor: 14,
+                rightFactor: 23,
+              ),
+              onUnlocked: () => Navigator.of(context).push<void>(
+                MaterialPageRoute<void>(
+                  builder: (_) =>
+                      const Scaffold(body: Text('Ajustes abiertos')),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    Future<void> openSettings() async {
+      await tester.enterText(find.byType(TextField), '322');
+      await tester.tap(find.byKey(const Key('adult-gate-submit')));
+      await tester.pumpAndSettle();
+    }
+
+    await openSettings();
+    expect(find.text('Ajustes abiertos'), findsOneWidget);
+
+    navigatorKey.currentState!.pop();
+    await tester.pumpAndSettle();
+
+    final answerField = tester.widget<TextField>(find.byType(TextField));
+    final submitButton = tester.widget<FilledButton>(
+      find.byKey(const Key('adult-gate-submit')),
+    );
+    expect(answerField.controller?.text, isEmpty);
+    expect(answerField.enabled, isTrue);
+    expect(submitButton.onPressed, isNotNull);
+
+    await openSettings();
+    expect(find.text('Ajustes abiertos'), findsOneWidget);
   });
 }

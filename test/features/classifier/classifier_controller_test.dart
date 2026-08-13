@@ -9,6 +9,7 @@ import 'package:animalspredictor/l10n/textos.dart';
 import 'package:animalspredictor/models/prediction.dart';
 import 'package:animalspredictor/models/user_collection.dart';
 import 'package:animalspredictor/services/classifier_service.dart';
+import 'package:animalspredictor/services/sound_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -193,8 +194,10 @@ void main() {
       photoPicker: _FakePhotoPicker(photo: _photo),
     );
     addTearDown(controller.dispose);
-    final settings = SettingsController(_SettingsStub())..load();
+    final sounds = _RecordingSoundService();
+    final settings = SettingsController(_SettingsStub(), sounds: sounds);
     addTearDown(settings.dispose);
+    await settings.load();
 
     await tester.pumpWidget(
       MaterialApp(
@@ -223,7 +226,13 @@ void main() {
     expect(find.text(TextosNino.yaLoTengo), findsOneWidget);
     expect(find.text(TextosNino.creoQueEs('Vaca')), findsOneWidget);
     expect(find.text(TextosNino.nivelSeguro), findsOneWidget);
+    expect(find.text(TextosNino.escucharAnimal), findsOneWidget);
     expect(find.textContaining('%'), findsNothing);
+    expect(sounds.played, [AppSound.cow]);
+
+    await tester.tap(find.text(TextosNino.escucharAnimal));
+    await tester.pump();
+    expect(sounds.played, [AppSound.cow, AppSound.cow]);
 
     // La sugerencia principal llega marcada y la alternativa se ofrece con su
     // propia ficha: no queda ninguna lista de nombres escritos.
@@ -394,6 +403,16 @@ class _SettingsStub implements SettingsRepository {
 
   @override
   Future<void> saveTheme(AppThemePreference theme) async {}
+}
+
+class _RecordingSoundService implements SoundService {
+  final played = <AppSound>[];
+
+  @override
+  Future<void> play(AppSound sound) async => played.add(sound);
+
+  @override
+  Future<void> dispose() async {}
 }
 
 final _photo = PickedPhoto(

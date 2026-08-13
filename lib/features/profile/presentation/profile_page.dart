@@ -130,6 +130,8 @@ class _AdultSettingsPageState extends State<AdultSettingsPage> {
     setState(() => _signingOut = true);
     try {
       await widget.authService.signOut();
+      if (!mounted) return;
+      _returnToAuthGate();
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -191,6 +193,8 @@ class _AdultSettingsPageState extends State<AdultSettingsPage> {
     setState(() => _deleting = true);
     try {
       await widget.authService.deleteAccount(password: confirmed.password);
+      if (!mounted) return;
+      _returnToAuthGate();
     } on FirebaseAuthException catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(
@@ -210,6 +214,12 @@ class _AdultSettingsPageState extends State<AdultSettingsPage> {
       if (mounted) setState(() => _deleting = false);
     }
   }
+
+  /// Ajustes se abre sobre el shell. Al terminar la sesión, [AuthGate] ya ha
+  /// cambiado a la pantalla de acceso, pero queda oculto por esta ruta hasta
+  /// retirar todo lo que se apiló sobre él.
+  void _returnToAuthGate() =>
+      Navigator.of(context).popUntil((route) => route.isFirst);
 
   String _deletionMessage(FirebaseAuthException error) => switch (error.code) {
     'wrong-password' ||
