@@ -34,3 +34,18 @@ doc/api/
 # Bytecode de las herramientas de Python en tool/
 __pycache__/
 *.py[cod]
+
+# Entornos, herramientas, datasets y ejecuciones locales de ML.
+ml/.venv*/
+ml/.python/
+ml/.tools/
+ml/data/raw/
+ml/data/processed/
+ml/runs/
+ml/artifacts/
+ml/cache/
+ml/mobile_smoke/**/build/
+ml/mobile_smoke/**/.gradle/
+ml/reports/pilot*/contact_sheets/
+ml/reports/pilot*/manifest.jsonl
+ml/reports/pilot*/review.csv
