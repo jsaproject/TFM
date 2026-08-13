@@ -233,7 +233,14 @@ List<Animal> _filteredAnimals(
   UserCollection collection,
   CollectionFilter? filter,
 ) {
-  final animals = animalCatalog
+  final visibleCatalog = <Animal>[
+    ...animalCatalog,
+    for (final animal in legacyAnimalCatalog)
+      if (!currentAnimalByName.containsKey(animal.name) &&
+          (collection.counts[animal.name] ?? 0) > 0)
+        animal,
+  ];
+  final animals = visibleCatalog
       .where((animal) {
         final count = collection.counts[animal.name] ?? 0;
         return switch (filter) {
@@ -393,32 +400,35 @@ class _AnimalTile extends StatelessWidget {
   Widget build(BuildContext context) => Semantics(
     button: true,
     label: '${animal.name}, $count ${count == 1 ? 'foto' : 'fotos'}',
-    child: Card(
-      child: InkWell(
-        onTap: onTap,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: SizedBox(
-                width: double.infinity,
-                child: AnimalImage(animal: animal),
+    onTap: onTap,
+    child: ExcludeSemantics(
+      child: Card(
+        child: InkWell(
+          onTap: onTap,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: SizedBox(
+                  width: double.infinity,
+                  child: AnimalImage(animal: animal),
+                ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(MichiTokens.space12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    animal.name,
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  Text('$count ${count == 1 ? 'foto' : 'fotos'}'),
-                ],
+              Padding(
+                padding: const EdgeInsets.all(MichiTokens.space12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      animal.name,
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    Text('$count ${count == 1 ? 'foto' : 'fotos'}'),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     ),

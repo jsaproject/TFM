@@ -152,17 +152,15 @@ class ClassifierController extends ChangeNotifier {
     }
   }
 
-  /// Una identificación vale si el grupo gana con holgura y, además, el modelo
-  /// no ve con más fuerza algo que no es un animal.
+  /// Los modelos con rechazo calibrado deciden de forma explícita. Se conserva
+  /// la heurística anterior para fakes y clasificadores antiguos.
   static bool _isReliable(ClassificationResult result) =>
-      result.primary.confidence >= minimumReliableConfidence &&
-      !result.looksLikeSomethingElse;
+      result.reliable ??
+      (result.primary.confidence >= minimumReliableConfidence &&
+          !result.looksLikeSomethingElse);
 
-  /// Los grupos de una sola clase de ImageNet, como Caballo o Cebra, rondan el
-  /// 0,7 de confianza en fotos correctas, así que un umbral más alto los
-  /// rechazaría casi siempre. El descarte de fondo lo hace
-  /// [ClassificationResult.looksLikeSomethingElse], que compara contra las 602
-  /// clases que no son animales.
+  /// Umbral heredado que solo se usa cuando el servicio no aporta su propia
+  /// decisión de fiabilidad.
   static const minimumReliableConfidence = 0.5;
 
   @override

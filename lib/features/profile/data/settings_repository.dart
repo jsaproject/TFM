@@ -1,0 +1,141 @@
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+enum AppThemePreference { system, light, dark }
+
+@immutable
+class ProfileSettings {
+  const ProfileSettings({
+    this.theme = AppThemePreference.system,
+    this.hapticsEnabled = true,
+  });
+
+  final AppThemePreference theme;
+  final bool hapticsEnabled;
+}
+
+abstract class SettingsRepository {
+  Future<ProfileSettings> load();
+  Future<void> saveTheme(AppThemePreference theme);
+  Future<void> saveHapticsEnabled(bool enabled);
+}
+
+class SharedPreferencesSettingsRepository implements SettingsRepository {
+  SharedPreferencesSettingsRepository({
+    Future<SharedPreferences> Function()? preferences,
+  }) : _preferences = preferences ?? SharedPreferences.getInstance;
+
+  static const _themeKey = 'profile.theme';
+  static const _hapticsKey = 'profile.haptics_enabled';
+
+  final Future<SharedPreferences> Function() _preferences;
+
+  @override
+  Future<ProfileSettings> load() async {
+    final preferences = await _preferences();
+    final storedTheme = preferences.getString(_themeKey);
+    final theme = AppThemePreference.values.firstWhere(
+      (preference) => preference.name == storedTheme,
+      orElse: () => AppThemePreference.system,
+    );
+    return ProfileSettings(
+      theme: theme,
+      hapticsEnabled: preferences.getBool(_hapticsKey) ?? true,
+    );
+  }
+
+  @override
+  Future<void> saveTheme(AppThemePreference theme) async {
+    final saved = await (await _preferences()).setString(_themeKey, theme.name);
+    if (!saved) throw StateError('No se ha podido guardar el tema.');
+  }
+
+  @override
+  Future<void> saveHapticsEnabled(bool enabled) async {
+    final saved = await (await _preferences()).setBool(_hapticsKey, enabled);
+    if (!saved) {
+      throw StateError('No se ha podido guardar la respuesta háptica.');
+    }
+  }
+}
+
+class SettingsController extends ChangeNotifier {
+  SettingsController(this._repository);
+
+  final SettingsRepository _repository;
+  AppThemePreference _theme = AppThemePreference.system;
+  bool _hapticsEnabled = true;
+  bool _isLoading = true;
+  String? _errorMessage;
+
+  AppThemePreference get theme => _theme;
+  bool get hapticsEnabled => _hapticsEnabled;
+  bool get isLoading => _isLoading;
+  String? get errorMessage => _errorMessage;
+
+  ThemeMode get themeMode => switch (_theme) {
+    AppThemePreference.system => ThemeMode.system,
+    AppThemePreference.light => ThemeMode.light,
+    AppThemePreference.dark => ThemeMode.dark,
+  };
+
+  Future<void> load() async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+    try {
+      final settings = await _repository.load();
+      _theme = settings.theme;
+      _hapticsEnabled = settings.hapticsEnabled;
+    } catch (_) {
+      _errorMessage =
+          'No se han podido cargar los ajustes. Se usarán los valores predeterminados.';
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> setTheme(AppThemePreference theme) async {
+    if (_isLoading || theme == _theme) return true;
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+    try {
+      await _repository.saveTheme(theme);
+      _theme = theme;
+      return true;
+    } catch (_) {
+      _errorMessage = 'No se ha podido guardar el tema. Inténtalo de nuevo.';
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> setHapticsEnabled(bool enabled) async {
+    if (_isLoading || enabled == _hapticsEnabled) return true;
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+    try {
+      await _repository.saveHapticsEnabled(enabled);
+      _hapticsEnabled = enabled;
+      return true;
+    } catch (_) {
+      _errorMessage =
+          'No se ha podido guardar la respuesta háptica. Inténtalo de nuevo.';
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> provideConfirmationFeedback() async {
+    if (_hapticsEnabled && !kIsWeb) await HapticFeedback.mediumImpact();
+  }
+}

@@ -139,7 +139,7 @@ class FirestoreCollectionRepository implements CollectionRepository {
   }
 
   void _validateAnimal(String animal) {
-    if (!animalByName.containsKey(animal)) {
+    if (!currentAnimalByName.containsKey(animal)) {
       throw ArgumentError.value(animal, 'animal', 'Animal no compatible');
     }
   }

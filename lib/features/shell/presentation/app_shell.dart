@@ -4,6 +4,8 @@ import 'package:animalspredictor/features/classifier/presentation/classifier_con
 import 'package:animalspredictor/features/classifier/presentation/classifier_page.dart';
 import 'package:animalspredictor/features/collection/presentation/collection_page.dart';
 import 'package:animalspredictor/features/profile/presentation/profile_page.dart';
+import 'package:animalspredictor/features/profile/data/permission_service.dart';
+import 'package:animalspredictor/features/profile/data/settings_repository.dart';
 import 'package:animalspredictor/services/classifier_service.dart';
 import 'package:animalspredictor/services/collection_repository.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -19,6 +21,8 @@ class AppShell extends StatefulWidget {
     required this.classifier,
     required this.collectionRepository,
     required this.photoPicker,
+    required this.settings,
+    required this.permissionService,
   });
 
   final User user;
@@ -26,6 +30,8 @@ class AppShell extends StatefulWidget {
   final ClassifierService classifier;
   final CollectionRepository collectionRepository;
   final PhotoPickerService photoPicker;
+  final SettingsController settings;
+  final PermissionService permissionService;
 
   @override
   State<AppShell> createState() => _AppShellState();
@@ -82,6 +88,7 @@ class _AppShellState extends State<AppShell> {
         onConfirmPrediction: _savePrediction,
         isAnonymous: widget.user.isAnonymous,
         greetingName: widget.user.displayName,
+        settings: widget.settings,
       ),
       CollectionPage(
         userId: widget.user.uid,
@@ -93,6 +100,8 @@ class _AppShellState extends State<AppShell> {
         email: widget.user.email,
         isAnonymous: widget.user.isAnonymous,
         authService: widget.authService,
+        settings: widget.settings,
+        permissionService: widget.permissionService,
       ),
     ],
   );

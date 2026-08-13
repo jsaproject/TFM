@@ -24,8 +24,8 @@ void main() {
       buildPage(
         _CollectionRepositoryStub(
           collection: UserCollection(
-            counts: const {'Anfibio': 2, 'Antílope': 1},
-            lastIdentified: {'Anfibio': DateTime(2026, 8, 12)},
+            counts: const {'Vaca': 2, 'Caballo': 1},
+            lastIdentified: {'Vaca': DateTime(2026, 8, 12)},
           ),
         ),
       ),
@@ -36,16 +36,14 @@ void main() {
       find.text('2 de ${animalCatalog.length} especies descubiertas'),
       findsOneWidget,
     );
-    // La cuadrícula es perezosa y el catálogo va por orden alfabético, así que
-    // las especies de la prueba son de las primeras para que se rendericen.
-    expect(find.text('Anfibio'), findsOneWidget);
-    expect(find.text('Araña y escorpión'), findsOneWidget);
+    expect(find.text('Vaca'), findsOneWidget);
+    expect(find.text('Cerdo'), findsOneWidget);
 
     await tester.tap(find.text('Pendientes'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Anfibio'), findsNothing);
-    expect(find.text('Araña y escorpión'), findsOneWidget);
+    expect(find.text('Vaca'), findsNothing);
+    expect(find.text('Cerdo'), findsOneWidget);
   });
 
   testWidgets('muestra una acción de reintento ante un error de carga', (
@@ -89,22 +87,42 @@ void main() {
       buildPage(
         _CollectionRepositoryStub(
           collection: UserCollection(
-            counts: const {'Anfibio': 2},
-            lastIdentified: {'Anfibio': DateTime(2026, 8, 12)},
+            counts: const {'Vaca': 2},
+            lastIdentified: {'Vaca': DateTime(2026, 8, 12)},
           ),
           predictions: const [
-            CollectionPrediction(id: 'prediction-1', animal: 'Anfibio'),
+            CollectionPrediction(id: 'prediction-1', animal: 'Vaca'),
           ],
         ),
       ),
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Anfibio'));
+    await tester.tap(find.text('Vaca'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Vive entre el agua y la tierra.'), findsOneWidget);
-    expect(find.text('Historial de Anfibio'), findsOneWidget);
+    expect(
+      find.text('Tranquila, curiosa y experta en pastar.'),
+      findsOneWidget,
+    );
+    expect(find.text('Historial de Vaca'), findsOneWidget);
+  });
+
+  testWidgets('anuncia cada especie como una unica accion con su contador', (
+    tester,
+  ) async {
+    final semantics = tester.ensureSemantics();
+    await tester.pumpWidget(
+      buildPage(
+        _CollectionRepositoryStub(
+          collection: const UserCollection(counts: {'Vaca': 1}),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.bySemanticsLabel('Vaca, 1 foto'), findsOneWidget);
+    semantics.dispose();
   });
 }
 

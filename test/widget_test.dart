@@ -25,5 +25,7 @@ class _AuthStub implements AuthService {
   @override
   Future<void> signOut() async {}
   @override
+  Future<void> deleteAccount({String? password}) async {}
+  @override
   Future<void> signUp(String email, String password) async {}
 }

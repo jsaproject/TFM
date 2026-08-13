@@ -21,7 +21,161 @@ class Animal {
   final String? imageAsset;
 }
 
+/// Las 28 especies que reconoce el modelo actual y que forman el progreso.
 const animalCatalog = <Animal>[
+  Animal(
+    name: 'Vaca',
+    description: 'Tranquila, curiosa y experta en pastar.',
+    icon: Icons.agriculture,
+    imageAsset: 'assets/vaca.jpg',
+  ),
+  Animal(
+    name: 'Caballo',
+    description: 'Rápido, fuerte y elegante.',
+    icon: Icons.pets,
+    imageAsset: 'assets/caballo.jpg',
+  ),
+  Animal(
+    name: 'Cerdo',
+    description: 'Listo, sociable y con un gran olfato.',
+    icon: Icons.savings,
+  ),
+  Animal(
+    name: 'Oveja',
+    description: 'Su lana parece una nube calentita.',
+    icon: Icons.cloud_outlined,
+    imageAsset: 'assets/oveja.jpg',
+  ),
+  Animal(
+    name: 'Cabra',
+    description: 'Inquieta, ágil y amiga de las alturas.',
+    icon: Icons.terrain,
+  ),
+  Animal(
+    name: 'Burro',
+    description: 'Paciente, resistente y de orejas larguísimas.',
+    icon: Icons.pets,
+  ),
+  Animal(
+    name: 'Gallina',
+    description: 'Picotea, cacarea y cuida de sus pollitos.',
+    icon: Icons.egg_alt,
+    imageAsset: 'assets/gallina.jpg',
+  ),
+  Animal(
+    name: 'Pato',
+    description: 'Nada, vuela y camina con mucho salero.',
+    icon: Icons.waves,
+  ),
+  Animal(
+    name: 'Perro',
+    description: 'Compañero fiel, juguetón y cariñoso.',
+    icon: Icons.pets,
+    imageAsset: 'assets/perro.jpg',
+  ),
+  Animal(
+    name: 'Gato',
+    description: 'Curioso, suave y maestro de las siestas.',
+    icon: Icons.pets,
+    imageAsset: 'assets/gato.jpg',
+  ),
+  Animal(
+    name: 'Conejo',
+    description: 'Orejas largas, nariz inquieta y grandes saltos.',
+    icon: Icons.cruelty_free,
+  ),
+  Animal(
+    name: 'Hámster',
+    description: 'Pequeño, redondito y siempre atareado.',
+    icon: Icons.pets,
+  ),
+  Animal(
+    name: 'Tortuga',
+    description: 'Lleva su casa siempre encima.',
+    icon: Icons.eco,
+  ),
+  Animal(
+    name: 'Pez',
+    description: 'Nada entre burbujas y colores.',
+    icon: Icons.set_meal,
+  ),
+  Animal(
+    name: 'Loro',
+    description: 'Plumas brillantes y una voz muy divertida.',
+    icon: Icons.flutter_dash,
+  ),
+  Animal(
+    name: 'León',
+    description: 'Una gran melena y un rugido impresionante.',
+    icon: Icons.pets,
+  ),
+  Animal(
+    name: 'Tigre',
+    description: 'Cada tigre tiene un dibujo de rayas único.',
+    icon: Icons.pets,
+  ),
+  Animal(
+    name: 'Elefante',
+    description: 'Gigante amable con una trompa muy útil.',
+    icon: Icons.pets,
+    imageAsset: 'assets/elefante.jpg',
+  ),
+  Animal(
+    name: 'Jirafa',
+    description: 'Su largo cuello alcanza las hojas más altas.',
+    icon: Icons.park_outlined,
+  ),
+  Animal(
+    name: 'Cebra',
+    description: 'Sus rayas no se repiten jamás.',
+    icon: Icons.pets,
+  ),
+  Animal(
+    name: 'Mono',
+    description: 'Manos hábiles y mirada muy curiosa.',
+    icon: Icons.pets,
+  ),
+  Animal(
+    name: 'Panda',
+    description: 'Un oso blanco y negro al que le encanta el bambú.',
+    icon: Icons.forest,
+  ),
+  Animal(
+    name: 'Oso',
+    description: 'Grande, fuerte y sorprendentemente buen nadador.',
+    icon: Icons.pets,
+  ),
+  Animal(
+    name: 'Hipopótamo',
+    description: 'Pasa el día fresquito dentro del agua.',
+    icon: Icons.water,
+  ),
+  Animal(
+    name: 'Rinoceronte',
+    description: 'Piel gruesa, gran cuerno y pasos poderosos.',
+    icon: Icons.pets,
+  ),
+  Animal(
+    name: 'Cocodrilo',
+    description: 'Espera inmóvil bajo el agua.',
+    icon: Icons.water,
+  ),
+  Animal(
+    name: 'Pingüino',
+    description: 'Parece llevar esmoquin y nada rapidísimo.',
+    icon: Icons.ac_unit,
+  ),
+  Animal(
+    name: 'Koala',
+    description: 'Abraza los eucaliptos y duerme muchas horas.',
+    icon: Icons.park,
+  ),
+];
+
+/// Grupos de versiones anteriores. Solo se muestran cuando una colección
+/// existente contiene alguno; así se preservan los descubrimientos antiguos
+/// sin mezclarlos con las 28 especies del modelo nuevo.
+const legacyAnimalCatalog = <Animal>[
   Animal(
     name: 'Anfibio',
     description: 'Vive entre el agua y la tierra.',
@@ -244,8 +398,13 @@ const animalCatalog = <Animal>[
   ),
 ];
 
-final animalByName = <String, Animal>{
+final currentAnimalByName = <String, Animal>{
   for (final animal in animalCatalog) animal.name: animal,
+};
+
+final animalByName = <String, Animal>{
+  for (final animal in legacyAnimalCatalog) animal.name: animal,
+  ...currentAnimalByName,
 };
 
 /// Nombres usados antes de agrupar las clases de ImageNet.
@@ -254,9 +413,10 @@ final animalByName = <String, Animal>{
 /// traducen al leer, sin reescribir los documentos: el dato del usuario se
 /// conserva y sigue contando para su colección.
 const legacyAnimalNames = <String, String>{
-  'Gallina': 'Ave de corral',
-  'Vaca': 'Bovino',
-  'Oveja': 'Ovino y caprino',
+  'Bovino': 'Vaca',
+  'Ave de corral': 'Gallina',
+  'Conejo y liebre': 'Conejo',
+  'Primate': 'Mono',
   'Araña': 'Araña y escorpión',
   'Ardilla': 'Roedor',
 };

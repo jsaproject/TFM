@@ -3,13 +3,20 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:animalspredictor/auth_service.dart';
+import 'package:animalspredictor/features/profile/data/settings_repository.dart';
 
 /// Muestra una explicación breve una sola vez en cada dispositivo.
 class WelcomeGate extends StatefulWidget {
-  const WelcomeGate({super.key, required this.user, required this.authService});
+  const WelcomeGate({
+    super.key,
+    required this.user,
+    required this.authService,
+    required this.settings,
+  });
 
   final User user;
   final AuthService authService;
+  final SettingsController settings;
 
   @override
   State<WelcomeGate> createState() => _WelcomeGateState();
@@ -45,7 +52,11 @@ class _WelcomeGateState extends State<WelcomeGate> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
     if (_seenWelcome!) {
-      return HomePage(user: widget.user, authService: widget.authService);
+      return HomePage(
+        user: widget.user,
+        authService: widget.authService,
+        settings: widget.settings,
+      );
     }
     return _WelcomePage(onStart: _finishWelcome);
   }

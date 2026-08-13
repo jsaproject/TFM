@@ -1,5 +1,6 @@
 import 'package:animalspredictor/animal_catalog.dart';
 import 'package:animalspredictor/app_theme.dart';
+import 'package:animalspredictor/features/profile/data/settings_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -12,12 +13,14 @@ class ClassifierPage extends StatefulWidget {
     required this.controller,
     required this.onConfirmPrediction,
     required this.isAnonymous,
+    required this.settings,
     this.greetingName,
   });
 
   final ClassifierController controller;
   final Future<void> Function(String animal) onConfirmPrediction;
   final bool isAnonymous;
+  final SettingsController settings;
   final String? greetingName;
 
   @override
@@ -101,6 +104,7 @@ class _ClassifierPageState extends State<ClassifierPage> {
     setState(() => _saving = true);
     try {
       await widget.onConfirmPrediction(animal);
+      await widget.settings.provideConfirmationFeedback();
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -244,9 +248,8 @@ class _CaptureGuide extends StatelessWidget {
           ),
           const SizedBox(height: MichiTokens.space8),
           Text(
-            'Reconoce ${animalCatalog.length} grupos de animales, desde perros '
-            'y gatos hasta insectos, aves, peces y reptiles. Los tienes todos '
-            'en tu colección.',
+            'Reconoce ${animalCatalog.length} animales de granja, domésticos '
+            'y de zoo. Los tienes todos en tu colección.',
           ),
           const SizedBox(height: MichiTokens.space8),
           const Row(

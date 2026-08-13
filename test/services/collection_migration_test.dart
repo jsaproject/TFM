@@ -5,13 +5,13 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('traduce los nombres guardados antes de agrupar las clases', () {
     final collection = userCollectionFromFirestore({
-      'collection': {'Vaca': 3, 'Gallina': 1, 'Perro': 2},
+      'collection': {'Bovino': 3, 'Ave de corral': 1, 'Perro': 2},
     });
 
-    expect(collection.counts['Bovino'], 3);
-    expect(collection.counts['Ave de corral'], 1);
+    expect(collection.counts['Vaca'], 3);
+    expect(collection.counts['Gallina'], 1);
     expect(collection.counts['Perro'], 2);
-    expect(collection.counts.containsKey('Vaca'), isFalse);
+    expect(collection.counts.containsKey('Bovino'), isFalse);
   });
 
   test('suma el nombre antiguo y el nuevo en el mismo grupo', () {
@@ -20,7 +20,7 @@ void main() {
     });
 
     expect(collection.counts['Araña y escorpión'], 3);
-    expect(collection.discovered, 1);
+    expect(collection.discovered, 0);
   });
 
   test('se queda con la fecha más reciente al fusionar nombres', () {
@@ -45,7 +45,7 @@ void main() {
   });
 
   test('deja intacto un nombre que ya es un grupo actual', () {
-    expect(resolveAnimalName('Bovino'), 'Bovino');
-    expect(resolveAnimalName('Vaca'), 'Bovino');
+    expect(resolveAnimalName('Bovino'), 'Vaca');
+    expect(resolveAnimalName('Vaca'), 'Vaca');
   });
 }

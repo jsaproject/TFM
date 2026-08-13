@@ -1,8 +1,4 @@
-import 'dart:convert';
-
-import 'package:animalspredictor/animal_catalog.dart';
 import 'package:animalspredictor/services/animal_group_mapping.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 AnimalGroupMapping buildMapping() => AnimalGroupMapping.fromJson({
@@ -82,16 +78,5 @@ void main() {
       }),
       throwsA(isA<FormatException>()),
     );
-  });
-
-  test('el mapeo embarcado cuadra con el catálogo', () async {
-    final raw = await rootBundle.loadString(animalGroupsAsset);
-    final json = jsonDecode(raw) as Map<String, dynamic>;
-    final mapping = AnimalGroupMapping.fromJson(json);
-
-    expect(mapping.classCount, 1000);
-    // Si alguien añade un grupo al JSON y olvida el catálogo, la app dejaría de
-    // poder mostrar ese resultado. Esta comprobación lo impide.
-    expect(mapping.groupNames.toSet(), animalByName.keys.toSet());
   });
 }

@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:animalspredictor/features/classifier/data/photo_picker_service.dart';
 import 'package:animalspredictor/features/classifier/presentation/classifier_controller.dart';
 import 'package:animalspredictor/features/classifier/presentation/classifier_page.dart';
+import 'package:animalspredictor/features/profile/data/settings_repository.dart';
 import 'package:animalspredictor/models/prediction.dart';
 import 'package:animalspredictor/services/classifier_service.dart';
 import 'package:flutter/material.dart';
@@ -41,7 +42,7 @@ void main() {
     await controller.classifySelectedPhoto();
 
     expect(controller.state.status, ClassifierStatus.success);
-    expect(controller.state.prediction?.animal, 'Bovino');
+    expect(controller.state.prediction?.animal, 'Vaca');
     expect(controller.state.result?.alternatives.single.animal, 'Caballo');
   });
 
@@ -51,7 +52,7 @@ void main() {
       final controller = ClassifierController(
         classifier: _FakeClassifier(
           result: ClassificationResult(
-            primary: const Prediction(animal: 'Bovino', confidence: 0.42),
+            primary: const Prediction(animal: 'Vaca', confidence: 0.42),
             alternatives: const [],
           ),
         ),
@@ -73,7 +74,7 @@ void main() {
         result: ClassificationResult(
           // El grupo gana con holgura, pero las clases que no son animales
           // acumulan todavía más masa: es una foto de otra cosa.
-          primary: const Prediction(animal: 'Bovino', confidence: 0.30),
+          primary: const Prediction(animal: 'Vaca', confidence: 0.30),
           alternatives: const [],
           notAnimalConfidence: 0.65,
         ),
@@ -126,6 +127,40 @@ void main() {
     },
   );
 
+  test('respeta la decisión de rechazo calibrada del modelo', () async {
+    final accepted = ClassifierController(
+      classifier: _FakeClassifier(
+        result: ClassificationResult(
+          primary: const Prediction(animal: 'Vaca', confidence: 0.30),
+          alternatives: const [],
+          reliable: true,
+        ),
+      ),
+      photoPicker: _FakePhotoPicker(photo: _photo),
+    );
+    final rejected = ClassifierController(
+      classifier: _FakeClassifier(
+        result: ClassificationResult(
+          primary: const Prediction(animal: 'Vaca', confidence: 0.99),
+          alternatives: const [],
+          reliable: false,
+        ),
+      ),
+      photoPicker: _FakePhotoPicker(photo: _photo),
+    );
+    addTearDown(accepted.dispose);
+    addTearDown(rejected.dispose);
+
+    for (final controller in [accepted, rejected]) {
+      await controller.load();
+      await controller.selectPhoto(ImageSource.gallery);
+      await controller.classifySelectedPhoto();
+    }
+
+    expect(accepted.state.status, ClassifierStatus.success);
+    expect(rejected.state.status, ClassifierStatus.unrecognized);
+  });
+
   testWidgets('guía la selección desde el CTA hasta el resultado', (
     tester,
   ) async {
@@ -134,6 +169,8 @@ void main() {
       photoPicker: _FakePhotoPicker(photo: _photo),
     );
     addTearDown(controller.dispose);
+    final settings = SettingsController(_SettingsStub())..load();
+    addTearDown(settings.dispose);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -141,6 +178,7 @@ void main() {
           controller: controller,
           greetingName: 'Michi',
           isAnonymous: true,
+          settings: settings,
           onConfirmPrediction: (_) async {},
         ),
       ),
@@ -169,6 +207,17 @@ void main() {
   });
 }
 
+class _SettingsStub implements SettingsRepository {
+  @override
+  Future<ProfileSettings> load() async => const ProfileSettings();
+
+  @override
+  Future<void> saveHapticsEnabled(bool enabled) async {}
+
+  @override
+  Future<void> saveTheme(AppThemePreference theme) async {}
+}
+
 final _photo = PickedPhoto(
   path: '/temporal/animal.jpg',
   bytes: Uint8List.fromList([1, 2, 3]),
@@ -192,7 +241,7 @@ class _FakeClassifier implements ClassifierService {
     : result =
           result ??
           ClassificationResult(
-            primary: const Prediction(animal: 'Bovino', confidence: 0.92),
+            primary: const Prediction(animal: 'Vaca', confidence: 0.92),
             alternatives: const [
               Prediction(animal: 'Caballo', confidence: 0.05),
             ],
