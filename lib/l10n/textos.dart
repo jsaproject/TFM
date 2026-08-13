@@ -70,6 +70,12 @@ abstract final class TextosNino {
   static String yaTienes(String animal) => '¡Ya tienes: $animal!';
   static const noHePodidoGuardarlo = 'No he podido guardarlo. Prueba otra vez.';
 
+  // Celebración al guardar.
+  static const celebracionNuevo = '¡Nuevo!';
+  static const celebracionOtraFoto = '¡Otra foto suya!';
+  static const medallaNueva = '¡Medalla nueva!';
+  static const tocaParaSeguir = 'Toca para seguir';
+
   // Avisos y errores de la pantalla de la foto.
   static const pruebaOtraVez = 'Prueba otra vez';
   static const abrirAjustes = 'Abrir Ajustes';
@@ -88,9 +94,22 @@ abstract final class TextosNino {
   static String tienesAnimales(int tuyos, int total) =>
       'Tienes $tuyos animales de $total';
   static String elUltimo(String animal) => 'El último: $animal';
+  static String teFaltan(int cuantos) =>
+      cuantos == 1 ? 'Te falta 1 animal' : 'Te faltan $cuantos animales';
+  static const yaEstanTodos = '¡Ya están todos!';
+
+  // Medallas.
+  static const misMedallas = 'Mis medallas';
   static const logroPrimeraFoto = 'Primera foto';
   static const logroCincoAnimales = 'Cinco animales';
+  static const logroDiezAnimales = 'Diez animales';
+  static const logroVeinteAnimales = 'Veinte animales';
+  static const logroGranja = 'Toda la granja';
+  static const logroCasa = 'Los de casa';
+  static const logroZoo = 'Todo el zoo';
   static const logroTodos = '¡Están todos!';
+  static String medallaGanada(String medalla) => 'Medalla: $medalla';
+  static String medallaPorGanar(String medalla) => 'Aún no: $medalla';
   static const filtroLosQueTengo = 'Los que tengo';
   static const filtroLosQueFaltan = 'Los que faltan';
   static String fotos(int cuantas) =>
@@ -201,6 +220,10 @@ abstract final class TextosNino {
     guardado,
     yaTienes('Vaca'),
     noHePodidoGuardarlo,
+    celebracionNuevo,
+    celebracionOtraFoto,
+    medallaNueva,
+    tocaParaSeguir,
     pruebaOtraVez,
     abrirAjustes,
     soloEnMovil,
@@ -215,9 +238,20 @@ abstract final class TextosNino {
     tuProgreso,
     tienesAnimales(3, 28),
     elUltimo('Vaca'),
+    teFaltan(1),
+    teFaltan(5),
+    yaEstanTodos,
+    misMedallas,
     logroPrimeraFoto,
     logroCincoAnimales,
+    logroDiezAnimales,
+    logroVeinteAnimales,
+    logroGranja,
+    logroCasa,
+    logroZoo,
     logroTodos,
+    medallaGanada('Toda la granja'),
+    medallaPorGanar('Toda la granja'),
     filtroLosQueTengo,
     filtroLosQueFaltan,
     fotos(1),
@@ -338,6 +372,10 @@ abstract final class TextosAdulto {
   static const hapticaTitulo = 'Respuesta háptica';
   static const hapticaTexto =
       'Vibrar brevemente al confirmar acciones compatibles.';
+  static const sonidoTitulo = 'Sonidos';
+  static const sonidoTexto =
+      'Campanillas al reconocer un animal, al guardarlo y al ganar una '
+      'medalla. Si el dispositivo está en silencio, no suenan.';
   static const permisosTitulo = 'Permisos';
   static const permisoCamara = 'Cámara';
   static const permisoFotos = 'Fotos';
@@ -408,4 +446,6 @@ abstract final class TextosAdulto {
       'No se ha podido guardar el tema. Inténtalo de nuevo.';
   static const errorGuardarHaptica =
       'No se ha podido guardar la respuesta háptica. Inténtalo de nuevo.';
+  static const errorGuardarSonido =
+      'No se ha podido guardar el ajuste de sonido. Inténtalo de nuevo.';
 }

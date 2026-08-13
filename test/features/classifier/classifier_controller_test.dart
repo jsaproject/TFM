@@ -1,10 +1,13 @@
+import 'package:animalspredictor/animal_catalog.dart';
 import 'package:animalspredictor/features/classifier/data/photo_picker_service.dart';
 import 'package:animalspredictor/features/classifier/presentation/classifier_controller.dart';
 import 'package:animalspredictor/features/classifier/presentation/classifier_page.dart';
+import 'package:animalspredictor/features/collection/domain/celebration.dart';
 import 'package:animalspredictor/features/collection/presentation/animal_selector.dart';
 import 'package:animalspredictor/features/profile/data/settings_repository.dart';
 import 'package:animalspredictor/l10n/textos.dart';
 import 'package:animalspredictor/models/prediction.dart';
+import 'package:animalspredictor/models/user_collection.dart';
 import 'package:animalspredictor/services/classifier_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -143,7 +146,9 @@ void main() {
     expect(controller.state.result, isNull);
     expect(controller.state.image, isNull);
     expect(controller.state.photoPath, isNull);
-    expect(controller.state.noticeMessage, TextosNino.guardado);
+    // No queda ningún aviso: de decir que se ha guardado se encarga la
+    // celebración, no la pantalla de detrás.
+    expect(controller.state.noticeMessage, isNull);
   });
 
   test('respeta la decisión de rechazo calibrada del modelo', () async {
@@ -196,9 +201,9 @@ void main() {
         home: ClassifierPage(
           controller: controller,
           greetingName: 'Michi',
-          isAnonymous: true,
           settings: settings,
-          onConfirmPrediction: (_) async {},
+          onConfirmPrediction: (animal) async =>
+              Celebration(animal: animal, savedToCollection: false),
         ),
       ),
     );
@@ -234,6 +239,87 @@ void main() {
     expect(find.text(TextosNino.esOtro), findsOneWidget);
   });
 
+  testWidgets('enseña el progreso sin salir de la pantalla de la foto', (
+    tester,
+  ) async {
+    final controller = ClassifierController(
+      classifier: _FakeClassifier(),
+      photoPicker: _FakePhotoPicker(photo: _photo),
+    );
+    addTearDown(controller.dispose);
+    final settings = SettingsController(_SettingsStub())..load();
+    addTearDown(settings.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ClassifierPage(
+          controller: controller,
+          settings: settings,
+          collection: const UserCollection(counts: {'Vaca': 1, 'Gato': 2}),
+          onConfirmPrediction: (animal) async => Celebration(animal: animal),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text(TextosNino.tienesAnimales(2, animalCatalog.length)),
+      findsOneWidget,
+    );
+    expect(
+      find.text(TextosNino.teFaltan(animalCatalog.length - 2)),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('avisa sin snackbar cuando no ha podido guardar', (tester) async {
+    final controller = ClassifierController(
+      classifier: _FakeClassifier(),
+      photoPicker: _FakePhotoPicker(photo: _photo),
+    );
+    addTearDown(controller.dispose);
+    final settings = SettingsController(_SettingsStub())..load();
+    addTearDown(settings.dispose);
+    var intentos = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ClassifierPage(
+          controller: controller,
+          settings: settings,
+          onConfirmPrediction: (animal) async {
+            intentos++;
+            throw StateError('sin conexión');
+          },
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('classifier-primary-cta')),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.byKey(const Key('classifier-primary-cta')));
+    await tester.pumpAndSettle();
+
+    await tester.ensureVisible(find.text(TextosNino.guardar));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(TextosNino.guardar));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(SnackBar), findsNothing);
+    expect(find.text(TextosNino.noHePodidoGuardarlo), findsOneWidget);
+
+    // Y la tarjeta ofrece volver a intentarlo con la misma foto.
+    await tester.ensureVisible(find.text(TextosNino.pruebaOtraVez));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(TextosNino.pruebaOtraVez));
+    await tester.pumpAndSettle();
+
+    expect(intentos, 2);
+  });
+
   testWidgets('deja elegir cualquier animal en la rejilla completa', (
     tester,
   ) async {
@@ -261,9 +347,11 @@ void main() {
       MaterialApp(
         home: ClassifierPage(
           controller: controller,
-          isAnonymous: false,
           settings: settings,
-          onConfirmPrediction: (animal) async => guardados.add(animal),
+          onConfirmPrediction: (animal) async {
+            guardados.add(animal);
+            return Celebration(animal: animal, isNewAnimal: true);
+          },
         ),
       ),
     );
@@ -300,6 +388,9 @@ class _SettingsStub implements SettingsRepository {
 
   @override
   Future<void> saveHapticsEnabled(bool enabled) async {}
+
+  @override
+  Future<void> saveSoundEnabled(bool enabled) async {}
 
   @override
   Future<void> saveTheme(AppThemePreference theme) async {}

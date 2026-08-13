@@ -642,14 +642,69 @@ ACEPTACION
 
 
 ================================================================================
-FASE 4 - PREMIAR AL NINO
+FASE 4 - PREMIAR AL NINO   [COMPLETADA 2026-08-13]
 ================================================================================
 
-Objetivo: que confirmar un animal se sienta como ganar algo. Hoy no se siente
-nada.
+ESTADO: COMPLETADA (2026-08-13). Las seis tareas estan hechas. Los sonidos son
+tres campanillas sintetizadas, no grabaciones: se generan con
+tool/generate_sounds.py, asi que se pueden rehacer o sustituir sin tocar
+codigo.
 
-ESTADO ACTUAL
--------------
+Que se ha hecho:
+
+  - 4.1 Nueva celebracion a pantalla completa (features/classifier/presentation
+    /celebration_overlay.dart): la foto del nino, el nombre del animal a 40 dp,
+    confeti pintado con un CustomPainter y "Toca para seguir". Se cierra sola
+    al acabar o con un toque en cualquier sitio. Sin paquete de animacion: el
+    confeti sale de una semilla fija, asi que se ve igual siempre y los tests
+    no dependen del azar. Si el sistema tiene las animaciones desactivadas, no
+    hay confeti.
+  - 4.2 Fiesta larga (MichiTokens.durationCelebration, 1500 ms) para un animal
+    nuevo o una medalla, con la palabra "!Nuevo!"; fiesta corta
+    (durationCelebrationShort, 900 ms) para una foto repetida, que dice
+    "!Otra foto suya!". Lo decide Celebration.duration.
+  - 4.3 Sonidos con audioplayers 6.8: uno al reconocer la foto, uno al
+    guardarla y otro cuando entra una medalla. Suenan con respectSilence, o
+    sea que un movil en silencio sigue en silencio. Los tres ficheros viven en
+    assets/sonidos/ y ocupan 85 KB en total. La interfaz no habla con el
+    reproductor: pide un AppSound a SettingsController.playSound(), que es
+    quien mira el interruptor de la tarea 5.4.
+  - 4.4 Los logros salen del build de collection_page y pasan a ser un modelo
+    propio (features/collection/domain/achievement.dart): ocho medallas con
+    meta tipada (fotos, animales o completar un sitio). Cada animal del
+    catalogo declara donde vive (AnimalHabitat: granja, casa o salvaje), asi
+    que las medallas de sitio sacan su objetivo del catalogo y se ajustan
+    solas si manana cambia. Las ya celebradas se guardan en Firestore, en el
+    campo 'achievements' del documento del usuario, y se leen validando contra
+    las medallas que existen hoy. Sin migracion, como decia el plan: el campo
+    es nuevo y no rompe ninguna coleccion.
+  - 4.5 Fuera los dos SnackBar de la pantalla de la foto. El exito es la
+    celebracion; el fallo al guardar es una tarjeta con icono grande y boton
+    "Prueba otra vez" que reintenta con la misma foto. El aviso "!Guardado!"
+    que dejaba reset() tambien sobra y se ha quitado.
+  - 4.6 El progreso se ve mientras el nino hace fotos: CollectionProgress es
+    ahora un widget compartido por la pantalla de la foto y la cabecera de la
+    coleccion. Dice cuantos tiene, cuantos le faltan y, en la coleccion, ensena
+    las ocho medallas en una fila que se desliza. El AppShell escucha la
+    coleccion una sola vez y la reparte.
+  - Observacion que dejo abierta la FASE 3 (el boton de la camara por debajo
+    del pliegue): la tarjeta de consejos pasa a ir detras de los botones, que
+    compensa de sobra lo que ocupa el progreso nuevo.
+
+Tests anadidos: test/features/collection/achievement_test.dart (medallas,
+celebracion y colecciones que no se mutan), test/features/classifier/
+celebration_test.dart (nuevo, repetido, invitado, medalla, cierre solo y por
+toque, y el interruptor de sonido), mas casos nuevos en user_collection_test,
+animal_catalog_test, settings_repository_test, collection_page_test y
+classifier_controller_test.
+
+Comprobaciones: dart format, flutter analyze y los 87 tests de la suite pasan.
+No se ha podido compilar para Android ni iOS en este entorno (no hay SDK de
+Android instalado), asi que el unico paso pendiente de comprobar en un
+dispositivo es que audioplayers suene y respete el silencio.
+
+ESTADO ANTES DE LA FASE
+-----------------------
 
   El unico feedback al guardar es un SnackBar de texto
   (classifier_page.dart:109-117) y una vibracion opcional que el adulto puede
@@ -744,9 +799,10 @@ TAREAS
        y el aviso de "la imagen se procesa solo en este dispositivo"
        (classifier_page.dart:260).
 
-  5.4  Anadir el ajuste de sonido que necesita la tarea 4.3, junto al de
-       vibracion que ya existe (profile_page.dart:202-209). Va en
-       SettingsRepository, que ya tiene el patron hecho para haptics.
+  5.4  HECHA en la FASE 4, porque la tarea 4.3 no podia esperar. El ajuste de
+       sonido esta en SettingsRepository con el mismo patron que la vibracion
+       y sale en Perfil, justo debajo de ella. Cuando esta fase parta la
+       pantalla en dos, se va con el resto a la zona del adulto.
 
   5.5  Para el caso invitado, exigir tambien la puerta de adulto antes de
        eliminar, ya que no hay contrasena que lo frene.

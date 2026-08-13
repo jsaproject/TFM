@@ -1,9 +1,16 @@
+import 'dart:async';
+
 import 'package:animalspredictor/animal_catalog.dart';
 import 'package:animalspredictor/app_theme.dart';
 import 'package:animalspredictor/features/classifier/domain/confidence_level.dart';
+import 'package:animalspredictor/features/classifier/presentation/celebration_overlay.dart';
+import 'package:animalspredictor/features/collection/domain/celebration.dart';
 import 'package:animalspredictor/features/collection/presentation/animal_selector.dart';
+import 'package:animalspredictor/features/collection/presentation/collection_progress.dart';
 import 'package:animalspredictor/features/profile/data/settings_repository.dart';
 import 'package:animalspredictor/l10n/textos.dart';
+import 'package:animalspredictor/models/user_collection.dart';
+import 'package:animalspredictor/services/sound_service.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -15,15 +22,20 @@ class ClassifierPage extends StatefulWidget {
     super.key,
     required this.controller,
     required this.onConfirmPrediction,
-    required this.isAnonymous,
     required this.settings,
+    this.collection,
     this.greetingName,
   });
 
   final ClassifierController controller;
-  final Future<void> Function(String animal) onConfirmPrediction;
-  final bool isAnonymous;
+
+  /// Guarda el animal y devuelve qué hay que celebrar por él.
+  final Future<Celebration> Function(String animal) onConfirmPrediction;
   final SettingsController settings;
+
+  /// Colección del niño, para enseñarle el progreso sin salir de aquí. Nula
+  /// mientras no ha llegado o cuando entra como invitado.
+  final UserCollection? collection;
   final String? greetingName;
 
   @override
@@ -33,6 +45,8 @@ class ClassifierPage extends StatefulWidget {
 class _ClassifierPageState extends State<ClassifierPage> {
   String? _selectedAnimal;
   bool _saving = false;
+  String? _saveError;
+  ClassifierStatus? _lastStatus;
 
   @override
   void initState() {
@@ -49,6 +63,15 @@ class _ClassifierPageState extends State<ClassifierPage> {
 
   void _syncSelectedAnimal() {
     final state = widget.controller.state;
+    if (state.status != _lastStatus) {
+      if (state.status == ClassifierStatus.success) {
+        unawaited(widget.settings.playSound(AppSound.success));
+      }
+      _lastStatus = state.status;
+      // El fallo al guardar es de la foto anterior: en cuanto cambia el
+      // estado deja de tener sentido.
+      if (_saveError != null) setState(() => _saveError = null);
+    }
     final animal = state.status == ClassifierStatus.success
         ? state.prediction?.animal
         : null;
@@ -73,26 +96,25 @@ class _ClassifierPageState extends State<ClassifierPage> {
   Future<void> _confirm() async {
     final animal = _selectedAnimal;
     if (animal == null || _saving) return;
-    setState(() => _saving = true);
+    final photo = widget.controller.state.image;
+    setState(() {
+      _saving = true;
+      _saveError = null;
+    });
     try {
-      await widget.onConfirmPrediction(animal);
+      final celebration = await widget.onConfirmPrediction(animal);
       await widget.settings.provideConfirmationFeedback();
       if (!mounted) return;
       widget.controller.reset();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            widget.isAnonymous
-                ? TextosNino.guardado
-                : TextosNino.yaTienes(animal),
-          ),
-        ),
+      await showCelebration(
+        context,
+        celebration: celebration,
+        settings: widget.settings,
+        photo: photo,
       );
     } catch (_) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text(TextosNino.noHePodidoGuardarlo)),
-      );
+      setState(() => _saveError = TextosNino.noHePodidoGuardarlo);
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -117,8 +139,10 @@ class _ClassifierPageState extends State<ClassifierPage> {
                 children: [
                   _WelcomeHeader(name: widget.greetingName),
                   const SizedBox(height: MichiTokens.space16),
-                  const _CaptureGuide(),
-                  const SizedBox(height: MichiTokens.space24),
+                  if (widget.collection != null) ...[
+                    CollectionProgress(collection: widget.collection!),
+                    const SizedBox(height: MichiTokens.space16),
+                  ],
                   AnimatedSwitcher(
                     duration: MichiTokens.durationMedium,
                     child: _PhotoPreview(
@@ -136,6 +160,12 @@ class _ClassifierPageState extends State<ClassifierPage> {
                           setState(() => _selectedAnimal = value),
                       onChooseAnimal: _chooseAnimal,
                       onConfirm: _confirm,
+                    ),
+                  if (_saveError != null)
+                    _ErrorCard(
+                      message: _saveError!,
+                      showSettings: false,
+                      onRetry: _confirm,
                     ),
                   if (state.noticeMessage != null)
                     _NoticeCard(message: state.noticeMessage!),
@@ -169,6 +199,10 @@ class _ClassifierPageState extends State<ClassifierPage> {
                     icon: const Icon(Icons.photo_library_outlined),
                     label: const Text(TextosNino.usarGaleria),
                   ),
+                  // Los consejos van detrás del botón: son de leer una vez, y
+                  // delante dejaban la cámara por debajo del pliegue.
+                  const SizedBox(height: MichiTokens.space24),
+                  const _CaptureGuide(),
                 ],
               ),
             ),

@@ -4,6 +4,7 @@ import 'package:animalspredictor/features/collection/presentation/animal_detail_
 import 'package:animalspredictor/features/collection/presentation/animal_image.dart';
 import 'package:animalspredictor/features/collection/presentation/animal_selector.dart';
 import 'package:animalspredictor/features/collection/presentation/collection_history_page.dart';
+import 'package:animalspredictor/features/collection/presentation/collection_progress.dart';
 import 'package:animalspredictor/features/collection/presentation/prediction_edit_action.dart';
 import 'package:animalspredictor/l10n/textos.dart';
 import 'package:animalspredictor/models/user_collection.dart';
@@ -173,7 +174,7 @@ class _CollectionContent extends StatelessWidget {
         SliverPadding(
           padding: MichiTokens.pagePadding,
           sliver: SliverToBoxAdapter(
-            child: _CollectionHeader(collection: collection),
+            child: CollectionProgress(collection: collection, detailed: true),
           ),
         ),
         SliverPadding(
@@ -239,70 +240,6 @@ List<Animal> _filteredAnimals(
         };
       })
       .toList(growable: false);
-}
-
-class _CollectionHeader extends StatelessWidget {
-  const _CollectionHeader({required this.collection});
-  final UserCollection collection;
-
-  @override
-  Widget build(BuildContext context) {
-    final achievements = <String>[
-      if (collection.totalPhotos > 0) TextosNino.logroPrimeraFoto,
-      if (collection.discovered >= 5) TextosNino.logroCincoAnimales,
-      if (collection.discovered == animalCatalog.length) TextosNino.logroTodos,
-    ];
-    final latest = collection.lastDiscoveredAnimal;
-    return Card(
-      color: Theme.of(context).colorScheme.secondaryContainer,
-      child: Padding(
-        padding: const EdgeInsets.all(MichiTokens.space16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              TextosNino.tuProgreso,
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: MichiTokens.space8),
-            Text(
-              TextosNino.tienesAnimales(
-                collection.discovered,
-                animalCatalog.length,
-              ),
-            ),
-            const SizedBox(height: MichiTokens.space8),
-            LinearProgressIndicator(
-              value: collection.discovered / animalCatalog.length,
-              semanticsLabel: TextosNino.tuProgreso,
-            ),
-            if (latest != null) ...[
-              const SizedBox(height: MichiTokens.space12),
-              Text(TextosNino.elUltimo(latest)),
-            ],
-            if (achievements.isNotEmpty) ...[
-              const SizedBox(height: MichiTokens.space12),
-              Wrap(
-                spacing: MichiTokens.space8,
-                runSpacing: MichiTokens.space8,
-                children: achievements
-                    .map(
-                      (achievement) => Chip(
-                        avatar: const Icon(
-                          Icons.emoji_events_outlined,
-                          size: MichiTokens.iconSizeSmall,
-                        ),
-                        label: Text(achievement),
-                      ),
-                    )
-                    .toList(growable: false),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
 }
 
 class _CollectionFilters extends StatelessWidget {
