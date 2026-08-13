@@ -1,9 +1,11 @@
 import 'dart:async';
 
 import 'package:animalspredictor/animal_catalog.dart';
+import 'package:animalspredictor/app_animations.dart';
 import 'package:animalspredictor/app_theme.dart';
 import 'package:animalspredictor/features/collection/presentation/animal_detail_page.dart';
 import 'package:animalspredictor/features/collection/presentation/animal_image.dart';
+import 'package:animalspredictor/features/collection/presentation/animal_name.dart';
 import 'package:animalspredictor/features/collection/presentation/animal_selector.dart';
 import 'package:animalspredictor/features/collection/presentation/collection_history_page.dart';
 import 'package:animalspredictor/features/collection/presentation/collection_progress.dart';
@@ -184,9 +186,28 @@ class _CollectionContent extends StatelessWidget {
           ],
         ),
         SliverPadding(
-          padding: MichiTokens.pagePadding,
+          padding: const EdgeInsets.fromLTRB(
+            MichiTokens.space24,
+            MichiTokens.space8,
+            MichiTokens.space24,
+            MichiTokens.space20,
+          ),
           sliver: SliverToBoxAdapter(
-            child: CollectionProgress(collection: collection, detailed: true),
+            child: CollectionProgress(
+              collection: collection,
+              detailed: true,
+            ).entrance(),
+          ),
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(
+            MichiTokens.space24,
+            0,
+            MichiTokens.space24,
+            MichiTokens.space20,
+          ),
+          sliver: SliverToBoxAdapter(
+            child: CollectionMedals(collection: collection).entrance(step: 1),
           ),
         ),
         SliverPadding(
@@ -195,7 +216,7 @@ class _CollectionContent extends StatelessWidget {
             child: _CollectionFilters(
               selected: filter,
               onChanged: onFilterChanged,
-            ),
+            ).entrance(step: 2),
           ),
         ),
         SliverPadding(
@@ -222,6 +243,9 @@ class _CollectionContent extends StatelessWidget {
                       animal: animal,
                       count: collection.counts[animal.name] ?? 0,
                       onTap: () => onOpenAnimal(animal),
+                      // Las primeras fichas entran escalonadas; a partir de
+                      // ahí ya está el ojo puesto y no hace falta.
+                      entranceStep: index < 6 ? index : null,
                     );
                   },
                 ),
@@ -296,10 +320,18 @@ class _FilterChip extends StatelessWidget {
   final CollectionFilter? selected;
   final ValueChanged<CollectionFilter?> onChanged;
 
+  // Los dos filtros caben en una línea; con la letra de las pastillas del
+  // resto de la app se partían en dos filas y empujaban la cuadrícula fuera de
+  // la pantalla. El alto sigue siendo el de un dedo pequeño.
   @override
   Widget build(BuildContext context) => FilterChip(
     avatar: Icon(icon, size: MichiTokens.iconSizeSmall),
     label: Text(label),
+    labelStyle: Theme.of(context).textTheme.labelMedium,
+    padding: const EdgeInsets.symmetric(
+      horizontal: MichiTokens.space12,
+      vertical: MichiTokens.chipCompactVerticalPadding,
+    ),
     selected: selected == filter,
     onSelected: (isSelected) => onChanged(isSelected ? filter : null),
   );
@@ -310,49 +342,79 @@ class _AnimalTile extends StatelessWidget {
     required this.animal,
     required this.count,
     required this.onTap,
+    this.entranceStep,
   });
   final Animal animal;
   final int count;
   final VoidCallback onTap;
 
+  /// Puesto en la entrada escalonada. Nulo si la ficha aparece sin animación.
+  final int? entranceStep;
+
   @override
-  Widget build(BuildContext context) => Semantics(
-    button: true,
-    label: TextosNino.animalConFotos(animal.name, count),
-    onTap: onTap,
-    child: ExcludeSemantics(
-      child: Card(
-        shape: MichiTokens.animalCardShape,
-        child: InkWell(
-          onTap: onTap,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: SizedBox(
-                  width: double.infinity,
-                  child: AnimalImage(animal: animal),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(MichiTokens.space12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      animal.name,
-                      style: Theme.of(context).textTheme.titleLarge,
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final owned = count > 0;
+    final tile = Semantics(
+      button: true,
+      label: TextosNino.animalConFotos(animal.name, count),
+      onTap: onTap,
+      child: ExcludeSemantics(
+        child: Card(
+          shape: MichiTokens.animalCardShape.copyWith(
+            side: BorderSide(
+              color: owned ? colors.secondary : colors.outlineVariant,
+              width: MichiTokens.cardBorderWidth,
+            ),
+          ),
+          child: InkWell(
+            onTap: onTap,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: SizedBox(
+                    width: double.infinity,
+                    // Los que faltan se ven apagados: la diferencia entre lo
+                    // conseguido y lo pendiente se nota sin leer nada.
+                    child: Opacity(
+                      opacity: owned ? 1 : 0.5,
+                      child: AnimalPortrait(animal: animal),
                     ),
-                    Text(TextosNino.fotos(count)),
-                  ],
+                  ),
                 ),
-              ),
-            ],
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    MichiTokens.space12,
+                    MichiTokens.space12,
+                    MichiTokens.space12,
+                    MichiTokens.space12,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      AnimalName(
+                        name: animal.name,
+                        textAlign: TextAlign.start,
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                      const SizedBox(height: MichiTokens.space8),
+                      AnimalCountBadge(
+                        label: TextosNino.fotos(count),
+                        owned: owned,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
-    ),
-  );
+    );
+    final step = entranceStep;
+    return step == null ? tile : tile.entrance(step: step);
+  }
 }
 
 class _GuestCollection extends StatelessWidget {

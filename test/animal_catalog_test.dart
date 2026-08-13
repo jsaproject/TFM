@@ -2,18 +2,28 @@ import 'package:animalspredictor/animal_catalog.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('ningún animal del catálogo repite icono', () {
-    final iconos = <int, String>{};
+  test('ningún animal del catálogo repite retrato', () {
+    final retratos = <String, String>{};
     for (final animal in animalCatalog) {
-      final repetido = iconos[animal.icon.codePoint];
+      final repetido = retratos[animal.emoji];
       expect(
         repetido,
         isNull,
-        reason: '${animal.name} y $repetido comparten icono',
+        reason: '${animal.name} y $repetido comparten retrato',
       );
-      iconos[animal.icon.codePoint] = animal.name;
+      retratos[animal.emoji] = animal.name;
     }
-    expect(iconos, hasLength(animalCatalog.length));
+    expect(retratos, hasLength(animalCatalog.length));
+  });
+
+  test('todos los animales tienen retrato', () {
+    for (final animal in [...animalCatalog, ...legacyAnimalCatalog]) {
+      expect(
+        animal.emoji.trim(),
+        isNotEmpty,
+        reason: '${animal.name} no tiene retrato',
+      );
+    }
   });
 
   test('cada animal del catálogo tiene un nombre distinto', () {

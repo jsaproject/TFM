@@ -131,15 +131,24 @@ class _DestinationBadge extends StatelessWidget {
             ? (colors.tertiary, colors.onTertiary)
             : (colors.tertiaryContainer, colors.onTertiaryContainer),
     };
-    return DecoratedBox(
+    return AnimatedContainer(
+      duration: MichiTokens.durationShort,
+      curve: Curves.easeOut,
+      padding: MichiTokens.navigationBadgePadding,
       decoration: ShapeDecoration(
         color: background,
         shape: const StadiumBorder(),
+        shadows: selected
+            ? [
+                BoxShadow(
+                  color: background.withValues(alpha: 0.45),
+                  blurRadius: MichiTokens.space12,
+                  offset: const Offset(0, MichiTokens.space4),
+                ),
+              ]
+            : null,
       ),
-      child: Padding(
-        padding: MichiTokens.navigationBadgePadding,
-        child: Icon(icon, size: MichiTokens.iconSizeMedium, color: foreground),
-      ),
+      child: Icon(icon, size: MichiTokens.iconSizeMedium, color: foreground),
     );
   }
 }

@@ -67,59 +67,107 @@ class _AdultGateState extends State<AdultGate> {
   }
 
   @override
-  Widget build(BuildContext context) => Card(
-    color: Theme.of(context).colorScheme.tertiaryContainer,
-    child: Padding(
-      padding: const EdgeInsets.all(MichiTokens.space16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Semantics(
-                label: TextosAdulto.puertaAdultosSemantica,
-                child: const ExcludeSemantics(child: Icon(Icons.lock_outline)),
-              ),
-              const SizedBox(width: MichiTokens.space8),
-              Text(
-                TextosAdulto.puertaAdultosTitulo,
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-            ],
-          ),
-          const SizedBox(height: MichiTokens.space12),
-          const Text(TextosAdulto.puertaAdultosTexto),
-          const SizedBox(height: MichiTokens.space12),
-          Text(
-            TextosAdulto.puertaAdultosPregunta(_challenge.expression),
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: MichiTokens.space12),
-          TextField(
-            controller: _answerController,
-            autofocus: false,
-            enabled: !_openingSettings,
-            keyboardType: TextInputType.number,
-            textInputAction: TextInputAction.done,
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            onSubmitted: (_) => _submit(),
-            decoration: InputDecoration(
-              labelText: TextosAdulto.puertaAdultosRespuesta,
-              errorText: _errorText,
-              constraints: const BoxConstraints(
-                minHeight: MichiTokens.touchTargetMin,
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    // Tarjeta neutra con un acento ámbar: es la zona del adulto, no otra
+    // pantalla de colores del niño.
+    return Card(
+      color: colors.surfaceContainerHigh,
+      shape: MichiTokens.animalCardShape.copyWith(
+        side: BorderSide(
+          color: colors.outlineVariant,
+          width: MichiTokens.cardBorderWidth,
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(MichiTokens.space20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Semantics(
+                  label: TextosAdulto.puertaAdultosSemantica,
+                  child: ExcludeSemantics(
+                    child: Container(
+                      width: MichiTokens.touchTargetMin,
+                      height: MichiTokens.touchTargetMin,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: colors.tertiary,
+                      ),
+                      child: Icon(
+                        Icons.lock_outline,
+                        size: MichiTokens.iconSizeMedium,
+                        color: colors.onTertiary,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: MichiTokens.space16),
+                Expanded(
+                  child: Text(
+                    TextosAdulto.puertaAdultosTitulo,
+                    style: theme.textTheme.titleLarge,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: MichiTokens.space16),
+            Text(
+              TextosAdulto.puertaAdultosTexto,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colors.onSurfaceVariant,
               ),
             ),
-          ),
-          const SizedBox(height: MichiTokens.space12),
-          FilledButton.icon(
-            key: const Key('adult-gate-submit'),
-            onPressed: _openingSettings ? null : _submit,
-            icon: const Icon(Icons.lock_open_outlined),
-            label: const Text(TextosAdulto.puertaAdultosAbrir),
-          ),
-        ],
+            const SizedBox(height: MichiTokens.space16),
+            // La operación, destacada sobre su propio fondo: es lo que hay que
+            // resolver, no una línea más del texto.
+            DecoratedBox(
+              decoration: ShapeDecoration(
+                color: colors.surfaceContainerLowest,
+                shape: MichiTokens.cardShape,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: MichiTokens.space20,
+                  vertical: MichiTokens.space16,
+                ),
+                child: Text(
+                  TextosAdulto.puertaAdultosPregunta(_challenge.expression),
+                  style: theme.textTheme.headlineSmall,
+                ),
+              ),
+            ),
+            const SizedBox(height: MichiTokens.space16),
+            TextField(
+              controller: _answerController,
+              autofocus: false,
+              enabled: !_openingSettings,
+              keyboardType: TextInputType.number,
+              textInputAction: TextInputAction.done,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              onSubmitted: (_) => _submit(),
+              style: theme.textTheme.titleMedium,
+              decoration: InputDecoration(
+                labelText: TextosAdulto.puertaAdultosRespuesta,
+                errorText: _errorText,
+                constraints: const BoxConstraints(
+                  minHeight: MichiTokens.touchTargetMin,
+                ),
+              ),
+            ),
+            const SizedBox(height: MichiTokens.space16),
+            FilledButton.icon(
+              key: const Key('adult-gate-submit'),
+              onPressed: _openingSettings ? null : _submit,
+              icon: const Icon(Icons.lock_open_outlined),
+              label: const Text(TextosAdulto.puertaAdultosAbrir),
+            ),
+          ],
+        ),
       ),
-    ),
-  );
+    );
+  }
 }

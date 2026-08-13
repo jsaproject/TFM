@@ -89,16 +89,35 @@ class _WelcomePage extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Icon(
-                          Icons.pets,
-                          size: MichiTokens.iconSizeHero,
-                          color: Theme.of(context).colorScheme.primary,
+                        // La marca, en una pastilla de color: es lo primero
+                        // que se ve al abrir la app.
+                        Center(
+                          child: Container(
+                            width: MichiTokens.brandMarkSize,
+                            height: MichiTokens.brandMarkSize,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  Theme.of(context).colorScheme.primary,
+                                  Theme.of(context).colorScheme.tertiary,
+                                ],
+                              ),
+                            ),
+                            child: Icon(
+                              Icons.pets,
+                              size: MichiTokens.iconSizeHero,
+                              color: Theme.of(context).colorScheme.onPrimary,
+                            ),
+                          ),
                         ),
                         const SizedBox(height: MichiTokens.space20),
                         Text(
                           TextosNino.marca,
                           textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.headlineSmall,
+                          style: Theme.of(context).textTheme.headlineMedium,
                         ),
                         const SizedBox(height: MichiTokens.space24),
                         const _WelcomeStep(
