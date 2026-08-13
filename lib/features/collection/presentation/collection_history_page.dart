@@ -114,9 +114,11 @@ class _PredictionHistoryListState extends State<PredictionHistoryList> {
           subtitle: Text(_dateLabel(prediction.createdAt)),
           trailing: isUpdating
               ? const SizedBox(
-                  height: 24,
-                  width: 24,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                  height: MichiTokens.progressIndicatorSize,
+                  width: MichiTokens.progressIndicatorSize,
+                  child: CircularProgressIndicator(
+                    strokeWidth: MichiTokens.progressIndicatorStrokeWidth,
+                  ),
                 )
               : PopupMenuButton<PredictionEditAction>(
                   tooltip: 'Acciones de identificación',
@@ -149,7 +151,7 @@ class _HistoryError extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.cloud_off_outlined, size: 56),
+          const Icon(Icons.cloud_off_outlined, size: MichiTokens.iconSizeLarge),
           const SizedBox(height: MichiTokens.space16),
           const Text(
             'No se ha podido cargar el historial. Comprueba tu conexión e inténtalo de nuevo.',
@@ -173,14 +175,14 @@ class _HistorySkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) => ListView.separated(
     padding: MichiTokens.pagePadding,
-    itemCount: 6,
+    itemCount: MichiTokens.historySkeletonItemCount,
     separatorBuilder: (_, _) => const SizedBox(height: MichiTokens.space8),
     itemBuilder: (context, _) => DecoratedBox(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: const BorderRadius.all(MichiTokens.radiusMedium),
       ),
-      child: const SizedBox(height: 72),
+      child: const SizedBox(height: MichiTokens.historySkeletonItemHeight),
     ),
   );
 }

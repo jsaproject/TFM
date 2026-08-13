@@ -135,7 +135,9 @@ class _SignInPageState extends State<SignInPage> {
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 480),
+            constraints: const BoxConstraints(
+              maxWidth: MichiTokens.authenticationMaxWidth,
+            ),
             child: ListView(
               padding: MichiTokens.pagePadding,
               children: [
@@ -223,8 +225,11 @@ class _SignInPageState extends State<SignInPage> {
                   onPressed: _busy ? null : _submit,
                   child: _busy
                       ? const SizedBox.square(
-                          dimension: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
+                          dimension: MichiTokens.progressIndicatorSize,
+                          child: CircularProgressIndicator(
+                            strokeWidth:
+                                MichiTokens.progressIndicatorStrokeWidth,
+                          ),
                         )
                       : Text(actionLabel),
                 ),
@@ -306,15 +311,15 @@ class _BrandWelcome extends StatelessWidget {
     child: Column(
       children: [
         Container(
-          width: 112,
-          height: 112,
+          width: MichiTokens.brandMarkSize,
+          height: MichiTokens.brandMarkSize,
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.primaryContainer,
             shape: BoxShape.circle,
           ),
           child: Icon(
             Icons.pets_outlined,
-            size: 56,
+            size: MichiTokens.iconSizeLarge,
             color: Theme.of(context).colorScheme.onPrimaryContainer,
           ),
         ),

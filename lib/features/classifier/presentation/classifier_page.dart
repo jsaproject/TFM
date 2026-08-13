@@ -141,7 +141,9 @@ class _ClassifierPageState extends State<ClassifierPage> {
           top: false,
           child: Center(
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 600),
+              constraints: const BoxConstraints(
+                maxWidth: MichiTokens.contentMaxWidth,
+              ),
               child: ListView(
                 padding: MichiTokens.pagePadding,
                 children: [
@@ -255,7 +257,10 @@ class _CaptureGuide extends StatelessWidget {
           const SizedBox(height: MichiTokens.space8),
           const Row(
             children: [
-              Icon(Icons.phone_android_outlined, size: 18),
+              Icon(
+                Icons.phone_android_outlined,
+                size: MichiTokens.iconSizeSmall,
+              ),
               SizedBox(width: MichiTokens.space8),
               Expanded(
                 child: Text('La imagen se procesa solo en este dispositivo.'),
@@ -279,7 +284,7 @@ class _PhotoPreview extends StatelessWidget {
         : 'Vista previa de la imagen seleccionada',
     image: true,
     child: AspectRatio(
-      aspectRatio: 1,
+      aspectRatio: MichiTokens.squareImageAspectRatio,
       child: Card(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -300,7 +305,8 @@ class _PhotoPreview extends StatelessWidget {
                   )
                 else
                   Image.asset('assets/farm_animals.png', fit: BoxFit.contain),
-                if (state.isBusy) const ColoredBox(color: Color(0x33000000)),
+                if (state.isBusy)
+                  const ColoredBox(color: MichiTokens.veilOverlay),
                 if (state.isBusy)
                   const Center(
                     child: Column(
@@ -401,8 +407,10 @@ class _PredictionPanel extends StatelessWidget {
                 onPressed: saving || selectedAnimal == null ? null : onConfirm,
                 icon: saving
                     ? const SizedBox.square(
-                        dimension: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                        dimension: MichiTokens.progressIndicatorSize,
+                        child: CircularProgressIndicator(
+                          strokeWidth: MichiTokens.progressIndicatorStrokeWidth,
+                        ),
                       )
                     : const Icon(Icons.check_circle_outline),
                 label: Text(saving ? 'Guardando…' : 'Confirmar resultado'),

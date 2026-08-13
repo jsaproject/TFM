@@ -1,4 +1,5 @@
 import 'package:animalspredictor/animal_catalog.dart';
+import 'package:animalspredictor/app_theme.dart';
 import 'package:flutter/material.dart';
 
 /// Ilustración de un grupo del catálogo.
@@ -39,7 +40,11 @@ class _Fallback extends StatelessWidget {
       child: ColoredBox(
         color: colors.surfaceContainerHighest,
         child: Center(
-          child: Icon(animal.icon, size: 40, color: colors.onSurfaceVariant),
+          child: Icon(
+            animal.icon,
+            size: MichiTokens.iconSizeProminent,
+            color: colors.onSurfaceVariant,
+          ),
         ),
       ),
     );

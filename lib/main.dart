@@ -1,4 +1,5 @@
 import 'package:animalspredictor/app.dart';
+import 'package:animalspredictor/app_theme.dart';
 import 'package:animalspredictor/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -19,12 +20,15 @@ class _StartupErrorApp extends StatelessWidget {
   const _StartupErrorApp();
 
   @override
-  Widget build(BuildContext context) => const MaterialApp(
+  Widget build(BuildContext context) => MaterialApp(
     debugShowCheckedModeBanner: false,
+    theme: MichiTheme.light(),
+    darkTheme: MichiTheme.dark(),
+    themeMode: ThemeMode.system,
     home: Scaffold(
       body: Center(
         child: Padding(
-          padding: EdgeInsets.all(24),
+          padding: MichiTokens.pagePadding,
           child: Text(
             'No se pudo iniciar la aplicación. Comprueba la conexión e inténtalo de nuevo.',
             textAlign: TextAlign.center,

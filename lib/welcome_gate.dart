@@ -1,4 +1,5 @@
 import 'package:animalspredictor/home_page.dart';
+import 'package:animalspredictor/app_theme.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -72,50 +73,60 @@ class _WelcomePage extends StatelessWidget {
     body: SafeArea(
       child: ColoredBox(
         color: Theme.of(context).colorScheme.surface,
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 560),
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Icon(
-                    Icons.pets,
-                    size: 72,
-                    color: Theme.of(context).colorScheme.primary,
+        child: LayoutBuilder(
+          builder: (context, constraints) => SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxWidth: MichiTokens.welcomeMaxWidth,
                   ),
-                  const SizedBox(height: 20),
-                  Text(
-                    'Bienvenido a La granja de Michi',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.headlineSmall,
+                  child: Padding(
+                    padding: MichiTokens.pagePadding,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Icon(
+                          Icons.pets,
+                          size: MichiTokens.iconSizeHero,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        const SizedBox(height: MichiTokens.space20),
+                        Text(
+                          'Bienvenido a La granja de Michi',
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.headlineSmall,
+                        ),
+                        const SizedBox(height: MichiTokens.space24),
+                        const _WelcomeStep(
+                          icon: Icons.camera_alt_outlined,
+                          title: 'Haz una foto',
+                          text:
+                              'Usa la cámara para identificar un animal al momento.',
+                        ),
+                        const _WelcomeStep(
+                          icon: Icons.photo_library_outlined,
+                          title: 'O elige de tu galería',
+                          text:
+                              'También puedes clasificar una imagen que ya tengas.',
+                        ),
+                        const _WelcomeStep(
+                          icon: Icons.collections_bookmark_outlined,
+                          title: 'Completa tu colección',
+                          text:
+                              'Confirma cada resultado para guardarlo en tu cuenta.',
+                        ),
+                        const SizedBox(height: MichiTokens.space28),
+                        FilledButton(
+                          onPressed: onStart,
+                          child: const Text('Empezar a explorar'),
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 24),
-                  const _WelcomeStep(
-                    icon: Icons.camera_alt_outlined,
-                    title: 'Haz una foto',
-                    text:
-                        'Usa la cámara para identificar un animal al momento.',
-                  ),
-                  const _WelcomeStep(
-                    icon: Icons.photo_library_outlined,
-                    title: 'O elige de tu galería',
-                    text: 'También puedes clasificar una imagen que ya tengas.',
-                  ),
-                  const _WelcomeStep(
-                    icon: Icons.collections_bookmark_outlined,
-                    title: 'Completa tu colección',
-                    text:
-                        'Confirma cada resultado para guardarlo en tu cuenta.',
-                  ),
-                  const SizedBox(height: 28),
-                  FilledButton(
-                    onPressed: onStart,
-                    child: const Text('Empezar a explorar'),
-                  ),
-                ],
+                ),
               ),
             ),
           ),
@@ -138,14 +149,18 @@ class _WelcomeStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 8),
+    padding: const EdgeInsets.symmetric(vertical: MichiTokens.space8),
     child: Semantics(
       label: '$title. $text',
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: Theme.of(context).colorScheme.primary, size: 30),
-          const SizedBox(width: 16),
+          Icon(
+            icon,
+            color: Theme.of(context).colorScheme.primary,
+            size: MichiTokens.iconSizeMedium,
+          ),
+          const SizedBox(width: MichiTokens.space16),
           Expanded(
             child: Text.rich(
               TextSpan(
@@ -153,7 +168,7 @@ class _WelcomeStep extends StatelessWidget {
                 children: [
                   TextSpan(
                     text: '$title\n',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                    style: Theme.of(context).textTheme.titleMedium,
                   ),
                   TextSpan(text: text),
                 ],

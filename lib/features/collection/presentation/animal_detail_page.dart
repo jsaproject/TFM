@@ -99,7 +99,7 @@ class _AnimalDetailContent extends StatelessWidget {
               ClipRRect(
                 borderRadius: const BorderRadius.all(MichiTokens.radiusLarge),
                 child: AspectRatio(
-                  aspectRatio: 16 / 9,
+                  aspectRatio: MichiTokens.landscapeImageAspectRatio,
                   child: AnimalImage(animal: animal),
                 ),
               ),
@@ -144,11 +144,10 @@ class _AnimalDetailContent extends StatelessWidget {
         PredictionHistoryList(
           predictions: predictions,
           onEdit: onEdit,
-          padding: const EdgeInsets.fromLTRB(
-            MichiTokens.space24,
-            0,
-            MichiTokens.space24,
-            MichiTokens.space24,
+          padding: const EdgeInsets.only(
+            left: MichiTokens.space24,
+            right: MichiTokens.space24,
+            bottom: MichiTokens.space24,
           ),
           asSliver: true,
         ),
@@ -190,7 +189,7 @@ class _DetailError extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.cloud_off_outlined, size: 56),
+          const Icon(Icons.cloud_off_outlined, size: MichiTokens.iconSizeLarge),
           const SizedBox(height: MichiTokens.space16),
           const Text(
             'No se ha podido cargar esta especie. Comprueba tu conexión e inténtalo de nuevo.',

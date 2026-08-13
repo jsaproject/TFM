@@ -1,3 +1,4 @@
+import 'package:animalspredictor/app_theme.dart';
 import 'package:animalspredictor/welcome_gate.dart';
 import 'package:animalspredictor/sign_in_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -26,7 +27,7 @@ class AuthGate extends StatelessWidget {
         return const Scaffold(
           body: Center(
             child: Padding(
-              padding: EdgeInsets.all(24),
+              padding: MichiTokens.pagePadding,
               child: Text(
                 'No se ha podido comprobar la sesión. Vuelve a abrir la aplicación.',
                 textAlign: TextAlign.center,

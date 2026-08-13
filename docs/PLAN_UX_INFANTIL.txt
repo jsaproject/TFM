@@ -165,6 +165,8 @@ PROBLEMA 0.3 - El SnackBar es el unico aviso y se va solo
 FASE 1 - UN UNICO TEMA, DEFINIDO APARTE Y FACIL DE CAMBIAR
 ================================================================================
 
+ESTADO: COMPLETADA (2026-08-13)
+
 Objetivo: que cambiar el aspecto entero de la app sea editar un fichero.
 El fichero ya existe (lib/app_theme.dart, 85 lineas). Hay que ampliarlo,
 hacerlo infantil, y quitar los pocos restos que se le escapan.

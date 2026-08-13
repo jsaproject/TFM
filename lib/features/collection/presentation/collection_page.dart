@@ -208,10 +208,11 @@ class _CollectionContent extends StatelessWidget {
               ? const SliverToBoxAdapter(child: _NoFilteredAnimals())
               : SliverGrid.builder(
                   gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                    maxCrossAxisExtent: 260,
+                    maxCrossAxisExtent:
+                        MichiTokens.collectionGridMaxCrossAxisExtent,
                     mainAxisSpacing: MichiTokens.space12,
                     crossAxisSpacing: MichiTokens.space12,
-                    mainAxisExtent: 242,
+                    mainAxisExtent: MichiTokens.collectionGridMainAxisExtent,
                   ),
                   itemCount: animals.length,
                   itemBuilder: (context, index) {
@@ -313,7 +314,7 @@ class _CollectionHeader extends StatelessWidget {
                       (achievement) => Chip(
                         avatar: const Icon(
                           Icons.emoji_events_outlined,
-                          size: 18,
+                          size: MichiTokens.iconSizeSmall,
                         ),
                         label: Text(achievement),
                       ),
@@ -403,6 +404,7 @@ class _AnimalTile extends StatelessWidget {
     onTap: onTap,
     child: ExcludeSemantics(
       child: Card(
+        shape: MichiTokens.animalCardShape,
         child: InkWell(
           onTap: onTap,
           child: Column(
@@ -461,7 +463,7 @@ class _CollectionError extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.cloud_off_outlined, size: 64),
+          const Icon(Icons.cloud_off_outlined, size: MichiTokens.iconSizeLarge),
           const SizedBox(height: MichiTokens.space16),
           Text(
             'No se ha podido cargar la colección. Comprueba tu conexión e inténtalo de nuevo.',
@@ -486,13 +488,13 @@ class _CollectionSkeleton extends StatelessWidget {
   Widget build(BuildContext context) => ListView(
     padding: MichiTokens.pagePadding,
     children: const [
-      _SkeletonBlock(height: 190),
+      _SkeletonBlock(height: MichiTokens.collectionHeaderSkeletonHeight),
       SizedBox(height: MichiTokens.space16),
-      _SkeletonBlock(height: 40),
+      _SkeletonBlock(height: MichiTokens.collectionFilterSkeletonHeight),
       SizedBox(height: MichiTokens.space16),
-      _SkeletonBlock(height: 180),
+      _SkeletonBlock(height: MichiTokens.collectionCardSkeletonHeight),
       SizedBox(height: MichiTokens.space12),
-      _SkeletonBlock(height: 180),
+      _SkeletonBlock(height: MichiTokens.collectionCardSkeletonHeight),
     ],
   );
 }
@@ -535,7 +537,10 @@ class _EmptyCollection extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.collections_bookmark_outlined, size: 64),
+          const Icon(
+            Icons.collections_bookmark_outlined,
+            size: MichiTokens.iconSizeLarge,
+          ),
           const SizedBox(height: MichiTokens.space16),
           Text(
             'Tu colección está esperando',

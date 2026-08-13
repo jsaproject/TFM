@@ -36,3 +36,10 @@ flutter:
     - assets/perro.jpg
     - assets/vaca.jpg
     - assets/models/
+  fonts:
+    - family: Andika
+      fonts:
+        - asset: assets/fonts/Andika-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Andika-Bold.ttf
+          weight: 700

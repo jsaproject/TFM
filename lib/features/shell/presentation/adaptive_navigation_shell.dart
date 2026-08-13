@@ -1,3 +1,4 @@
+import 'package:animalspredictor/app_theme.dart';
 import 'package:flutter/material.dart';
 
 class ShellDestination {
@@ -26,7 +27,7 @@ class AdaptiveNavigationShell extends StatelessWidget {
   final List<ShellDestination> destinations;
   final List<Widget> children;
 
-  static const railBreakpoint = 840.0;
+  static const railBreakpoint = MichiTokens.navigationRailBreakpoint;
 
   @override
   Widget build(BuildContext context) => LayoutBuilder(
@@ -49,7 +50,7 @@ class AdaptiveNavigationShell extends StatelessWidget {
                   )
                   .toList(),
             ),
-            const VerticalDivider(width: 1),
+            const VerticalDivider(width: MichiTokens.dividerThickness),
             Expanded(child: content),
           ],
         );

@@ -198,7 +198,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     ],
                   ),
                 ),
-                const Divider(height: 1),
+                const Divider(height: MichiTokens.dividerThickness),
                 SwitchListTile(
                   title: const Text('Respuesta háptica'),
                   subtitle: const Text(
@@ -236,8 +236,10 @@ class _ProfilePageState extends State<ProfilePage> {
             onPressed: _signingOut || _deleting ? null : _signOut,
             icon: _signingOut
                 ? const SizedBox.square(
-                    dimension: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
+                    dimension: MichiTokens.progressIndicatorSize,
+                    child: CircularProgressIndicator(
+                      strokeWidth: MichiTokens.progressIndicatorStrokeWidth,
+                    ),
                   )
                 : const Icon(Icons.logout),
             label: Text(_signingOut ? 'Cerrando sesión…' : 'Cerrar sesión'),
@@ -247,8 +249,10 @@ class _ProfilePageState extends State<ProfilePage> {
             onPressed: _signingOut || _deleting ? null : _deleteAccount,
             icon: _deleting
                 ? const SizedBox.square(
-                    dimension: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
+                    dimension: MichiTokens.progressIndicatorSize,
+                    child: CircularProgressIndicator(
+                      strokeWidth: MichiTokens.progressIndicatorStrokeWidth,
+                    ),
                   )
                 : const Icon(Icons.delete_forever_outlined),
             label: Text(
