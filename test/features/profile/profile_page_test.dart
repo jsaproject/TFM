@@ -255,9 +255,6 @@ class _AuthServiceStub implements AuthService {
   Future<void> signIn(String email, String password) async {}
 
   @override
-  Future<void> signInAnonymously() async {}
-
-  @override
   Future<void> signOut() async => signOutCalls++;
 
   @override

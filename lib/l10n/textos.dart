@@ -320,8 +320,8 @@ abstract final class TextosAdulto {
   static const continuar = 'Continuar';
   static const invitadoTitulo = '¿Quieres probar primero?';
   static const invitadoTexto =
-      'Como invitado no guardaremos tu correo ni tus descubrimientos en una '
-      'colección.';
+      'Como invitado guardaremos tus descubrimientos solo en este dispositivo. '
+      'Crea o inicia sesión para sincronizarlos con tu cuenta.';
   static const invitadoBoton = 'Continuar como invitado';
   static const correoInvalido = 'Escribe un correo válido.';
   static const contrasenaCorta =
@@ -359,6 +359,8 @@ abstract final class TextosAdulto {
       'No se ha podido iniciar como invitado. Inténtalo de nuevo.';
   static const errorRecuperacion =
       'No se ha podido enviar el correo de recuperación. Inténtalo de nuevo.';
+  static const errorSincronizarColeccion =
+      'No se ha podido sincronizar la colección local. Comprueba internet y vuelve a intentarlo.';
 
   // Perfil y ajustes.
   static const perfilTitulo = 'Perfil y ajustes';
@@ -374,7 +376,7 @@ abstract final class TextosAdulto {
   static const cuentaInvitado = 'Invitado';
   static const cuentaUsuario = 'Usuario';
   static const cuentaInvitadoTexto =
-      'Tus descubrimientos no se guardan en una colección.';
+      'Tus descubrimientos se guardan solo en este dispositivo.';
   static const cuentaTexto = 'Tu colección está asociada a esta cuenta.';
   static const aparienciaTitulo = 'Apariencia y respuesta';
   static const tema = 'Tema';

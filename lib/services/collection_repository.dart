@@ -20,6 +20,22 @@ abstract class CollectionRepository {
   Future<void> markAchievementsSeen(String uid, Iterable<String> ids);
 }
 
+/// Combina datos que se originaron en Realm con una cuenta de Firestore.
+///
+/// Los documentos de historial conservan el id local para que repetir la
+/// operación después de un corte de red no añada fotos duplicadas.
+abstract class CollectionSyncRepository {
+  Future<void> importLocalCollection(
+    String uid, {
+    required List<CollectionPrediction> predictions,
+    required Iterable<String> seenAchievementIds,
+  });
+}
+
+abstract class DisposableCollectionRepository {
+  Future<void> dispose();
+}
+
 class CollectionPrediction {
   const CollectionPrediction({
     required this.id,
@@ -32,7 +48,8 @@ class CollectionPrediction {
   final DateTime? createdAt;
 }
 
-class FirestoreCollectionRepository implements CollectionRepository {
+class FirestoreCollectionRepository
+    implements CollectionRepository, CollectionSyncRepository {
   FirestoreCollectionRepository(this._firestore);
   final FirebaseFirestore _firestore;
   final Set<String> _legacyMigrations = {};
@@ -133,6 +150,65 @@ class FirestoreCollectionRepository implements CollectionRepository {
     await _user(uid).set({
       'achievements': FieldValue.arrayUnion(known),
     }, SetOptions(merge: true));
+  }
+
+  @override
+  Future<void> importLocalCollection(
+    String uid, {
+    required List<CollectionPrediction> predictions,
+    required Iterable<String> seenAchievementIds,
+  }) async {
+    final knownAchievements = seenAchievementIds
+        .where(_knownAchievementIds.contains)
+        .toList(growable: false);
+    if (predictions.isEmpty && knownAchievements.isEmpty) return;
+
+    final validPredictions = <CollectionPrediction>[];
+    for (final prediction in predictions) {
+      _validateAnimal(prediction.animal);
+      if (prediction.id.isEmpty || prediction.id.length > 150) {
+        throw ArgumentError.value(
+          prediction.id,
+          'prediction.id',
+          'Identificador local no compatible',
+        );
+      }
+      validPredictions.add(prediction);
+    }
+
+    final user = _user(uid);
+    for (final prediction in validPredictions) {
+      final reference = user.collection('predictions').doc(prediction.id);
+      await _firestore.runTransaction((transaction) async {
+        final existing = await transaction.get(reference);
+        final userSnapshot = await transaction.get(user);
+        // Si esta foto ya llegó durante un intento anterior, no se vuelve a
+        // sumar. El id local estable hace la transferencia idempotente.
+        if (existing.exists) return;
+        final date = prediction.createdAt ?? DateTime.now();
+        final storedDates = userSnapshot.data()?['lastIdentified'];
+        final storedDate = storedDates is Map
+            ? storedDates[prediction.animal]
+            : null;
+        final replacesStoredDate =
+            storedDate is! Timestamp || date.isAfter(storedDate.toDate());
+        transaction.set(reference, {
+          'animal': prediction.animal,
+          'createdAt': Timestamp.fromDate(date),
+        });
+        transaction.set(user, {
+          'collection': {prediction.animal: FieldValue.increment(1)},
+          'lastIdentifiedAt': FieldValue.serverTimestamp(),
+          if (replacesStoredDate)
+            'lastIdentified': {prediction.animal: Timestamp.fromDate(date)},
+        }, SetOptions(merge: true));
+      });
+    }
+    if (knownAchievements.isNotEmpty) {
+      await user.set({
+        'achievements': FieldValue.arrayUnion(knownAchievements),
+      }, SetOptions(merge: true));
+    }
   }
 
   DocumentReference<Map<String, dynamic>> _user(String uid) =>

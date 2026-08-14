@@ -1,12 +1,12 @@
 import 'package:animalspredictor/auth_service.dart';
 import 'package:animalspredictor/l10n/textos.dart';
+import 'package:animalspredictor/services/guest_session_service.dart';
 import 'package:animalspredictor/sign_in_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class FakeAuthService implements AuthService {
-  bool anonymousSignInCalled = false;
   String? signedInEmail;
   String? signedUpEmail;
   String? resetEmail;
@@ -14,7 +14,6 @@ class FakeAuthService implements AuthService {
 
   @override
   Stream<User?> get changes => const Stream.empty();
-
   @override
   Future<void> sendPasswordResetEmail(String email) async => resetEmail = email;
 
@@ -23,9 +22,6 @@ class FakeAuthService implements AuthService {
     if (signInError != null) throw signInError!;
     signedInEmail = email;
   }
-
-  @override
-  Future<void> signInAnonymously() async => anonymousSignInCalled = true;
 
   @override
   Future<void> signOut() async {}
@@ -38,8 +34,26 @@ class FakeAuthService implements AuthService {
       signedUpEmail = email;
 }
 
-Widget _app(FakeAuthService auth) =>
-    MaterialApp(home: SignInPage(authService: auth));
+class _GuestSessionServiceStub implements GuestSessionService {
+  var started = false;
+
+  @override
+  Future<bool> isActive() async => started;
+
+  @override
+  Future<void> start() async => started = true;
+
+  @override
+  Future<void> stop() async => started = false;
+}
+
+Widget _app(FakeAuthService auth, {_GuestSessionServiceStub? guest}) =>
+    MaterialApp(
+      home: SignInPage(
+        authService: auth,
+        guestSessionService: guest ?? _GuestSessionServiceStub(),
+      ),
+    );
 
 Future<void> _tapAfterScrolling(WidgetTester tester, Finder finder) async {
   await tester.scrollUntilVisible(
@@ -57,7 +71,7 @@ void main() {
       tester,
       find.widgetWithText(FilledButton, TextosAdulto.accesoBoton),
     );
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(find.text(TextosAdulto.correoInvalido), findsOneWidget);
     expect(find.text(TextosAdulto.contrasenaCorta), findsOneWidget);
@@ -101,11 +115,12 @@ void main() {
 
   testWidgets('permite continuar como invitado', (tester) async {
     final auth = FakeAuthService();
-    await tester.pumpWidget(_app(auth));
+    final guest = _GuestSessionServiceStub();
+    await tester.pumpWidget(_app(auth, guest: guest));
     await _tapAfterScrolling(tester, find.text(TextosAdulto.invitadoBoton));
     await tester.pump();
 
-    expect(auth.anonymousSignInCalled, isTrue);
+    expect(guest.started, isTrue);
   });
 
   testWidgets('envía el correo de recuperación', (tester) async {

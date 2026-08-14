@@ -5,7 +5,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 abstract class AuthService {
   Stream<User?> get changes;
   Future<void> signIn(String email, String password);
-  Future<void> signInAnonymously();
   Future<void> signUp(String email, String password);
   Future<void> sendPasswordResetEmail(String email);
   Future<void> signOut();
@@ -26,9 +25,6 @@ class FirebaseAuthService implements AuthService {
       _auth.signInWithEmailAndPassword(email: email, password: password);
 
   @override
-  Future<void> signInAnonymously() => _auth.signInAnonymously();
-
-  @override
   Future<void> signUp(String email, String password) async {
     final credential = await _auth.createUserWithEmailAndPassword(
       email: email,
@@ -42,7 +38,7 @@ class FirebaseAuthService implements AuthService {
       'email': email,
       'collection': <String, int>{},
       'createdAt': FieldValue.serverTimestamp(),
-    });
+    }, SetOptions(merge: true));
   }
 
   @override
@@ -57,15 +53,16 @@ class FirebaseAuthService implements AuthService {
     final user = _auth.currentUser;
     if (user == null) throw StateError(TextosAdulto.errorSinSesion);
 
-    if (!user.isAnonymous) {
-      final email = user.email;
-      if (email == null || password == null || password.isEmpty) {
-        throw StateError(TextosAdulto.errorContrasenaNecesaria);
-      }
-      await user.reauthenticateWithCredential(
-        EmailAuthProvider.credential(email: email, password: password),
-      );
+    if (user.isAnonymous) {
+      throw StateError(TextosAdulto.errorSinSesion);
     }
+    final email = user.email;
+    if (email == null || password == null || password.isEmpty) {
+      throw StateError(TextosAdulto.errorContrasenaNecesaria);
+    }
+    await user.reauthenticateWithCredential(
+      EmailAuthProvider.credential(email: email, password: password),
+    );
 
     await _deleteUserData(user.uid);
     await user.delete();

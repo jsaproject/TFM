@@ -25,6 +25,8 @@ class ProfilePage extends StatelessWidget {
     required this.authService,
     required this.settings,
     required this.permissionService,
+    this.onGuestSignOut,
+    this.onDeleteGuestCollection,
     this.adultGateChallenge,
   });
 
@@ -35,6 +37,8 @@ class ProfilePage extends StatelessWidget {
   final AuthService authService;
   final SettingsController settings;
   final PermissionService permissionService;
+  final Future<void> Function()? onGuestSignOut;
+  final Future<void> Function()? onDeleteGuestCollection;
   final AdultGateChallenge? adultGateChallenge;
 
   @override
@@ -64,6 +68,8 @@ class ProfilePage extends StatelessWidget {
                     authService: authService,
                     settings: settings,
                     permissionService: permissionService,
+                    onGuestSignOut: onGuestSignOut,
+                    onDeleteGuestCollection: onDeleteGuestCollection,
                   ),
                 ),
               ),
@@ -84,6 +90,8 @@ class AdultSettingsPage extends StatefulWidget {
     required this.authService,
     required this.settings,
     required this.permissionService,
+    this.onGuestSignOut,
+    this.onDeleteGuestCollection,
   });
 
   final String? email;
@@ -91,6 +99,8 @@ class AdultSettingsPage extends StatefulWidget {
   final AuthService authService;
   final SettingsController settings;
   final PermissionService permissionService;
+  final Future<void> Function()? onGuestSignOut;
+  final Future<void> Function()? onDeleteGuestCollection;
 
   @override
   State<AdultSettingsPage> createState() => _AdultSettingsPageState();
@@ -129,7 +139,16 @@ class _AdultSettingsPageState extends State<AdultSettingsPage> {
   Future<void> _signOut() async {
     setState(() => _signingOut = true);
     try {
-      await widget.authService.signOut();
+      if (widget.isAnonymous) {
+        final endGuestSession = widget.onGuestSignOut;
+        if (endGuestSession == null) {
+          await widget.authService.signOut();
+        } else {
+          await endGuestSession();
+        }
+      } else {
+        await widget.authService.signOut();
+      }
       if (!mounted) return;
       _returnToAuthGate();
     } catch (_) {
@@ -192,7 +211,16 @@ class _AdultSettingsPageState extends State<AdultSettingsPage> {
 
     setState(() => _deleting = true);
     try {
-      await widget.authService.deleteAccount(password: confirmed.password);
+      if (widget.isAnonymous) {
+        final deleteGuestCollection = widget.onDeleteGuestCollection;
+        if (deleteGuestCollection == null) {
+          await widget.authService.deleteAccount(password: confirmed.password);
+        } else {
+          await deleteGuestCollection();
+        }
+      } else {
+        await widget.authService.deleteAccount(password: confirmed.password);
+      }
       if (!mounted) return;
       _returnToAuthGate();
     } on FirebaseAuthException catch (error) {

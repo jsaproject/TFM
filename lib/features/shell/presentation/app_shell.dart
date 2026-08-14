@@ -7,14 +7,14 @@ import 'package:animalspredictor/features/classifier/presentation/classifier_pag
 import 'package:animalspredictor/features/collection/domain/achievement.dart';
 import 'package:animalspredictor/features/collection/domain/celebration.dart';
 import 'package:animalspredictor/features/collection/presentation/collection_page.dart';
-import 'package:animalspredictor/features/profile/presentation/profile_page.dart';
 import 'package:animalspredictor/features/profile/data/permission_service.dart';
 import 'package:animalspredictor/features/profile/data/settings_repository.dart';
+import 'package:animalspredictor/features/profile/presentation/profile_page.dart';
 import 'package:animalspredictor/l10n/textos.dart';
+import 'package:animalspredictor/models/app_session.dart';
 import 'package:animalspredictor/models/user_collection.dart';
 import 'package:animalspredictor/services/classifier_service.dart';
 import 'package:animalspredictor/services/collection_repository.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import 'adaptive_navigation_shell.dart';
@@ -22,22 +22,26 @@ import 'adaptive_navigation_shell.dart';
 class AppShell extends StatefulWidget {
   const AppShell({
     super.key,
-    required this.user,
+    required this.session,
     required this.authService,
     required this.classifier,
     required this.collectionRepository,
     required this.photoPicker,
     required this.settings,
     required this.permissionService,
+    this.onGuestSignOut,
+    this.onDeleteGuestCollection,
   });
 
-  final User user;
+  final AppSession session;
   final AuthService authService;
   final ClassifierService classifier;
   final CollectionRepository collectionRepository;
   final PhotoPickerService photoPicker;
   final SettingsController settings;
   final PermissionService permissionService;
+  final Future<void> Function()? onGuestSignOut;
+  final Future<void> Function()? onDeleteGuestCollection;
 
   @override
   State<AppShell> createState() => _AppShellState();
@@ -56,19 +60,18 @@ class _AppShellState extends State<AppShell> {
       classifier: widget.classifier,
       photoPicker: widget.photoPicker,
     );
-    // La colección se escucha aquí, y no solo en su pantalla, porque el
-    // progreso se ve mientras el niño hace fotos y porque para celebrar hay
-    // que saber si el animal ya estaba.
-    if (!widget.user.isAnonymous) {
-      _collectionSubscription = widget.collectionRepository
-          .watch(widget.user.uid)
-          .listen(
-            (collection) => setState(() => _collection = collection),
-            // Si la colección no llega, la pantalla de la colección ya enseña
-            // su error y su reintento; aquí basta con no mostrar progreso.
-            onError: (_) => setState(() => _collection = null),
-          );
-    }
+    // El progreso y las celebraciones necesitan la misma fuente de verdad en
+    // ambos modos: Realm para invitado y Firestore para cuentas.
+    _collectionSubscription = widget.collectionRepository
+        .watch(widget.session.id)
+        .listen(
+          (collection) {
+            if (mounted) setState(() => _collection = collection);
+          },
+          onError: (_) {
+            if (mounted) setState(() => _collection = null);
+          },
+        );
   }
 
   @override
@@ -79,13 +82,8 @@ class _AppShellState extends State<AppShell> {
   }
 
   Future<Celebration> _savePrediction(String animal) async {
-    if (widget.user.isAnonymous) {
-      return Celebration(animal: animal, savedToCollection: false);
-    }
     final before = _collection;
-    await widget.collectionRepository.savePrediction(widget.user.uid, animal);
-    // Sin colección conocida no se puede saber qué es nuevo, así que se
-    // celebra sin promesas en lugar de anunciar medallas que quizá ya tenía.
+    await widget.collectionRepository.savePrediction(widget.session.id, animal);
     if (before == null) return Celebration(animal: animal);
 
     final celebration = celebrationFor(before, animal);
@@ -98,12 +96,11 @@ class _AppShellState extends State<AppShell> {
   Future<void> _markSeen(List<Achievement> achievements) async {
     try {
       await widget.collectionRepository.markAchievementsSeen(
-        widget.user.uid,
+        widget.session.id,
         achievements.map((achievement) => achievement.id),
       );
     } catch (_) {
-      // Anotar la medalla es secundario: si falla, lo peor que pasa es que se
-      // vuelva a celebrar en la siguiente foto. No se interrumpe el guardado.
+      // Las medallas se pueden volver a anunciar sin perder una foto.
     }
   }
 
@@ -124,7 +121,6 @@ class _AppShellState extends State<AppShell> {
         selectedIcon: Icons.collections_bookmark,
         accent: ShellAccent.secondary,
       ),
-      // Perfil es la puerta de la zona de adultos (FASE 5): candado y nombre.
       ShellDestination(
         label: TextosNino.navegacionAdultos,
         icon: Icons.lock_outline,
@@ -137,24 +133,26 @@ class _AppShellState extends State<AppShell> {
         controller: _classifierController,
         onConfirmPrediction: _savePrediction,
         collection: _collection,
-        greetingName: widget.user.displayName,
+        greetingName: widget.session.displayName,
         settings: widget.settings,
       ),
       CollectionPage(
-        userId: widget.user.uid,
-        isAnonymous: widget.user.isAnonymous,
+        userId: widget.session.id,
+        isAnonymous: widget.session.isAnonymous,
         repository: widget.collectionRepository,
         settings: widget.settings,
         onStartIdentifying: () => setState(() => _selectedIndex = 0),
       ),
       ProfilePage(
-        displayName: widget.user.displayName,
+        displayName: widget.session.displayName,
         collection: _collection,
-        email: widget.user.email,
-        isAnonymous: widget.user.isAnonymous,
+        email: widget.session.email,
+        isAnonymous: widget.session.isAnonymous,
         authService: widget.authService,
         settings: widget.settings,
         permissionService: widget.permissionService,
+        onGuestSignOut: widget.onGuestSignOut,
+        onDeleteGuestCollection: widget.onDeleteGuestCollection,
       ),
     ],
   );

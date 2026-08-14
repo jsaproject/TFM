@@ -190,8 +190,6 @@ class _Auth implements AuthService {
   @override
   Future<void> signIn(String email, String password) async {}
   @override
-  Future<void> signInAnonymously() async {}
-  @override
   Future<void> signOut() async {}
   @override
   Future<void> signUp(String email, String password) async {}

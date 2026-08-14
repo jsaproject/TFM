@@ -121,7 +121,6 @@ class _CollectionPageState extends State<CollectionPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.isAnonymous) return const _GuestCollection();
     return StreamBuilder<UserCollection>(
       key: ValueKey(_refreshKey),
       stream: widget.repository.watch(widget.userId),
@@ -415,18 +414,6 @@ class _AnimalTile extends StatelessWidget {
     final step = entranceStep;
     return step == null ? tile : tile.entrance(step: step);
   }
-}
-
-class _GuestCollection extends StatelessWidget {
-  const _GuestCollection();
-
-  @override
-  Widget build(BuildContext context) => const Center(
-    child: Padding(
-      padding: MichiTokens.pagePadding,
-      child: Text(TextosNino.entraParaGuardar, textAlign: TextAlign.center),
-    ),
-  );
 }
 
 class _CollectionError extends StatelessWidget {

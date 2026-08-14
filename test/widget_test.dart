@@ -20,8 +20,6 @@ class _AuthStub implements AuthService {
   @override
   Future<void> signIn(String email, String password) async {}
   @override
-  Future<void> signInAnonymously() async {}
-  @override
   Future<void> sendPasswordResetEmail(String email) async {}
   @override
   Future<void> signOut() async {}

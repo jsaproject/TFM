@@ -1,24 +1,28 @@
 import 'package:animalspredictor/home_page.dart';
 import 'package:animalspredictor/app_theme.dart';
 import 'package:animalspredictor/l10n/textos.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:animalspredictor/auth_service.dart';
 import 'package:animalspredictor/features/profile/data/settings_repository.dart';
+import 'package:animalspredictor/models/app_session.dart';
 
 /// Muestra una explicación breve una sola vez en cada dispositivo.
 class WelcomeGate extends StatefulWidget {
   const WelcomeGate({
     super.key,
-    required this.user,
+    required this.session,
     required this.authService,
     required this.settings,
+    this.onGuestSignOut,
+    this.onDeleteGuestCollection,
   });
 
-  final User user;
+  final AppSession session;
   final AuthService authService;
   final SettingsController settings;
+  final Future<void> Function()? onGuestSignOut;
+  final Future<void> Function()? onDeleteGuestCollection;
 
   @override
   State<WelcomeGate> createState() => _WelcomeGateState();
@@ -55,9 +59,11 @@ class _WelcomeGateState extends State<WelcomeGate> {
     }
     if (_seenWelcome!) {
       return HomePage(
-        user: widget.user,
+        session: widget.session,
         authService: widget.authService,
         settings: widget.settings,
+        onGuestSignOut: widget.onGuestSignOut,
+        onDeleteGuestCollection: widget.onDeleteGuestCollection,
       );
     }
     return _WelcomePage(onStart: _finishWelcome);

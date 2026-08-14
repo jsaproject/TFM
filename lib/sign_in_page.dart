@@ -1,20 +1,29 @@
 import 'package:animalspredictor/app_theme.dart';
 import 'package:animalspredictor/auth_service.dart';
 import 'package:animalspredictor/l10n/textos.dart';
+import 'package:animalspredictor/services/guest_session_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class SignInPage extends StatefulWidget {
-  SignInPage({super.key, AuthService? authService})
-    : authService =
-          authService ??
-          FirebaseAuthService(
-            FirebaseAuth.instance,
-            FirebaseFirestore.instance,
-          );
+  SignInPage({
+    super.key,
+    AuthService? authService,
+    GuestSessionService? guestSessionService,
+    this.onGuestSessionStarted,
+  }) : authService =
+           authService ??
+           FirebaseAuthService(
+             FirebaseAuth.instance,
+             FirebaseFirestore.instance,
+           ),
+       guestSessionService =
+           guestSessionService ?? SharedPreferencesGuestSessionService();
 
   final AuthService authService;
+  final GuestSessionService guestSessionService;
+  final VoidCallback? onGuestSessionStarted;
 
   @override
   State<SignInPage> createState() => _SignInPageState();
@@ -43,10 +52,12 @@ class _SignInPageState extends State<SignInPage> {
     try {
       if (_register) {
         await _auth.signUp(_email.text.trim(), _password.text);
+        await widget.guestSessionService.stop();
         if (!mounted) return;
         await _showRegistrationConfirmation();
       } else {
         await _auth.signIn(_email.text.trim(), _password.text);
+        await widget.guestSessionService.stop();
       }
     } on FirebaseAuthException catch (error) {
       _setError(_authErrorMessage(error));
@@ -66,9 +77,8 @@ class _SignInPageState extends State<SignInPage> {
       _errorMessage = null;
     });
     try {
-      await _auth.signInAnonymously();
-    } on FirebaseAuthException catch (error) {
-      _setError(_authErrorMessage(error));
+      await widget.guestSessionService.start();
+      widget.onGuestSessionStarted?.call();
     } catch (_) {
       _setError(TextosAdulto.errorInvitado);
     } finally {
