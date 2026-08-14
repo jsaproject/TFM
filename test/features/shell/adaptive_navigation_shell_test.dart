@@ -54,30 +54,19 @@ void main() {
     expect(find.text(TextosNino.navegacionInicio), findsAtLeastNWidgets(1));
   });
 
-  testWidgets('pinta cada sección con el color de su acento', (tester) async {
+  testWidgets('usa el indicador Material rectangular y sin brillo', (
+    tester,
+  ) async {
     await pumpShell(tester, 390);
 
-    final colors = MichiTheme.light().colorScheme;
-    final fondos = tester
-        .widgetList<DecoratedBox>(
-          find.descendant(
-            of: find.byType(NavigationBar),
-            matching: find.byType(DecoratedBox),
-          ),
-        )
-        .map((caja) => caja.decoration)
-        .whereType<ShapeDecoration>()
-        .map((forma) => forma.color)
-        .whereType<Color>()
-        .toSet();
-
+    final navigationTheme = MichiTheme.light().navigationBarTheme;
     expect(
-      fondos,
-      containsAll(<Color>[
-        colors.primary,
-        colors.secondaryContainer,
-        colors.tertiaryContainer,
-      ]),
+      navigationTheme.indicatorColor,
+      MichiTheme.light().colorScheme.secondaryContainer,
+    );
+    expect(
+      navigationTheme.indicatorShape,
+      MichiTokens.navigationDestinationShape,
     );
     for (final icono in tester.widgetList<Icon>(
       find.descendant(
@@ -87,6 +76,13 @@ void main() {
     )) {
       expect(icono.size, MichiTokens.iconSizeMedium);
     }
+    expect(
+      find.descendant(
+        of: find.byType(NavigationBar),
+        matching: find.byType(AnimatedContainer),
+      ),
+      findsNothing,
+    );
   });
 
   testWidgets('muestra una NavigationRail en pantalla ancha', (tester) async {

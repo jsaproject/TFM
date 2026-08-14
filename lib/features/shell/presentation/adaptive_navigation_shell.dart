@@ -1,10 +1,8 @@
 import 'package:animalspredictor/app_theme.dart';
 import 'package:flutter/material.dart';
 
-/// Color con el que se reconoce cada sección de la app.
-///
-/// Un niño que no lee distingue las secciones por el color de la pastilla del
-/// icono, no por la etiqueta. Los tres valores salen del esquema del tema.
+/// Rol histórico de cada destino. El tema Material decide ahora el indicador
+/// común para evitar que cada sección parezca una pastilla distinta.
 enum ShellAccent { primary, secondary, tertiary }
 
 class ShellDestination {
@@ -51,15 +49,9 @@ class AdaptiveNavigationShell extends StatelessWidget {
               destinations: destinations
                   .map(
                     (destination) => NavigationRailDestination(
-                      icon: _DestinationBadge(
-                        icon: destination.icon,
-                        accent: destination.accent,
-                        selected: false,
-                      ),
+                      icon: _DestinationBadge(icon: destination.icon),
                       selectedIcon: _DestinationBadge(
                         icon: destination.selectedIcon,
-                        accent: destination.accent,
-                        selected: true,
                       ),
                       label: Text(destination.label),
                     ),
@@ -79,15 +71,9 @@ class AdaptiveNavigationShell extends StatelessWidget {
           destinations: destinations
               .map(
                 (destination) => NavigationDestination(
-                  icon: _DestinationBadge(
-                    icon: destination.icon,
-                    accent: destination.accent,
-                    selected: false,
-                  ),
+                  icon: _DestinationBadge(icon: destination.icon),
                   selectedIcon: _DestinationBadge(
                     icon: destination.selectedIcon,
-                    accent: destination.accent,
-                    selected: true,
                   ),
                   label: destination.label,
                 ),
@@ -99,56 +85,13 @@ class AdaptiveNavigationShell extends StatelessWidget {
   );
 }
 
-/// Pastilla de color con el icono de la sección dentro.
-///
-/// Sustituye al indicador de Material (que el tema deja transparente) para que
-/// cada sección tenga su propio color en los dos estados.
+/// Icono de destino; el indicador rectangular suave pertenece a Material.
 class _DestinationBadge extends StatelessWidget {
-  const _DestinationBadge({
-    required this.icon,
-    required this.accent,
-    required this.selected,
-  });
+  const _DestinationBadge({required this.icon});
 
   final IconData icon;
-  final ShellAccent accent;
-  final bool selected;
 
   @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    final (background, foreground) = switch (accent) {
-      ShellAccent.primary =>
-        selected
-            ? (colors.primary, colors.onPrimary)
-            : (colors.primaryContainer, colors.onPrimaryContainer),
-      ShellAccent.secondary =>
-        selected
-            ? (colors.secondary, colors.onSecondary)
-            : (colors.secondaryContainer, colors.onSecondaryContainer),
-      ShellAccent.tertiary =>
-        selected
-            ? (colors.tertiary, colors.onTertiary)
-            : (colors.tertiaryContainer, colors.onTertiaryContainer),
-    };
-    return AnimatedContainer(
-      duration: MichiTokens.durationShort,
-      curve: Curves.easeOut,
-      padding: MichiTokens.navigationBadgePadding,
-      decoration: ShapeDecoration(
-        color: background,
-        shape: const StadiumBorder(),
-        shadows: selected
-            ? [
-                BoxShadow(
-                  color: background.withValues(alpha: 0.45),
-                  blurRadius: MichiTokens.space12,
-                  offset: const Offset(0, MichiTokens.space4),
-                ),
-              ]
-            : null,
-      ),
-      child: Icon(icon, size: MichiTokens.iconSizeMedium, color: foreground),
-    );
-  }
+  Widget build(BuildContext context) =>
+      Icon(icon, size: MichiTokens.iconSizeMedium);
 }

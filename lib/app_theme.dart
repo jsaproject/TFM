@@ -1,7 +1,17 @@
 import 'package:flutter/material.dart';
 
+import 'design_system/michi_colors.dart';
+
 /// Tokens de diseño compartidos de La granja de Michi.
 abstract final class MichiTokens {
+  /// Roles semánticos que preservan los alias cromáticos existentes.
+  static const paper = crema;
+  static const ink = tinta;
+  static const actionPrimary = naranja;
+  static const progress = verde;
+  static const discovery = amarillo;
+  static const danger = rojo;
+
   // Paleta "Granja al sol" — modo claro.
   static const naranja = Color(0xFFF76707);
   static const naranjaSuave = Color(0xFFFFE2CE);
@@ -65,6 +75,7 @@ abstract final class MichiTokens {
   static const brandMarkSize = 112.0;
   static const squareImageAspectRatio = 1.0;
   static const landscapeImageAspectRatio = 16 / 9;
+  static const photoAspectRatio = 4 / 3;
   static const dividerThickness = 1.0;
 
   static const radiusSmall = Radius.circular(12);
@@ -78,13 +89,20 @@ abstract final class MichiTokens {
     borderRadius: BorderRadius.all(radiusLarge),
   );
 
-  /// Los botones son pastillas: se distinguen de las tarjetas de un vistazo y
-  /// aciertan mejor con un dedo pequeño.
-  static const buttonShape = StadiumBorder();
+  /// Las acciones de página son rectángulos suaves; las pastillas quedan para
+  /// chips y badges breves.
+  static const buttonShape = RoundedRectangleBorder(
+    borderRadius: BorderRadius.all(radiusSmall),
+  );
+  static const navigationDestinationShape = RoundedRectangleBorder(
+    borderRadius: BorderRadius.all(radiusSmall),
+  );
 
   /// Borde fino de las tarjetas. Sustituye a la sombra: en modo oscuro una
   /// sombra no se ve y las tarjetas se fundían con el fondo.
   static const cardBorderWidth = 1.0;
+  static const borderWidth = 1.0;
+  static const focusBorderWidth = 3.0;
 
   static const durationShort = Duration(milliseconds: 150);
   static const durationMedium = Duration(milliseconds: 250);
@@ -244,8 +262,8 @@ abstract final class MichiTokens {
 }
 
 abstract final class MichiTheme {
-  static ThemeData light() => _data(_lightScheme, MichiTokens.cardShadowLight);
-  static ThemeData dark() => _data(_darkScheme, MichiTokens.cardShadowDark);
+  static ThemeData light() => _data(_lightScheme, _lightColors);
+  static ThemeData dark() => _data(_darkScheme, _darkColors);
 
   // Se sigue partiendo de fromSeed para que los ~45 roles del esquema salgan
   // coherentes entre sí, pero los roles que se ven en pantalla se fijan a
@@ -313,13 +331,49 @@ abstract final class MichiTheme {
     outlineVariant: MichiTokens.perfilOscuroSuave,
   );
 
-  static ThemeData _data(ColorScheme scheme, Color cardShadow) {
+  static const _lightColors = MichiColors(
+    paper: MichiTokens.crema,
+    ink: MichiTokens.tinta,
+    actionPrimary: MichiTokens.naranja,
+    onActionPrimary: MichiTokens.tinta,
+    progress: MichiTokens.verde,
+    discovery: MichiTokens.amarillo,
+    danger: MichiTokens.rojo,
+    border: MichiTokens.perfilClaroSuave,
+    focus: MichiTokens.naranja,
+    heroSurface: MichiTokens.cremaSuave,
+    photoFrameSurface: MichiTokens.cremaMedia,
+    albumPageSurface: MichiTokens.crema,
+    statePanelSurface: MichiTokens.cremaSuave,
+    adultSectionSurface: MichiTokens.cremaMedia,
+  );
+
+  static const _darkColors = MichiColors(
+    paper: MichiTokens.fondoOscuro,
+    ink: MichiTokens.cremaClara,
+    actionPrimary: MichiTokens.naranjaClaro,
+    onActionPrimary: MichiTokens.naranjaOscuro,
+    progress: MichiTokens.verdeClaro,
+    discovery: MichiTokens.amarilloClaro,
+    danger: MichiTokens.rojoClaro,
+    border: MichiTokens.perfilOscuroSuave,
+    focus: MichiTokens.naranjaClaro,
+    heroSurface: MichiTokens.fondoOscuroBajo,
+    photoFrameSurface: MichiTokens.fondoOscuroMedio,
+    albumPageSurface: MichiTokens.fondoOscuro,
+    statePanelSurface: MichiTokens.fondoOscuroMedio,
+    adultSectionSurface: MichiTokens.fondoOscuroAlto,
+  );
+
+  static ThemeData _data(ColorScheme scheme, MichiColors colors) {
     final textTheme = _textTheme(scheme);
     return ThemeData(
       useMaterial3: true,
       colorScheme: scheme,
+      extensions: [colors],
       fontFamily: MichiTokens.fontFamily,
       scaffoldBackgroundColor: scheme.surface,
+      focusColor: colors.focus,
       textTheme: textTheme,
       appBarTheme: AppBarTheme(
         centerTitle: false,
@@ -344,13 +398,18 @@ abstract final class MichiTheme {
         ),
         clipBehavior: Clip.antiAlias,
         margin: EdgeInsets.zero,
-        shadowColor: cardShadow,
+        shadowColor: Colors.transparent,
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
+          backgroundColor: colors.actionPrimary,
+          foregroundColor: colors.onActionPrimary,
+          disabledBackgroundColor: colors.ink.withValues(alpha: 0.12),
+          disabledForegroundColor: colors.ink.withValues(alpha: 0.45),
           minimumSize: const Size.fromHeight(MichiTokens.touchTargetMin),
           shape: MichiTokens.buttonShape,
           textStyle: MichiTokens.labelLarge,
+          overlayColor: colors.focus.withValues(alpha: 0.16),
           padding: const EdgeInsets.symmetric(horizontal: MichiTokens.space24),
         ),
       ),
@@ -360,6 +419,8 @@ abstract final class MichiTheme {
           shape: MichiTokens.buttonShape,
           textStyle: MichiTokens.labelLarge,
           side: BorderSide(color: scheme.outlineVariant, width: 2),
+          foregroundColor: colors.ink,
+          overlayColor: colors.focus.withValues(alpha: 0.12),
           padding: const EdgeInsets.symmetric(horizontal: MichiTokens.space24),
         ),
       ),
@@ -371,6 +432,8 @@ abstract final class MichiTheme {
           ),
           shape: MichiTokens.buttonShape,
           textStyle: MichiTokens.labelLarge,
+          foregroundColor: colors.ink,
+          overlayColor: colors.focus.withValues(alpha: 0.12),
         ),
       ),
       iconButtonTheme: IconButtonThemeData(
@@ -403,7 +466,7 @@ abstract final class MichiTheme {
         linearMinHeight: MichiTokens.progressBarHeight,
         linearTrackColor: scheme.surfaceContainerHighest,
         borderRadius: const BorderRadius.all(MichiTokens.radiusSmall),
-        color: scheme.primary,
+        color: colors.progress,
       ),
       dialogTheme: DialogThemeData(
         backgroundColor: scheme.surfaceContainerLow,
@@ -429,12 +492,11 @@ abstract final class MichiTheme {
           color: scheme.onInverseSurface,
         ),
       ),
-      // La navegación pinta su propia pastilla de color por sección
-      // (`AdaptiveNavigationShell`), así que el indicador de Material sobra.
       navigationBarTheme: NavigationBarThemeData(
         height: MichiTokens.navigationBarHeight,
         backgroundColor: scheme.surfaceContainerLow,
-        indicatorColor: Colors.transparent,
+        indicatorColor: scheme.secondaryContainer,
+        indicatorShape: MichiTokens.navigationDestinationShape,
         elevation: 0,
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         labelTextStyle: WidgetStatePropertyAll(
@@ -443,7 +505,8 @@ abstract final class MichiTheme {
       ),
       navigationRailTheme: NavigationRailThemeData(
         backgroundColor: scheme.surfaceContainerLow,
-        indicatorColor: Colors.transparent,
+        indicatorColor: scheme.secondaryContainer,
+        indicatorShape: MichiTokens.navigationDestinationShape,
         selectedLabelTextStyle: MichiTokens.labelMedium.copyWith(
           color: scheme.onSurface,
         ),
@@ -475,7 +538,10 @@ abstract final class MichiTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: const BorderRadius.all(MichiTokens.radiusMedium),
-          borderSide: BorderSide(color: scheme.primary, width: 2),
+          borderSide: BorderSide(
+            color: colors.focus,
+            width: MichiTokens.focusBorderWidth,
+          ),
         ),
       ),
     );
