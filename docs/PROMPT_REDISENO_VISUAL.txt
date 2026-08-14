@@ -1,0 +1,178 @@
+Actúa como un equipo senior de Product Design, UX/UI infantil, dirección de arte y desarrollo Flutter. Tu misión es rediseñar visualmente por completo La granja de Michi.
+
+La aplicación permite a niños identificar animales a partir de una foto tomada con cámara o elegida de la galería. La IA funciona localmente en el dispositivo, propone una de 28 especies y puede rechazar imágenes que no reconoce. El niño confirma o corrige el resultado y completa una colección con progreso, logros e historial. Hay un área de perfil para adultos con cuenta, permisos, privacidad y ajustes.
+
+OBJETIVO PRINCIPAL
+
+Mantén la funcionalidad, la privacidad y el procesamiento local, pero transforma la aplicación para que parezca un producto infantil premium creado por un estudio profesional. No quiero un simple cambio de colores ni reemplazar widgets genéricos por otros widgets genéricos.
+
+La app actual no debe seguir pareciendo una demo Flutter, una práctica académica, una colección de tarjetas estándar o una interfaz hecha sin dirección artística. Debe sentirse intencional, memorable, cálida, accesible y de gran calidad visual.
+
+PÚBLICO Y TONO
+
+- Público principal: niños de aproximadamente 6 a 10 años.
+- Público secundario: adultos responsables que administran cuenta, permisos, privacidad y ajustes.
+- Tono infantil inteligente: cercano, optimista y explorador; nunca condescendiente ni excesivamente de guardería.
+- Una predicción errónea o incierta nunca debe hacer sentir al niño que ha fallado. La app debe invitar a intentarlo otra vez o elegir manualmente.
+
+DIRECCIÓN CREATIVA
+
+Construye una identidad propia inspirada en una granja al sol y en un cuaderno/álbum de exploración de animales:
+
+- Fondo crema cálido, superficies naturales y mucho aire visual.
+- Naranja terracota como acción principal.
+- Verde natural para progreso y éxito.
+- Amarillo miel para descubrimientos, medallas y celebración.
+- Rojo únicamente para errores y acciones destructivas.
+- Fotografías de animales como contenido protagonista.
+- Texturas, marcos, ilustraciones o detalles gráficos sutiles solo cuando refuercen la marca; no uses decoración aleatoria.
+- Tipografía con personalidad para titulares y tipografía extremadamente legible para textos y controles.
+- Composición editorial: jerarquías fuertes, espacios generosos, bloques con intención y asimetría controlada.
+- Movimiento suave y significativo: aparición de una foto, avance de progreso, desbloqueo de un animal y celebración al descubrir uno nuevo.
+
+Evita expresamente:
+
+- Gradientes saturados, arcoíris, sombras pesadas o efectos brillantes sin motivo.
+- Emojis como iconos de interfaz.
+- Botones tipo pastilla usados indiscriminadamente.
+- Tarjetas genéricas repetidas por toda la pantalla.
+- Ilustraciones infantiles de baja calidad o fotografías de stock sin coherencia.
+- Exceso de colores, iconos o texto simultáneo.
+- Interfaces que parezcan una app para bebés o un juego genérico.
+
+LIBERTAD TÉCNICA
+
+No te limites a la arquitectura, assets, tipografías, componentes o dependencias existentes. Puedes añadir, sustituir o eliminar dependencias Flutter/Dart si producen una mejora real de calidad visual, UX, accesibilidad, rendimiento, pruebas o mantenibilidad.
+
+Puedes proponer paquetes o recursos para:
+
+- Animaciones y microinteracciones.
+- Iconografía e ilustración.
+- Fuentes.
+- Cámara, recorte y edición de imágenes.
+- Layout responsive.
+- Gestión de estado y navegación.
+- Skeletons y estados de carga.
+- Feedback háptico y sonido.
+- Persistencia.
+- Golden tests y pruebas visuales.
+- Monitorización, únicamente si no recopila datos sensibles y requiere consentimiento explícito.
+
+Antes de añadir cualquier dependencia, explica:
+
+1. Qué problema concreto resuelve.
+2. Por qué es preferible a una solución manual.
+3. Mantenimiento, licencia, compatibilidad Flutter/Android/iOS y null safety.
+4. Impacto en tamaño de la app, rendimiento, permisos y privacidad.
+5. Cómo se probará.
+
+No envíes fotos, resultados de clasificación ni datos infantiles a servicios externos. Mantén la clasificación local y no alteres la configuración generada de Firebase manualmente.
+
+REDISEÑA ESTOS FLUJOS
+
+1. Inicio
+- Debe ser una portada de exploración, no una lista de componentes.
+- Incluye saludo, progreso breve de colección, último descubrimiento si existe y una CTA hero inequívoca: «Identificar un animal» o «Haz una foto».
+- La acción de identificar debe dominar visualmente sin ocultar el progreso ni generar ruido.
+
+2. Cámara y galería
+- Cámara como acción principal y galería como alternativa clara.
+- Guía visual de encuadre, distancia, luz y «un animal por foto».
+- Explica de manera breve y amable que la foto se procesa en el dispositivo.
+- Los permisos, cancelación y errores deben tener diseño propio y acciones de recuperación.
+
+3. Procesamiento
+- Conserva la foto como protagonista.
+- Muestra progreso y espera de manera entretenida, pero sin falsificar una duración ni distraer.
+- Bloquea envíos duplicados y comunica el estado de forma accesible.
+
+4. Resultado fiable
+- Preséntalo como una ficha editorial de animal: foto, nombre, confianza expresada en lenguaje comprensible, alternativas y opción de escuchar el sonido.
+- Las acciones de confirmar o corregir deben ser evidentes y estar jerarquizadas.
+- Al guardar, ofrece una celebración breve y satisfactoria, adaptada a si el descubrimiento es nuevo o repetido.
+
+5. Resultado incierto o no reconocido
+- Debe ser una experiencia diseñada, no un error genérico.
+- Usa lenguaje honesto y optimista.
+- Ofrece repetir foto, consejos concretos y selección manual de especie.
+- Nunca presentes certeza donde el modelo no la tiene.
+
+6. Colección
+- Conviértela en un álbum de descubrimientos premium.
+- Diseña una cabecera compacta de progreso, logros y último animal.
+- Usa una cuadrícula responsive con animales descubiertos y pendientes claramente diferenciados.
+- Incluye filtros visuales por descubiertos, pendientes, recientes y cantidad.
+- Diseña estados vacío, carga skeleton, error, sin conexión y reintento.
+- La cuadrícula debe seguir siendo usable con cientos de registros.
+
+7. Detalle de especie e historial
+- Crea una ficha atractiva de animal con descripción, estadísticas, foto e historial.
+- El historial debe ser legible y no competir visualmente con el descubrimiento principal.
+- Diseña corrección y borrado con confirmación clara y recuperación cuando sea posible.
+
+8. Perfil adulto
+- Debe ser más sobrio y funcional que el área infantil, sin perder coherencia de marca.
+- Incluye cuenta/invitado, apariencia, sonido, háptica, permisos, privacidad, información del modelo, cierre de sesión y eliminación de cuenta.
+- Separa visual y semánticamente las acciones destructivas.
+
+NAVEGACIÓN Y RESPONSIVE
+
+- Teléfono: NavigationBar inferior con Inicio, Colección y Perfil.
+- Tablet/pantalla ancha: NavigationRail con los mismos destinos.
+- Conserva el estado de cada pestaña.
+- Diseña para móvil pequeño, móvil grande y tablet.
+- No asumas una única altura o ancho.
+- Todo debe seguir funcionando con texto al 200 %.
+
+ACCESIBILIDAD Y CALIDAD
+
+- Contraste WCAG AA como mínimo.
+- Controles táctiles de al menos 48 × 48 px.
+- Etiquetas semánticas en controles no textuales e imágenes significativas.
+- Foco, teclado y lector de pantalla correctamente resueltos.
+- Estados claros de carga, vacío, error, reintento, sin conexión y permisos donde correspondan.
+- Las acciones principales deben indicar carga y no poder activarse dos veces.
+- No pongas Firebase, permisos, cámara, TFLite ni lógica de negocio directamente en widgets nuevos.
+
+PLAN OBLIGATORIO ANTES DE IMPLEMENTAR
+
+Antes de modificar la interfaz, crea el archivo:
+
+docs/PLAN_REDISENO_VISUAL.txt
+
+Escríbelo en español y divídelo en fases pequeñas, independientes, ordenadas y verificables. Para cada fase incluye:
+
+- Objetivo de UX y visual.
+- Pantallas, componentes y flujos afectados.
+- Decisiones de diseño concretas.
+- Dependencias, fuentes, assets o paquetes a evaluar o incorporar.
+- Cambios técnicos y de arquitectura requeridos.
+- Riesgos de accesibilidad, rendimiento, privacidad o mantenimiento.
+- Criterios objetivos para considerarla terminada.
+- Pruebas visuales, de interacción y responsive necesarias.
+
+El plan debe contener, como mínimo, estas fases:
+
+1. Auditoría visual y definición de dirección creativa.
+2. Sistema de diseño profesional: tokens, paleta, tipografías, iconografía, layouts, componentes y motion.
+3. Navegación, estructura responsive y shell.
+4. Rediseño de Inicio y del flujo de cámara/galería.
+5. Rediseño de procesamiento, resultado fiable, baja confianza, corrección y celebraciones.
+6. Rediseño de Colección, detalle, filtros, historial y logros.
+7. Rediseño de Perfil adulto, permisos, privacidad y acciones sensibles.
+8. Accesibilidad, estados transitorios, pruebas golden, rendimiento y pulido final.
+
+Primero presenta el contenido de ese plan y espera confirmación antes de iniciar cambios masivos de interfaz. Después, implementa una fase cada vez, manteniendo la aplicación ejecutable, analizable y comprobable al final de cada fase.
+
+ENTREGABLES
+
+Para cada fase aprobada, entrega:
+
+- Qué cambió y por qué mejora la experiencia.
+- Componentes y archivos modificados.
+- Dependencias añadidas y su justificación.
+- Capturas o golden tests de las pantallas relevantes.
+- Resultado de formateo, análisis, tests y build relevante.
+- Pendientes o decisiones que requieran confirmación.
+
+Prioriza una experiencia coherente y excepcional por encima de aplicar muchas tendencias visuales. El resultado debe hacer que un niño quiera explorar animales y que un adulto confíe en la aplicación.

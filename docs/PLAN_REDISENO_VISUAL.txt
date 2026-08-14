@@ -1,0 +1,655 @@
+================================================================================
+PLAN DE REDISEÑO VISUAL — LA GRANJA DE MICHI
+================================================================================
+
+Fecha:   14 de agosto de 2026
+Estado:  en ejecución. La fase 1 está hecha (ver docs/redesign/) y pendiente de
+         un repaso antes de abrir la fase 2.
+Público: niños de 6 a 10 años. En segundo plano, el adulto que administra
+         cuenta, permisos, privacidad y ajustes.
+
+Esto es una aplicación personal: no se publica, no tiene usuarios y no hay
+entrega ni plazo. El plan existe para no perder el hilo entre sesiones, no para
+rendir cuentas a nadie. Por eso las fases son pequeñas, se cierran de una en
+una, y la que decide si una fase está bien es la pantalla del móvil, no una
+lista de comprobaciones.
+
+Este documento sustituye la hipótesis de público de docs/PLAN_UX_INFANTIL.txt
+(4-8 años) por 6-10 años, pero no lo anula: el reparto de tareas de aquel plan
+sigue vigente, en particular los 28 dibujos.
+
+
+================================================================================
+1. OBJETIVO Y LÍMITES
+================================================================================
+
+Objetivo
+--------
+
+Que la app deje de parecer una demo de Flutter y tenga identidad propia —"el
+cuaderno de campo de Michi"—, sin tocar el propósito, la clasificación local,
+la privacidad, los permisos, la autenticación ni la persistencia.
+
+Dos cosas a la vez:
+
+  - Que el niño quiera explorar y que una predicción incierta nunca se sienta
+    como un fallo suyo.
+  - Que el adulto vea un área sobria y honesta cuando entra en ajustes.
+
+Lo que no se toca
+-----------------
+
+  - Las fotos y los resultados no salen del dispositivo. Sin analítica ni
+    telemetría.
+  - No se edita a mano la configuración generada de Firebase.
+  - Ningún widget nuevo habla directamente con Firebase, TFLite, permisos,
+    cámara, galería ni sistema de ficheros.
+  - No se cambian el modelo, sus umbrales ni el contrato de docs/MODELO.md por
+    un motivo visual.
+  - No hay usuarios reales, así que si hace falta cambiar el esquema se propone
+    el modelo limpio directamente, sin capa de compatibilidad. Borrar datos sí
+    se confirma antes.
+  - Cada fase deja la app formateada, analizable, testeable y compilable. De
+    eso ya se encarga CI en cada push.
+
+
+================================================================================
+2. DE DÓNDE SE PARTE
+================================================================================
+
+Lo que ya está bien y no se rehace
+----------------------------------
+
+  - MichiTheme y MichiTokens centralizan paleta, tipografía, espaciado, radios,
+    tamaños táctiles y motion.
+  - Andika y Atkinson Hyperlegible van empaquetadas con sus licencias OFL; no
+    dependen de la red.
+  - El shell ya usa NavigationBar en teléfono y NavigationRail desde 840 px, y
+    conserva las tres pestañas con IndexedStack.
+  - Clasificador, selector de fotos, colección, ajustes y permisos se inyectan
+    como servicios sustituibles en pruebas.
+  - ClassifierController ya distingue carga, listo, foto, procesamiento,
+    resultado fiable, no reconocido y error.
+  - La colección ya tiene cuadrícula lazy, detalle, historial, skeleton, vacío,
+    error y reintento.
+  - Hay sonido, háptica configurable, celebración, puerta de adultos y
+    confirmación en las acciones sensibles.
+  - Hay pruebas unitarias y de widget, y un arnés de capturas en test/design/.
+
+Lo que falla
+------------
+
+  1. Inicio es una pila vertical de cabecera, progreso, foto y botones. No es
+     una portada.
+  2. Card es el contenedor por defecto en casi todo: 17 usos, 6 de ellos en
+     profile_page.dart y 5 en classifier_page.dart. La misma jerarquía sirve
+     para contenido, error, ajuste y acción.
+  3. StadiumBorder está en 6 sitios, incluidos el botón global y los destinos
+     de navegación. Cuando todo es pastilla, la pastilla deja de decir nada.
+  4. La navegación pinta cada destino de un color distinto, con brillo y
+     sombra. Compite con el contenido.
+  5. Hay 7 gradientes y 2 sombras explícitas repartidos por progreso, retrato,
+     resultado, medalla, perfil, navegación y bienvenida.
+  6. En la cuadrícula de la colección los 28 animales son emoji, no 21. El
+     retrato del álbum lo pinta AnimalPortrait, que ignora imageAsset por
+     completo (animal_image.dart:48); las 7 fotos existentes solo las usa
+     AnimalImage, reservado a la ficha de detalle. La mezcla de 7 fotos y 21
+     láminas se descartó a propósito porque dejaba la cuadrícula a medias.
+  7. assets/farm_animals.png enseña un damero de transparencia en el móvil, no
+     solo en las capturas. Se retira en la fase 4 y hasta entonces no se
+     reutiliza.
+  8. El ancho de contenido se limita a 600 px casi en todas partes; en tablet
+     sobra lienzo.
+  9. La colección solo ofrece "los que tengo" y "los que faltan". Faltan
+     recientes y cantidad.
+ 10. Los estados existen, pero cada uno se dibuja a su manera. No hay una
+     gramática común para carga, vacío, error, offline y permisos.
+ 11. El perfil adulto tiene la información correcta dentro de una pila de
+     tarjetas genéricas, sin ser visiblemente más sobrio que el área infantil.
+
+Falsos hallazgos ya descartados
+-------------------------------
+
+En las capturas del arnés los retratos de la colección salen como imagen rota.
+Es del entorno de pruebas: _Emoji declara fontFamilyFallback a Noto, Apple y
+Segoe Color Emoji, y ninguna existe en el runner de flutter test, así que salen
+cajas vacías. En el móvil los emoji se ven bien. No se rediseña nada por esto.
+
+
+================================================================================
+3. DIRECCIÓN: DOS REGISTROS
+================================================================================
+
+Concepto: "el cuaderno de campo de Michi". Un álbum de descubrimientos hecho
+una tarde de sol: papel cálido, etiquetas de archivo, marcos y bloques con
+aire. Nada de textura por todas partes: cada detalle explica algo —enmarca una
+foto, señala progreso, celebra un hallazgo— o no entra.
+
+La app tiene dos tipos de imagen y conviene no mezclarlos:
+
+  REGISTRO FOTOGRÁFICO — la foto que trae el niño.
+  Manda en elegir foto, procesar y resultado. Marco editorial, grande, estable
+  entre estados, sin nada que compita con ella.
+
+  REGISTRO ILUSTRADO — los 28 dibujos del catálogo.
+  Manda en el álbum, el selector manual, las medallas, los avatares y "el
+  último animal". Es lo que la app pone; la foto es lo que el niño trae.
+
+Solo se cruzan en la ficha de especie: allí el dibujo es el retrato y las fotos
+guardadas son historial, visualmente subordinado.
+
+Lenguaje visual
+---------------
+
+  - Fondo crema cálido y superficies tonales. Nada de blanco clínico.
+  - Terracota para la única acción primaria de cada pantalla.
+  - Verde solo para progreso, confirmación y conseguido.
+  - Amarillo miel para hallazgos, medallas y celebración.
+  - Rojo solo para error y acción destructiva.
+  - Formas rectangulares suaves de 16-28 px. La pastilla queda reservada a
+    chips, filtros y estados breves.
+  - Elevación mínima y bordes tonales. Sin brillos, sombras pesadas, arcoíris
+    ni gradientes saturados.
+  - Andika en titulares y nombres de animal; Atkinson Hyperlegible en lectura,
+    etiquetas y controles.
+  - Asimetría controlada en portada y resultado; regularidad en cuadrículas,
+    formularios y ajustes.
+  - Movimiento de 150-300 ms para cambios de estado; algo más largo solo cuando
+    el descubrimiento es nuevo. Se respeta la reducción de movimiento.
+
+Nota de paleta: el amarillo que se eligió en su día era #FAB005 y en
+app_theme.dart:14 hay #F5A623. Confirmar cuál se queda antes de la fase 2.
+
+Cómo se habla
+-------------
+
+  - Frases cortas, honestas, orientadas a la siguiente acción.
+  - "No consigo reconocerlo todavía", nunca un fallo del niño.
+  - La confianza se dice con palabras, sin inventar certeza ni duración.
+  - El área adulta usa términos técnicos solo cuando ayudan a decidir.
+
+Familias de superficie, no una tarjeta universal
+------------------------------------------------
+
+  - Portada: composición hero con marco de foto y CTA integrada.
+  - Lámina de especie: retrato, pie editorial y metadatos.
+  - Hoja de álbum: cuadrícula y progreso sobre una superficie continua.
+  - Panel de estado: uno solo para carga, vacío, error, offline y permisos.
+  - Sección adulta: grupos y divisores, más densa y menos expresiva.
+
+
+================================================================================
+4. TAMAÑOS Y ACCESIBILIDAD
+================================================================================
+
+Tamaños de referencia: 320x568 y 360x640 (móvil pequeño), 390x844 (principal),
+430x932 (grande), 768x1024 y 1180x820 (tablet).
+
+  - Menos de 600 px: una columna, padding lateral de 16-20 px, CTA a ancho
+    disponible.
+  - De 600 a 839 px: NavigationBar y una o dos columnas según el contenido.
+  - Desde 840 px: NavigationRail y lienzo de hasta 1200 px, con columnas
+    separadas para hero/contexto o contenido/detalle.
+  - La cuadrícula usa ancho máximo por celda y builders lazy, nunca un número
+    fijo de columnas.
+  - Nada de alturas rígidas en contenedores con texto. Todo se prueba a escala
+    de texto 1,0 y 2,0.
+  - Mínimo táctil de 48x48 px; las acciones infantiles primarias pueden subir a
+    56-64 px si mejora la puntería.
+  - Contraste AA, foco visible, orden de tabulación lógico y lector de pantalla
+    en toda acción.
+  - Las fotos y dibujos con significado llevan etiqueta semántica; los adornos
+    se excluyen del árbol.
+
+En 320x568 al 200 % el título de la app ya sale truncado y la cabecera se come
+el primer viewport. Lo arreglan las fases 3 y 4.
+
+
+================================================================================
+5. DEPENDENCIAS Y ASSETS
+================================================================================
+
+Por defecto no se añade nada. Se resuelve con Flutter, Material 3, los
+servicios actuales, las fuentes locales y flutter_animate, que ya está. Antes
+de meter un paquete hay que poder responder a tres cosas: qué problema concreto
+resuelve, por qué no sale a mano con el SDK, y qué cuesta en tamaño, arranque,
+permisos y privacidad.
+
+Decidido de antemano:
+
+  - google_fonts, no: las fuentes van empaquetadas y funcionan sin red.
+  - cached_network_image, no: no hay imágenes remotas ni las va a haber.
+  - Paquete de shimmer, no: un skeleton estable sale con Flutter y respeta la
+    reducción de movimiento.
+  - No se cambia gestión de estado ni navegación por estética.
+  - flutter_svg solo si la dirección aprobada acaba necesitando vectores que no
+    se puedan resolver con raster. Se compara antes con PNG/WebP y
+    CustomPainter.
+  - Paquete de cámara o de recorte solo si una prueba enseña el problema.
+    image_picker se queda detrás de PhotoPickerService.
+
+Los 28 dibujos
+--------------
+
+No se busca una biblioteca de fotos ni packs de iconos: los 28 dibujos los hace
+la hermana de Juan y el encargo está escrito en docs/PLAN_UX_INFANTIL.txt,
+PROBLEMA 3.0. Del lado del código lo único pendiente es integrarlos: declarar
+assets/animales/ en pubspec.yaml y rellenar los 28 imageAsset.
+
+Lo que hay que cerrar con ella antes de la fase 2, porque el marco del álbum se
+diseña contra esto:
+
+  - Cuadrados, mismo encuadre, animal centrado y entero, escala normalizada al
+    marco (el elefante y la mariposa ocupan lo mismo).
+  - Estilo único entre los 28. Es lo que más se nota si falla.
+  - Legibles a 96x96 dp: formas grandes, poca línea fina. Cuidado con los pares
+    que se confunden (perro/lobo, gato/león, vaca/toro, oveja/cabra).
+  - Fondo transparente en PNG, o el mismo fondo plano en los 28.
+  - Modo oscuro: si el fondo es transparente y la línea es oscura, el dibujo
+    desaparece sobre papel oscuro. La lámina del álbum llevará siempre una
+    superficie clara detrás, en los dos temas. Decidido aquí para que ella no
+    tenga que dibujar dos versiones.
+  - Maestro de 1024x1024 px. De ahí salen las densidades; en la app entran como
+    WebP, con un objetivo de 120 KB por dibujo y unos 3-4 MB en total.
+  - Nombre de fichero derivado del nombre del catálogo, en minúscula y sin
+    tildes: assets/animales/vaca.webp.
+  - Cuando lleguen los 28, se retiran los 7 JPG actuales del catálogo vigente
+    para no mezclar registros. Los JPG heredados (araña, ardilla, mariposa,
+    granja) siguen donde están: son muestras del modelo, no retratos.
+
+
+================================================================================
+6. FASES
+================================================================================
+
+
+--------------------------------------------------------------------------------
+FASE 1 — AUDITORÍA Y DIRECCIÓN                                          [HECHA]
+--------------------------------------------------------------------------------
+
+Objetivo: cerrar la dirección antes de tocar componentes, y saber qué se
+conserva, qué se rediseña y qué se deja fuera.
+
+Resultado: está en docs/redesign/FASE_1_AUDITORIA_Y_DIRECCION.md y
+docs/redesign/ASSETS_FASE_1.md, con capturas de acceso, inicio, colección,
+perfil y los estados transitorios en test/design/goldens/ (no versionado).
+
+Pendiente antes de abrir la fase 2:
+
+  - Repasar las capturas y confirmar las tres composiciones clave (portada,
+    resultado, álbum).
+  - Confirmar el amarillo de la paleta.
+  - Pasarle a su hermana el encargo de los dibujos con los añadidos de la
+    sección 5.
+  - Cerrar o descartar el trabajo en curso de sesión de invitado y colección
+    local con Realm. Toca collection_page, profile_page, home_page, app_shell y
+    collection_repository, que son justo los ficheros del rediseño; si se deja a
+    medias, los dos trabajos se mezclan.
+
+
+--------------------------------------------------------------------------------
+FASE 2 — TOKENS Y LAS PIEZAS QUE YA HACEN FALTA
+--------------------------------------------------------------------------------
+
+Objetivo: una gramática pequeña para que todas las pantallas parezcan del mismo
+producto, sin inventar componentes que aún no usa nadie.
+
+Qué cambia: tema claro y oscuro, tokens, y solo tres piezas —botones, chips y
+panel de estado—. Las superficies (hero, marco de foto, hoja de álbum, sección
+adulta) nacen en la fase que las estrena, no antes. Ficheros: app_theme.dart,
+app_animations.dart y las piezas compartidas que toquen.
+
+Decisiones:
+
+  - Los tokens se nombran por función además de por color: actionPrimary,
+    progress, discovery, danger, paper, ink, border, focus.
+  - Botones: rectángulo suave, con jerarquía primaria, secundaria y
+    destructiva. La pastilla queda para chips y badges.
+  - Un único panel de estado para carga, vacío, error, offline y permisos:
+    icono con nombre accesible, explicación breve, consecuencia y una acción de
+    salida.
+  - Fuera los gradientes y los brillos, salvo una excepción que se documente.
+  - Motion semántico: cambio de foto, avance de progreso, aparición de
+    resultado, descubrimiento nuevo y repetido. Lo prescindible se apaga con
+    reducción de movimiento.
+  - Foco visible y estados pressed/hovered/focused/disabled definidos desde el
+    tema, no widget a widget.
+  - Los iconos de control son Material. Los retratos de especie siguen siendo
+    emoji hasta que lleguen los dibujos: es contenido, no interfaz, y no
+    bloquea esta fase.
+
+Riesgos: perder contraste al calentar la paleta; romper métricas de fuente y
+provocar overflow al 200 %; inventar tokens de más.
+
+Hecha cuando:
+
+  - Los componentes compartidos no llevan hexadecimales ni medidas sueltas
+    fuera de tokens, salvo excepción documentada.
+  - Los pares de texto y superficie que se usan llegan a AA en los dos temas.
+  - Botón, chip, panel de estado y sección adulta se distinguen sin depender
+    solo del color.
+  - Ningún icono de control es un emoji.
+  - Puesto en el móvil, el conjunto se ve más tranquilo que ahora y no hay
+    ninguna pieza que cante.
+
+Cómo se comprueba: capturas del catálogo de componentes a 390 y 768 px, claro y
+oscuro; test de contraste y de estados; test con animaciones desactivadas;
+lectura de cada estilo a escala 2,0.
+
+
+--------------------------------------------------------------------------------
+FASE 3 — NAVEGACIÓN Y SHELL
+--------------------------------------------------------------------------------
+
+Objetivo: que la estructura sea estable y silenciosa, y deje el protagonismo al
+contenido.
+
+Qué cambia: AdaptiveNavigationShell, AppShell, NavigationBar, NavigationRail,
+barras superiores y apertura de detalles.
+
+Decisiones:
+
+  - NavigationBar por debajo de 840 px, NavigationRail desde 840.
+  - Un solo lenguaje de selección, tonal. Fuera las pastillas de tres colores,
+    el brillo y las sombras de los destinos.
+  - Icono y etiqueta siempre visibles en teléfono.
+  - En tablet, rail compacto y lienzo de hasta 1200 px. Ni el texto ni los
+    formularios se estiran hasta el borde.
+  - Las rutas de detalle van por encima del shell sin perder pestaña ni scroll.
+  - Título flexible, que es lo que hoy se trunca a 320 px al 200 %.
+
+Riesgos: recrear páginas o el clasificador al cambiar de pestaña; duplicar
+Scaffold y estropear insets; perder el foco al pasar de bar a rail.
+
+Hecha cuando:
+
+  - Los tres destinos funcionan en teléfono y tablet con el breakpoint
+    acordado.
+  - Selección, scroll y estado de cada pestaña sobreviven a diez cambios.
+  - El clasificador no se recarga por navegar.
+  - Ningún tamaño de la matriz desborda al 200 %.
+
+Cómo se comprueba: widget tests del breakpoint 839/840, de conservación de
+pestaña y scroll, navegación por teclado en bar y rail, y capturas del shell en
+390x844, 768x1024 y 1180x820.
+
+
+--------------------------------------------------------------------------------
+FASE 4 — INICIO Y ELECCIÓN DE FOTO
+--------------------------------------------------------------------------------
+
+Objetivo: que Inicio sea una portada con una acción inequívoca, y que elegir
+foto sea una experiencia guiada y fácil de recuperar cuando faltan permisos.
+
+Qué cambia: el estado inicial de ClassifierPage, el saludo, el progreso, el
+último descubrimiento, la CTA, y todo el camino de cámara, galería,
+cancelación y permisos. Aquí nacen ExplorationHero, PhotoFrame, CaptureGuide,
+PhotoSourceActions y PermissionStatePanel.
+
+Decisiones:
+
+  - Hero editorial con una sola CTA terracota. El progreso y el último
+    descubrimiento se ven, pero por debajo.
+  - Cámara primaria, galería alternativa clara. Nunca dos botones con el mismo
+    peso.
+  - Cuatro ayudas antes de capturar: buena luz, distancia, animal entero, un
+    animal por foto.
+  - "La foto se mira en este dispositivo", junto a la elección de origen y no
+    escondido en ajustes.
+  - Cancelar no es un error: vuelve al estado anterior sin feedback rojo.
+  - Permiso denegado, bloqueado y no disponible tienen mensajes y salidas
+    distintas: reintentar, abrir Ajustes o tirar de galería.
+  - Se retira assets/farm_animals.png. Lo que ocupe su sitio será marca o
+    marco, no un recorte con damero.
+  - En tablet, hero y contexto en dos columnas.
+
+Riesgos: que la guía haga la cámara más lenta de abrir; pedir permisos antes de
+que el niño inicie la acción; una imagen hero pesada; confundir estar sin red
+con que el clasificador no funcione, porque es local.
+
+Hecha cuando:
+
+  - Alguien que no conoce la app señala la cámara como la acción principal.
+  - Galería, privacidad local y los cuatro consejos se encuentran sin buscar.
+  - Cancelación, permiso denegado y bloqueado ofrecen salida en español.
+  - La acción no se dispara dos veces y anuncia que está ocupada.
+  - Inicio aguanta colección nula, vacía, parcial, completa y con error.
+
+Cómo se comprueba: widget tests de modelo y colección en todos sus estados;
+fakes de cámara, galería, cancelación y cada permiso; test de doble toque;
+capturas de portada y panel de permisos en los cinco tamaños; y una prueba a
+mano en el móvil con cámara y galería de verdad.
+
+
+--------------------------------------------------------------------------------
+FASE 5 — PROCESAMIENTO, RESULTADO Y CELEBRACIÓN
+--------------------------------------------------------------------------------
+
+Objetivo: que la foto sea protagonista desde que se elige hasta que se guarda,
+que la app diga con honestidad lo que sabe y que siempre haya una siguiente
+acción amable.
+
+Qué cambia: preview, procesamiento, resultado fiable, resultado incierto,
+selector manual, corrección, sonido, guardado y celebraciones.
+
+Decisiones:
+
+  - La foto se queda grande y quieta entre estados: nada de saltos.
+  - Procesamiento con indicador indeterminado de verdad. Ni porcentaje falso ni
+    duración inventada.
+  - Resultado fiable como lámina editorial: foto, nombre, confianza en
+    palabras, alternativas y sonido.
+  - La fiabilidad sale solo del resultado tipado del servicio y de los umbrales
+    del modelo. La interfaz no inventa reglas paralelas. Este es el límite que
+    no se negocia.
+  - Resultado incierto con lenguaje optimista, consejos concretos, repetir foto
+    y selector manual. No se preselecciona una especie como si fuera segura.
+  - Confirmar es primaria y corregir secundaria; las dos con disabled/loading y
+    bloqueo de doble envío.
+  - Si el guardado falla, se conservan foto y selección, con reintento visible.
+  - Descubrimiento nuevo: celebración corta en miel y verde, progreso animado y
+    medalla si toca. Repetido: más breve, sin fingir novedad.
+  - Ninguna información depende solo del sonido.
+
+Riesgos: enseñar lenguaje de confianza que no cuadre con el rechazo del modelo;
+resetear la foto antes de que termine el guardado; tocar State o BuildContext
+tras un await sin mounted; jank por imágenes o animaciones; una celebración que
+bloquee el siguiente uso.
+
+Hecha cuando:
+
+  - Ningún resultado rechazado se presenta como identificación fiable.
+  - Diez toques rápidos en confirmar guardan una sola vez.
+  - Un error conserva foto y selección y ofrece reintento.
+  - Nuevo, repetido e incierto se distinguen sin leer.
+  - El cambio de estado principal se ve en menos de 100 ms aunque la tarea siga.
+
+Cómo se comprueba: unit tests del mapeo fiable/incierto y de la orquestación
+del guardado; widget tests de cada estado; tests de doble envío, mounted y
+reducción de movimiento; capturas con foto horizontal y vertical, nombre largo
+y texto al 200 %; y una pasada en el móvil mirando si hay tirones.
+
+
+--------------------------------------------------------------------------------
+FASE 6 — ÁLBUM, FICHA, FILTROS E HISTORIAL
+--------------------------------------------------------------------------------
+
+Objetivo: convertir la colección en un álbum que dé ganas de completarlo, y que
+siga siendo legible con 0 o con cientos de registros.
+
+Qué cambia: cabecera de progreso, medallas, cuadrícula, filtros, ficha de
+especie, historial, corrección, borrado y todos sus estados. Aquí nacen
+AlbumPage y la lámina de especie.
+
+Decisiones:
+
+  - Una superficie continua de álbum con cabecera compacta, no una tarjeta por
+    bloque.
+  - Retrato dominante por especie, nombre y contador. Lo pendiente se distingue
+    por tratamiento tonal, nunca solo por opacidad o color.
+  - Cuatro modos: descubiertos, pendientes, recientes y cantidad. Cantidad es
+    un orden y se anuncia como tal.
+  - Los filtros van en chips: aquí la pastilla sí dice "selección compacta".
+  - SliverGrid.builder con ancho máximo por ficha; historial con
+    ListView/SliverList.builder.
+  - Ficha de especie como lámina: retrato ilustrado, descripción, veces
+    encontrada, primera y última vez, y las fotos guardadas debajo, claramente
+    subordinadas.
+  - Borrado con confirmación, y deshacer si el repositorio puede garantizarlo.
+    Nunca se anuncia el borrado antes de que termine.
+  - Aquí entran los 28 dibujos: declarar assets/animales/, rellenar los 28
+    imageAsset, hacer que AnimalPortrait use la ilustración y dejar el fallback
+    vivo solo para el catálogo heredado.
+
+Riesgos: engordar el APK con los dibujos; ordenar en cada rebuild; perder
+contadores al corregir, borrar o restaurar; enseñar caché como si estuviera
+sincronizado.
+
+Hecha cuando:
+
+  - El álbum va bien con 0, 1, 10 y 28 especies, y con 500 predicciones en el
+    historial sin construirlas todas.
+  - Los cuatro modos dan resultados deterministas y accesibles.
+  - Ninguna especie del catálogo vigente depende ya de un emoji.
+  - Corregir, borrar y restaurar dejan los contadores bien.
+  - Los estados de carga, vacío, sin resultados, error y offline se distinguen
+    entre sí y todos ofrecen salida.
+  - Abierto en el móvil, apetece seguir completándolo.
+
+Cómo se comprueba: unit tests de filtros, orden, contadores, corrección y
+restauración; tests del repositorio con fakes; widget tests de todos los
+estados; test de lazy building con 500 predicciones; capturas de álbum vacío,
+parcial y completo; y una mirada al scroll y a la memoria en el móvil.
+
+
+--------------------------------------------------------------------------------
+FASE 7 — PERFIL ADULTO, PERMISOS Y ACCIONES SENSIBLES
+--------------------------------------------------------------------------------
+
+Objetivo: un área adulta más sobria y densa, coherente con la marca, con lo
+peligroso claramente aparte.
+
+Qué cambia: perfil infantil, puerta de adultos, cuenta e invitado, apariencia,
+sonido, háptica, permisos, privacidad, información del modelo, cierre de sesión
+y eliminación de cuenta. Aquí nace AdultSection.
+
+Decisiones:
+
+  - Entrada infantil mínima; los ajustes siguen detrás de la puerta de adultos
+    que ya existe.
+  - Secciones, listas y divisores en vez de una pila de cards.
+  - Resumen de cuenta o invitado arriba; privacidad y modelo como contenido
+    desplegable o páginas aparte, para no saturar.
+  - Cada estado de permiso con icono, texto, consecuencia y acción.
+  - Cerrar sesión como acción secundaria al final.
+  - Zona sensible separada, con rojo solo en el aviso y en la acción, con la
+    irreversibilidad explicada y confirmación explícita.
+  - Loading dentro de la propia acción, bloqueo mutuo entre cerrar sesión y
+    eliminar, y errores que se quedan hasta que el adulto los lee.
+
+Riesgos: hacer el área adulta demasiado infantil o la privacidad demasiado
+técnica; esconder lo que implica la sesión de invitado; dar por hecho un
+signOut o un delete antes de que terminen.
+
+Hecha cuando:
+
+  - Cuenta e invitado se distinguen sin ambigüedad.
+  - Cada ajuste se encuentra por título y por semántica.
+  - Las acciones sensibles están aisladas y no se disparan dos veces.
+  - Todos los errores son accionables y están en español.
+  - La eliminación no navega ni se anuncia como éxito hasta que acaba.
+
+Cómo se comprueba: widget tests de invitado y cuenta, puerta adulta, ajustes y
+permisos; tests de loading, error y éxito de logout y delete con
+reautenticación; foco y teclado en switches, selector de tema y diálogos; y
+capturas de perfil, invitado, permisos bloqueados y zona sensible.
+
+
+--------------------------------------------------------------------------------
+FASE 8 — REPASO FINAL
+--------------------------------------------------------------------------------
+
+Objetivo: cerrar las incoherencias que queden entre flujos y comprobar que la
+app es accesible y va fina, no solo que sale bien en una captura.
+
+Qué cambia: todo lo que haya quedado descolgado, más motion, sonido, imágenes y
+navegación por foco.
+
+Decisiones:
+
+  - Unificar los paneles transitorios que se hayan quedado fuera del sistema de
+    la fase 2.
+  - Auditar AA con los valores reales de los dos temas.
+  - Respetar texto al 200 %, negrita del sistema, alto contraste donde Flutter
+    lo exponga y reducción de movimiento.
+  - Dejar animación solo donde explique una causa o un progreso.
+  - Acotar el tamaño de decodificación de las imágenes y precachear solo lo
+    imprescindible.
+
+Sobre los goldens: se versionan únicamente los del catálogo de componentes de
+la fase 2, a uno o dos tamaños. Las matrices de pantalla completa se quedan como
+capturas de revisión sin versionar. El desarrollo es en Windows y CI corre en
+ubuntu-latest: unos goldens de pantalla entera fallarían por fuentes y
+antialiasing, no por regresiones de verdad, y acabarían borrándose a golpe de
+--update-goldens, que es peor que no tenerlos.
+
+Riesgos: tapar overflows escondiendo texto en vez de hacer el layout adaptable;
+meter jank con fotos o sombras; confundir un widget test con haber probado
+TalkBack.
+
+Hecha cuando:
+
+  - Cero overflow y cero texto esencial truncado en la matriz de tamaños al
+    200 %.
+  - Todos los controles tienen 48x48 px, nombre accesible y foco visible.
+  - Todos los pares de color llegan a AA.
+  - Ni el arranque ni la inferencia han empeorado de forma perceptible.
+  - El scroll y las transiciones van finos en el móvil.
+  - Recorrida entera, la app parece de una pieza.
+
+Cómo se comprueba: suite parametrizada de viewports, temas y escalas; capturas
+finales de las pantallas clave; TalkBack a mano en Android; y un recorrido
+completo en el móvil —acceso o invitado, cámara, procesamiento, confirmación,
+colección, corrección, perfil y salida— más una prueba sin red.
+
+
+================================================================================
+7. CUÁNDO ESTÁ HECHA UNA FASE
+================================================================================
+
+CI ya corre en cada push dart format, flutter analyze, flutter test y
+flutter build apk --debug. No hace falta repetirlo aquí como ceremonia: si CI
+está en verde, esa parte está hecha.
+
+Lo que CI no puede hacer es mirar la pantalla. Así que una fase se cierra con
+tres cosas:
+
+  1. CI en verde.
+  2. Un par de capturas antes y después, contrastadas con las tres
+     composiciones clave de la fase 1.
+  3. Un rato con la app en el móvil. Si algo sigue cantando, la fase no está
+     cerrada, aunque todos los tests pasen. Este criterio manda sobre los
+     otros dos.
+
+Además, sin necesidad de comprobarlo cada vez: nada de credenciales ni datos
+personales en el repo, ni configuración de Firebase editada a mano, ni
+print/debugPrint de producción; las operaciones async terminan antes de decir
+que han ido bien; las acciones primarias muestran loading y no admiten doble
+envío; y los estados de carga, vacío, error, reintento, offline y permisos que
+apliquen están cubiertos.
+
+El build de release y las mediciones de tamaño solo cuando cambien assets o
+dependencias nativas, y al cerrar la fase 8.
+
+
+================================================================================
+8. ORDEN DE TRABAJO
+================================================================================
+
+Una fase cada vez. Al terminar, un resumen corto de qué cambió y por qué está
+mejor, las capturas, y lo que haya quedado pendiente o necesite decidirse.
+
+Antes de abrir la fase 2 hacen falta las cuatro cosas de la fase 1: repasar las
+capturas, confirmar el amarillo, mandarle el encargo de los dibujos a su
+hermana, y cerrar o descartar el trabajo de sesión de invitado que hay a medias
+en el árbol.
